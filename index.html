@@ -93,12 +93,13 @@
         <p>WebGPU 2D Gaussian splatting renders, baked from neural training to ride the mobile GPU.</p>
 
         <!--
-            counter.bitymi is hosted as a Release asset (too large for the
-            Pages branch). When the Release is published, replace `RELEASE_TAG`
-            below with the tag (e.g. `v0`).
+            Bundles are hosted on Hugging Face datasets (Pages branch can't
+            hold >100 MB blobs and GitHub Release CDN doesn't send CORS for
+            cross-origin browser fetch). HF returns Access-Control-Allow-Origin
+            for our Pages domain so the viewer's fetch() works directly.
         -->
         <a class="demo"
-           href="viewer/index.html?bundle=https://github.com/NilKel/bitymi-demos/releases/download/v0/counter.bitymi">
+           href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/counter.bitymi">
             <div class="title">Counter (mip-360, SV)</div>
             <div class="meta">7-site Spherical Voronoi · BC7 atlas · 221 MB · ~30 s on 4G, instant on Wi-Fi</div>
         </a>
