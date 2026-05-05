@@ -9,9 +9,11 @@ Thumbs.db
 *.log
 .cache/
 
-# Heavy assets — opt-in only. Remove the lines below to track scenes via git LFS,
-# or just push them with `git add -f scenes/<name>/...` when you're ready.
-# scenes/*/*.ply
-# scenes/*/*.npz
-# scenes/*/*.nat2
-# scenes/*/*.bc7
+# Heavy bundled scenes — keep them OUT of git. >100 MB blobs would be
+# rejected by the GitHub Pages branch anyway. We host them as Release
+# assets (gh release upload …); index.html links to the Releases CDN URL.
+scenes/*.bitymi
+scenes/*.ply
+scenes/*.npz
+scenes/*.nat2
+scenes/*.bc7

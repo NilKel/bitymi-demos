@@ -13,7 +13,7 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            background: #000;
+            background: #0a0a0a;
             color: #eee;
             font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
@@ -21,21 +21,68 @@
         main {
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            height: 100%;
+            padding: 6vh 6vw;
+            box-sizing: border-box;
+            max-width: 720px;
+            margin: 0 auto;
         }
 
         h1 {
             font-weight: 300;
             letter-spacing: 0.08em;
-            margin: 0 0 0.4em 0;
+            margin: 0 0 0.2em 0;
+            font-size: 1.8rem;
         }
 
         p {
-            opacity: 0.5;
-            margin: 0;
-            font-size: 0.9rem;
+            color: #a8a8a8;
+            margin: 0.4em 0;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        a.demo {
+            display: block;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 1.2em 1.4em;
+            margin: 0.8em 0;
+            text-decoration: none;
+            color: #eee;
+            transition: background 120ms ease, border-color 120ms ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        a.demo:hover {
+            background: #1f1f1f;
+            border-color: #3a3a3a;
+        }
+
+        a.demo .title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0.2em;
+        }
+
+        a.demo .meta {
+            color: #888;
+            font-size: 0.82rem;
+            font-feature-settings: "tnum";
+        }
+
+        .hint {
+            color: #5a5a5a;
+            font-size: 0.78rem;
+            margin-top: 1.4em;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+            font-size: 0.85em;
+            color: #c9c9c9;
         }
     </style>
 </head>
@@ -43,7 +90,23 @@
 <body>
     <main>
         <h1>BITYMI demos</h1>
-        <p>nothing here yet</p>
+        <p>WebGPU 2D Gaussian splatting renders, baked from neural training to ride the mobile GPU.</p>
+
+        <!--
+            counter.bitymi is hosted as a Release asset (too large for the
+            Pages branch). When the Release is published, replace `RELEASE_TAG`
+            below with the tag (e.g. `v0`).
+        -->
+        <a class="demo"
+           href="viewer/index.html?bundle=https://github.com/NilKel/bitymi-demos/releases/download/v0/counter.bitymi">
+            <div class="title">Counter (mip-360, SV)</div>
+            <div class="meta">7-site Spherical Voronoi · BC7 atlas · 221 MB · ~30 s on 4G, instant on Wi-Fi</div>
+        </a>
+
+        <p class="hint">
+            Drag to orbit · pinch to zoom · two-finger drag to pan.
+            Needs WebGPU (Chrome 121+ on Android, Safari 18.2+ on iOS).
+        </p>
     </main>
 </body>
 
