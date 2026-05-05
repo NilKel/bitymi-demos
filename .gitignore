@@ -1,0 +1,17 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# Local dev server log + scratch
+*.log
+.cache/
+
+# Heavy assets — opt-in only. Remove the lines below to track scenes via git LFS,
+# or just push them with `git add -f scenes/<name>/...` when you're ready.
+# scenes/*/*.ply
+# scenes/*/*.npz
+# scenes/*/*.nat2
+# scenes/*/*.bc7
