@@ -122,7 +122,7 @@
     <main>
         <h1>BITYMI demos</h1>
         <p>WebGPU Textured 2D surfel splatting with texture atlases baked from a neural representation.</p>
-        <p>All scenes use the same model: <code>3D_SH_res</code> + <code>--feature SV</code> (Spherical Voronoi, K=7 sites/Gaussian, BC7 atlas). On Wi-Fi the indoor scenes load in a couple seconds; the outdoor ones are larger (50–800 MB) so save them for a fast connection.</p>
+        <p>All scenes use the same model: <code>3D_SH_res</code> + <code>--feature SV</code> (per-surfel beta-scaled kernel, K=7 Spherical-Voronoi sites/surfel, BC7 residual atlas). On Wi-Fi the indoor scenes load in a couple seconds; the outdoor ones are larger (50–800 MB) so save them for a fast connection.</p>
 
         <!--
             Bundles are hosted on Hugging Face datasets (Pages branch can't
