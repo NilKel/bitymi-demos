@@ -66,28 +66,41 @@
             background: #1a1a1a;
             border: 1px solid #2a2a2a;
             border-radius: 12px;
-            padding: 1em 1.2em;
             text-decoration: none;
             color: #eee;
-            transition: background 120ms ease, border-color 120ms ease;
+            transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
             width: 100%;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
         a.demo:hover {
             background: #1f1f1f;
             border-color: #3a3a3a;
+            transform: translateY(-1px);
+        }
+
+        a.demo .thumb {
+            width: 100%;
+            aspect-ratio: 3 / 2;
+            object-fit: cover;
+            display: block;
+            background: #0d0d0d;
+        }
+
+        a.demo .text {
+            padding: 0.7em 0.9em 0.85em 0.9em;
         }
 
         a.demo .title {
-            font-size: 1.1rem;
+            font-size: 1.0rem;
             font-weight: 500;
-            margin-bottom: 0.2em;
+            margin-bottom: 0.15em;
         }
 
         a.demo .meta {
             color: #888;
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             font-feature-settings: "tnum";
         }
 
@@ -122,23 +135,35 @@
         <div class="grid">
             <a class="demo"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/counter.bitymi">
-                <div class="title">Counter</div>
-                <div class="meta">221 MB · mip-360</div>
+                <img class="thumb" src="static/thumbs/counter.jpg" alt="Counter scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Counter</div>
+                    <div class="meta">221 MB · mip-360</div>
+                </div>
             </a>
             <a class="demo"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/room.bitymi">
-                <div class="title">Room</div>
-                <div class="meta">259 MB · mip-360</div>
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Room</div>
+                    <div class="meta">259 MB · mip-360</div>
+                </div>
             </a>
             <a class="demo"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/kitchen.bitymi">
-                <div class="title">Kitchen</div>
-                <div class="meta">280 MB · mip-360</div>
+                <img class="thumb" src="static/thumbs/kitchen.jpg" alt="Kitchen scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Kitchen</div>
+                    <div class="meta">280 MB · mip-360</div>
+                </div>
             </a>
             <a class="demo"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/bonsai.bitymi">
-                <div class="title">Bonsai</div>
-                <div class="meta">334 MB · mip-360</div>
+                <img class="thumb" src="static/thumbs/bonsai.jpg" alt="Bonsai scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Bonsai</div>
+                    <div class="meta">334 MB · mip-360</div>
+                </div>
             </a>
         </div>
 
@@ -146,28 +171,43 @@
         <div class="grid">
             <a class="demo"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/stump.bitymi">
-                <div class="title">Stump</div>
-                <div class="meta">379 MB · mip-360</div>
+                <img class="thumb" src="static/thumbs/stump.jpg" alt="Stump scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Stump</div>
+                    <div class="meta">379 MB · mip-360</div>
+                </div>
             </a>
             <a class="demo"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/garden.bitymi">
-                <div class="title">Garden</div>
-                <div class="meta">564 MB · mip-360</div>
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Garden</div>
+                    <div class="meta">564 MB · mip-360</div>
+                </div>
             </a>
             <a class="demo"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/bicycle.bitymi">
-                <div class="title">Bicycle</div>
-                <div class="meta">627 MB · mip-360</div>
+                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Bicycle</div>
+                    <div class="meta">627 MB · mip-360</div>
+                </div>
             </a>
             <a class="demo"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/flowers.bitymi">
-                <div class="title">Flowers</div>
-                <div class="meta">779 MB · mip-360</div>
+                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Flowers</div>
+                    <div class="meta">779 MB · mip-360</div>
+                </div>
             </a>
             <a class="demo"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/treehill.bitymi">
-                <div class="title">Treehill</div>
-                <div class="meta">830 MB · mip-360</div>
+                <img class="thumb" src="static/thumbs/treehill.jpg" alt="Treehill scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Treehill</div>
+                    <div class="meta">830 MB · mip-360</div>
+                </div>
             </a>
         </div>
 
