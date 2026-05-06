@@ -35,6 +35,15 @@
             font-size: 1.8rem;
         }
 
+        h2 {
+            font-weight: 400;
+            font-size: 0.85rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #6a6a6a;
+            margin: 1.6em 0 0.4em 0;
+        }
+
         p {
             color: #a8a8a8;
             margin: 0.4em 0;
@@ -42,13 +51,22 @@
             font-size: 0.95rem;
         }
 
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6em;
+        }
+
+        @media (max-width: 520px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
         a.demo {
             display: block;
             background: #1a1a1a;
             border: 1px solid #2a2a2a;
             border-radius: 12px;
-            padding: 1.2em 1.4em;
-            margin: 0.8em 0;
+            padding: 1em 1.2em;
             text-decoration: none;
             color: #eee;
             transition: background 120ms ease, border-color 120ms ease;
@@ -91,6 +109,7 @@
     <main>
         <h1>BITYMI demos</h1>
         <p>WebGPU 2D Gaussian splatting renders, baked from neural training to ride the mobile GPU.</p>
+        <p>All scenes use the same model: <code>3D_SH_res</code> + <code>--feature SV</code> (Spherical Voronoi, K=7 sites/Gaussian, BC7 atlas). On Wi-Fi the indoor scenes load in a couple seconds; the outdoor ones are larger (50–800 MB) so save them for a fast connection.</p>
 
         <!--
             Bundles are hosted on Hugging Face datasets (Pages branch can't
@@ -98,15 +117,64 @@
             cross-origin browser fetch). HF returns Access-Control-Allow-Origin
             for our Pages domain so the viewer's fetch() works directly.
         -->
-        <a class="demo"
-           href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/counter.bitymi">
-            <div class="title">Counter (mip-360, SV)</div>
-            <div class="meta">7-site Spherical Voronoi · BC7 atlas · 221 MB · ~30 s on 4G, instant on Wi-Fi</div>
-        </a>
+
+        <h2>Indoor (light)</h2>
+        <div class="grid">
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/counter.bitymi">
+                <div class="title">Counter</div>
+                <div class="meta">221 MB · mip-360</div>
+            </a>
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/room.bitymi">
+                <div class="title">Room</div>
+                <div class="meta">259 MB · mip-360</div>
+            </a>
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/kitchen.bitymi">
+                <div class="title">Kitchen</div>
+                <div class="meta">280 MB · mip-360</div>
+            </a>
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/bonsai.bitymi">
+                <div class="title">Bonsai</div>
+                <div class="meta">334 MB · mip-360</div>
+            </a>
+        </div>
+
+        <h2>Outdoor (heavier)</h2>
+        <div class="grid">
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/stump.bitymi">
+                <div class="title">Stump</div>
+                <div class="meta">379 MB · mip-360</div>
+            </a>
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/garden.bitymi">
+                <div class="title">Garden</div>
+                <div class="meta">564 MB · mip-360</div>
+            </a>
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/bicycle.bitymi">
+                <div class="title">Bicycle</div>
+                <div class="meta">627 MB · mip-360</div>
+            </a>
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/flowers.bitymi">
+                <div class="title">Flowers</div>
+                <div class="meta">779 MB · mip-360</div>
+            </a>
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/treehill.bitymi">
+                <div class="title">Treehill</div>
+                <div class="meta">830 MB · mip-360</div>
+            </a>
+        </div>
 
         <p class="hint">
-            Drag to orbit · pinch to zoom · two-finger drag to pan.
+            Drag to orbit · pinch to zoom · two-finger / three-finger drag to pan.
             Needs WebGPU (Chrome 121+ on Android, Safari 18.2+ on iOS).
+            Tap the 📊 Benchmark panel inside the viewer for SMERF-style FPS sweeps.
         </p>
     </main>
 </body>
