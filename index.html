@@ -169,9 +169,10 @@
             <button type="button" data-quality="lite" aria-pressed="false">Lite (smaller, more compatible)</button>
             <button type="button" data-quality="untex" aria-pressed="false">Untex (debug, no atlas)</button>
             <button type="button" data-quality="untex-lite" aria-pressed="false">Untex-lite (max compat)</button>
+            <button type="button" data-quality="untex-ws" aria-pressed="false">Untex (WebSplatter)</button>
         </div>
         <p class="quality-note" id="quality-note">
-            Lite atlases are baked at <code>max_res 32</code> — about a quarter of HD's bundle size and friendlier to phones with tight memory or older WebGPU drivers. Pick Lite if HD failed to load. Untex skips the BC7 atlas entirely (mean SH only, lower visual quality) and is a diagnostic to confirm whether the rasterizer or the atlas is the blocker on a given device. Untex-lite uses the same untex bundle but a stripped-down render pipeline (no SV/SB/snugbox/atlas/kernel-type branches) for phones whose WebGPU driver wedges on the full shader.
+            Lite atlases are baked at <code>max_res 32</code> — about a quarter of HD's bundle size and friendlier to phones with tight memory or older WebGPU drivers. Pick Lite if HD failed to load. Untex skips the BC7 atlas entirely (mean SH only, lower visual quality) and is a diagnostic to confirm whether the rasterizer or the atlas is the blocker on a given device. Untex-lite uses the same untex bundle but a stripped-down render pipeline (no SV/SB/snugbox/atlas/kernel-type branches) for phones whose WebGPU driver wedges on the full shader. Untex (WebSplatter) is a separate viewer built on top of <a href="https://arxiv.org/abs/2602.03207" target="_blank" rel="noopener">WebSplatter</a> with our 2DGS+SV rasterizer ported on top — wait-free hierarchical Blelloch sort instead of the spin-wait Fuchsia radix that crashes on Snapdragon-class phones.
         </p>
 
         <!--
@@ -275,14 +276,17 @@
             const buttons = document.querySelectorAll('.quality-bar button[data-quality]');
             const cards = document.querySelectorAll('a.demo[data-scene]');
 
-            // q → bundle suffix + viewer query string. untex-lite shares the
-            // _untex.bitymi bundle but adds &lite=1 so the wasm picks the
-            // stripped shader path.
+            // q → which viewer to launch + bundle suffix + extra query string.
+            //   untex-lite shares the _untex.bitymi bundle but adds &lite=1
+            //     so the wasm picks the stripped-shader path.
+            //   untex-ws routes to a totally different viewer (Halloumi-WS,
+            //     built on WebSplatter) at /viewer-ws/ with its own pipeline.
             const SUFFIX = {
-                'hd':         { suffix: '',       extra: '' },
-                'lite':       { suffix: '_lite',  extra: '' },
-                'untex':      { suffix: '_untex', extra: '' },
-                'untex-lite': { suffix: '_untex', extra: '&lite=1' },
+                'hd':         { viewer: 'viewer',    suffix: '',       extra: '' },
+                'lite':       { viewer: 'viewer',    suffix: '_lite',  extra: '' },
+                'untex':      { viewer: 'viewer',    suffix: '_untex', extra: '' },
+                'untex-lite': { viewer: 'viewer',    suffix: '_untex', extra: '&lite=1' },
+                'untex-ws':   { viewer: 'viewer-ws', suffix: '_untex', extra: '' },
             };
             const VALID = new Set(Object.keys(SUFFIX));
 
@@ -294,7 +298,7 @@
                     const scene = card.dataset.scene;
                     const hdMb = parseInt(card.dataset.hdMb, 10);
                     const untexMb = parseInt(card.dataset.untexMb, 10);
-                    card.href = 'viewer/index.html?bundle=' + HF_BASE + scene + cfg.suffix + '.bitymi' + cfg.extra;
+                    card.href = cfg.viewer + '/index.html?bundle=' + HF_BASE + scene + cfg.suffix + '.bitymi' + cfg.extra;
                     const sizeEl = card.querySelector('.size');
                     if (sizeEl) {
                         let mb;
