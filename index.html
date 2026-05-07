@@ -168,8 +168,15 @@
             <button type="button" data-quality="lite-ws" aria-pressed="true">Lite (WebSplatter)</button>
             <button type="button" data-quality="hd-ws" aria-pressed="false">HD (WebSplatter)</button>
         </div>
+        <div class="quality-bar" role="group" aria-label="Atlas compression format">
+            <span class="label">Atlas</span>
+            <button type="button" data-atlas="bc7"  aria-pressed="true">BC7 (desktop / iOS)</button>
+            <button type="button" data-atlas="astc" aria-pressed="false">ASTC 4×4 (Android)</button>
+        </div>
         <p class="quality-note" id="quality-note">
-            Both options use the new viewer built on top of <a href="https://arxiv.org/abs/2602.03207" target="_blank" rel="noopener">WebSplatter</a> with our 2DGS + Spherical-Voronoi rasterizer ported on top — wait-free hierarchical Blelloch sort instead of the spin-wait Fuchsia radix that crashes on Snapdragon-class phones. <strong>Lite</strong> bakes the residual atlas at <code>max_res 32</code> (about ¼ the bundle size, friendlier to phones with tight memory). <strong>HD</strong> uses the full <code>max_res 64</code> atlas — sharper but ~4× larger. Both stream BC7 residual textures from Hugging Face and require <code>texture-compression-bc</code> on the WebGPU adapter; on devices without it (Adreno phones), the viewer transparently falls back to SV-only color (no residual).
+            Both options use the new viewer built on top of <a href="https://arxiv.org/abs/2602.03207" target="_blank" rel="noopener">WebSplatter</a> with our 2DGS + Spherical-Voronoi rasterizer ported on top — wait-free hierarchical Blelloch sort instead of the spin-wait Fuchsia radix that crashes on Snapdragon-class phones. <strong>Lite</strong> bakes the residual atlas at <code>max_res 32</code> (about ¼ the bundle size, friendlier to phones with tight memory). <strong>HD</strong> uses the full <code>max_res 64</code> atlas — sharper but ~4× larger.
+            <br><br>
+            <strong>Atlas format:</strong> <code>BC7</code> ships everywhere desktop / iOS Safari / iPad Pro support <code>texture-compression-bc</code>. <code>ASTC</code> is the Adreno / Mali Android equivalent — pick this on a Snapdragon Android phone if BC7 falls back to SV-only. Currently only the <em>kitchen</em> scene has an ASTC bake; other scenes silently use BC7 either way.
         </p>
 
         <!--
@@ -198,6 +205,7 @@
                 </div>
             </a>
             <a class="demo" data-scene="kitchen" data-hd-mb="280" data-untex-mb="64"
+               data-astc-lite="kitchen_astc_lite.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/kitchen.bitymi">
                 <img class="thumb" src="static/thumbs/kitchen.jpg" alt="Kitchen scene preview" loading="lazy">
                 <div class="text">
@@ -269,46 +277,84 @@
     <script>
         (function () {
             const HF_BASE = 'https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/';
-            const STORAGE_KEY = 'bitymi.quality';
-            const buttons = document.querySelectorAll('.quality-bar button[data-quality]');
+            const STORAGE_KEY_Q = 'bitymi.quality';
+            const STORAGE_KEY_A = 'bitymi.atlas';
+            const qualityButtons = document.querySelectorAll('.quality-bar button[data-quality]');
+            const atlasButtons   = document.querySelectorAll('.quality-bar button[data-atlas]');
             const cards = document.querySelectorAll('a.demo[data-scene]');
 
             // Two viewer modes — both route to the WebSplatter-based viewer-ws
-            // (the legacy wasm Halloumi paths are temporarily disabled). The
-            // BC7 atlas residual is sampled when texture-compression-bc is
-            // available; otherwise the viewer falls back to SV-only.
+            // (the legacy wasm Halloumi paths are temporarily disabled).
             const SUFFIX = {
                 'lite-ws': { viewer: 'viewer-ws', suffix: '_lite', extra: '' },
                 'hd-ws':   { viewer: 'viewer-ws', suffix: '',      extra: '' },
             };
-            const VALID = new Set(Object.keys(SUFFIX));
+            const VALID_Q = new Set(Object.keys(SUFFIX));
+            const VALID_A = new Set(['bc7', 'astc']);
 
-            function applyQuality(q) {
-                if (!VALID.has(q)) q = 'lite-ws';
-                buttons.forEach(b => b.setAttribute('aria-pressed', b.dataset.quality === q ? 'true' : 'false'));
-                const cfg = SUFFIX[q];
+            let currentQ = 'lite-ws';
+            let currentA = 'bc7';
+
+            function refreshCards() {
+                const cfg = SUFFIX[currentQ];
                 cards.forEach(card => {
                     const scene = card.dataset.scene;
                     const hdMb = parseInt(card.dataset.hdMb, 10);
-                    card.href = cfg.viewer + '/index.html?bundle=' + HF_BASE + scene + cfg.suffix + '.bitymi' + cfg.extra;
+
+                    // ASTC routing: per-scene attribute names the bundle
+                    // filename for that quality tier (e.g.
+                    //   data-astc-lite="kitchen_astc_lite.bitymi"
+                    //   data-astc-hd  ="kitchen_astc.bitymi"      ).
+                    // Cards without the matching attribute fall back to BC7
+                    // silently — same UX as the existing texture-compression
+                    // probe that disables the atlas if the GPU lacks the format.
+                    let filename = scene + cfg.suffix + '.bitymi';
+                    if (currentA === 'astc') {
+                        const astcName = (currentQ === 'lite-ws')
+                            ? card.dataset.astcLite
+                            : card.dataset.astcHd;
+                        if (astcName) filename = astcName;
+                    }
+                    card.href = cfg.viewer + '/index.html?bundle=' + HF_BASE + filename + cfg.extra;
+
                     const sizeEl = card.querySelector('.size');
                     if (sizeEl) {
                         // Lite is ~¼ HD; show the actual MB tier the user is about to download.
-                        const mb = q === 'lite-ws' ? Math.round(hdMb / 4) : hdMb;
+                        const mb = currentQ === 'lite-ws' ? Math.round(hdMb / 4) : hdMb;
                         sizeEl.textContent = mb + ' MB';
                     }
                 });
-                try { localStorage.setItem(STORAGE_KEY, q); } catch (e) {}
             }
 
-            buttons.forEach(b => b.addEventListener('click', () => applyQuality(b.dataset.quality)));
+            function applyQuality(q) {
+                if (!VALID_Q.has(q)) q = 'lite-ws';
+                currentQ = q;
+                qualityButtons.forEach(b => b.setAttribute('aria-pressed', b.dataset.quality === q ? 'true' : 'false'));
+                refreshCards();
+                try { localStorage.setItem(STORAGE_KEY_Q, q); } catch (e) {}
+            }
 
-            let initial = 'lite-ws';
+            function applyAtlas(a) {
+                if (!VALID_A.has(a)) a = 'bc7';
+                currentA = a;
+                atlasButtons.forEach(b => b.setAttribute('aria-pressed', b.dataset.atlas === a ? 'true' : 'false'));
+                refreshCards();
+                try { localStorage.setItem(STORAGE_KEY_A, a); } catch (e) {}
+            }
+
+            qualityButtons.forEach(b => b.addEventListener('click', () => applyQuality(b.dataset.quality)));
+            atlasButtons.forEach(b   => b.addEventListener('click', () => applyAtlas(b.dataset.atlas)));
+
+            let initialQ = 'lite-ws';
+            let initialA = 'bc7';
             try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (VALID.has(saved)) initial = saved;
+                const sQ = localStorage.getItem(STORAGE_KEY_Q);
+                const sA = localStorage.getItem(STORAGE_KEY_A);
+                if (VALID_Q.has(sQ)) initialQ = sQ;
+                if (VALID_A.has(sA)) initialA = sA;
             } catch (e) {}
-            applyQuality(initial);
+            applyQuality(initialQ);
+            applyAtlas(initialA);
         })();
     </script>
 </body>
