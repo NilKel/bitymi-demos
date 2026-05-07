@@ -183,7 +183,7 @@
             <br><br>
             <strong>Atlas format:</strong> <code>BC7</code> ships everywhere desktop / iOS Safari / iPad Pro support <code>texture-compression-bc</code>. <code>ASTC</code> is the Adreno / Mali Android equivalent — pick this on a Snapdragon Android phone if BC7 falls back to color-only (no residual).
             <br><br>
-            <strong>Color encoding:</strong> <code>SV</code> = Spherical-Voronoi softmax over K=7 sites per surfel. <code>SB</code> = SH-DC + K=2 spherical-beta directional lobes (sharper view-dependent specular). All 9 mip-360 scenes have both SV and SB ASTC bakes; the BC7 desktop bundles are SV-only for now. SV/SB params are FP16-quantized in the ASTC bundles — empirically lossless (PSNR > 84 dB, SSIM ≈ 1.0 vs FP32 reference).
+            <strong>Color encoding:</strong> <code>SV</code> = Spherical-Voronoi softmax over K=7 sites per surfel. <code>SB</code> = SH-DC + K=2 spherical-beta directional lobes (sharper view-dependent specular). All 9 mip-360 scenes ship both SV and SB at HD in BC7 and ASTC; Lite is SV-only. SV/SB params are FP16-quantized in every HD bundle — empirically lossless (PSNR > 84 dB, SSIM ≈ 1.0 vs FP32 reference).
         </p>
 
         <!--
@@ -198,6 +198,7 @@
             <a class="demo" data-scene="counter" data-hd-mb="221" data-untex-mb="35"
                data-astc-hd="counter_astc.bitymi"
                data-astc-lite="counter_astc_lite.bitymi"
+               data-sb-hd="counter_sb.bitymi"
                data-sb-astc-hd="counter_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/counter.bitymi">
                 <img class="thumb" src="static/thumbs/counter.jpg" alt="Counter scene preview" loading="lazy">
@@ -209,6 +210,7 @@
             <a class="demo" data-scene="room" data-hd-mb="259" data-untex-mb="33"
                data-astc-hd="room_astc.bitymi"
                data-astc-lite="room_astc_lite.bitymi"
+               data-sb-hd="room_sb.bitymi"
                data-sb-astc-hd="room_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/room.bitymi">
                 <img class="thumb" src="static/thumbs/room.jpg" alt="Room scene preview" loading="lazy">
@@ -232,6 +234,7 @@
             <a class="demo" data-scene="bonsai" data-hd-mb="334" data-untex-mb="49"
                data-astc-hd="bonsai_astc.bitymi"
                data-astc-lite="bonsai_astc_lite.bitymi"
+               data-sb-hd="bonsai_sb.bitymi"
                data-sb-astc-hd="bonsai_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/bonsai.bitymi">
                 <img class="thumb" src="static/thumbs/bonsai.jpg" alt="Bonsai scene preview" loading="lazy">
@@ -247,6 +250,7 @@
             <a class="demo" data-scene="stump" data-hd-mb="379" data-untex-mb="44"
                data-astc-hd="stump_astc.bitymi"
                data-astc-lite="stump_astc_lite.bitymi"
+               data-sb-hd="stump_sb.bitymi"
                data-sb-astc-hd="stump_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/stump.bitymi">
                 <img class="thumb" src="static/thumbs/stump.jpg" alt="Stump scene preview" loading="lazy">
@@ -258,6 +262,7 @@
             <a class="demo" data-scene="garden" data-hd-mb="564" data-untex-mb="67"
                data-astc-hd="garden_astc.bitymi"
                data-astc-lite="garden_astc_lite.bitymi"
+               data-sb-hd="garden_sb.bitymi"
                data-sb-astc-hd="garden_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/garden.bitymi">
                 <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden scene preview" loading="lazy">
@@ -269,6 +274,7 @@
             <a class="demo" data-scene="bicycle" data-hd-mb="627" data-untex-mb="75"
                data-astc-hd="bicycle_astc.bitymi"
                data-astc-lite="bicycle_astc_lite.bitymi"
+               data-sb-hd="bicycle_sb.bitymi"
                data-sb-astc-hd="bicycle_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/bicycle.bitymi">
                 <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle scene preview" loading="lazy">
@@ -280,6 +286,7 @@
             <a class="demo" data-scene="flowers" data-hd-mb="779" data-untex-mb="91"
                data-astc-hd="flowers_astc.bitymi"
                data-astc-lite="flowers_astc_lite.bitymi"
+               data-sb-hd="flowers_sb.bitymi"
                data-sb-astc-hd="flowers_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/flowers.bitymi">
                 <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers scene preview" loading="lazy">
@@ -291,6 +298,7 @@
             <a class="demo" data-scene="treehill" data-hd-mb="830" data-untex-mb="91"
                data-astc-hd="treehill_astc.bitymi"
                data-astc-lite="treehill_astc_lite.bitymi"
+               data-sb-hd="treehill_sb.bitymi"
                data-sb-astc-hd="treehill_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/treehill.bitymi">
                 <img class="thumb" src="static/thumbs/treehill.jpg" alt="Treehill scene preview" loading="lazy">
