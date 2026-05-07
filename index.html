@@ -173,10 +173,17 @@
             <button type="button" data-atlas="bc7"  aria-pressed="true">BC7 (desktop / iOS)</button>
             <button type="button" data-atlas="astc" aria-pressed="false">ASTC 4×4 (Android)</button>
         </div>
+        <div class="quality-bar" role="group" aria-label="Color encoding">
+            <span class="label">Color</span>
+            <button type="button" data-color="sv" aria-pressed="true">SV (K=7 Voronoi)</button>
+            <button type="button" data-color="sb" aria-pressed="false">SB (SH + β lobes)</button>
+        </div>
         <p class="quality-note" id="quality-note">
-            Both options use the new viewer built on top of <a href="https://arxiv.org/abs/2602.03207" target="_blank" rel="noopener">WebSplatter</a> with our 2DGS + Spherical-Voronoi rasterizer ported on top — wait-free hierarchical Blelloch sort instead of the spin-wait Fuchsia radix that crashes on Snapdragon-class phones. <strong>Lite</strong> bakes the residual atlas at <code>max_res 32</code> (about ¼ the bundle size, friendlier to phones with tight memory). <strong>HD</strong> uses the full <code>max_res 64</code> atlas — sharper but ~4× larger.
+            Both options use the new viewer built on top of <a href="https://arxiv.org/abs/2602.03207" target="_blank" rel="noopener">WebSplatter</a> with our 2DGS rasterizer ported on top — wait-free hierarchical Blelloch sort instead of the spin-wait Fuchsia radix that crashes on Snapdragon-class phones. <strong>Lite</strong> bakes the residual atlas at <code>max_res 32</code> (¼ the bundle size, friendlier to phones with tight memory). <strong>HD</strong> uses the full <code>max_res 64</code> atlas — sharper but ~4× larger.
             <br><br>
-            <strong>Atlas format:</strong> <code>BC7</code> ships everywhere desktop / iOS Safari / iPad Pro support <code>texture-compression-bc</code>. <code>ASTC</code> is the Adreno / Mali Android equivalent — pick this on a Snapdragon Android phone if BC7 falls back to SV-only. Currently only the <em>kitchen</em> scene has an ASTC bake; other scenes silently use BC7 either way.
+            <strong>Atlas format:</strong> <code>BC7</code> ships everywhere desktop / iOS Safari / iPad Pro support <code>texture-compression-bc</code>. <code>ASTC</code> is the Adreno / Mali Android equivalent — pick this on a Snapdragon Android phone if BC7 falls back to color-only (no residual).
+            <br><br>
+            <strong>Color encoding:</strong> <code>SV</code> = Spherical-Voronoi softmax over K=7 sites per surfel (default; ships for every scene). <code>SB</code> = standard 3DGS spherical harmonics + K=2 spherical-beta directional lobes — sharper view-dependent specular than SV but a heavier per-Gauss color buffer (60 floats vs 49). Only <em>kitchen</em> has an SB bake right now; others silently fall back to SV.
         </p>
 
         <!--
@@ -206,6 +213,8 @@
             </a>
             <a class="demo" data-scene="kitchen" data-hd-mb="280" data-untex-mb="64"
                data-astc-lite="kitchen_astc_lite.bitymi"
+               data-sb-hd="kitchen_sb.bitymi"
+               data-sb-astc-hd="kitchen_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/kitchen.bitymi">
                 <img class="thumb" src="static/thumbs/kitchen.jpg" alt="Kitchen scene preview" loading="lazy">
                 <div class="text">
@@ -279,21 +288,43 @@
             const HF_BASE = 'https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/';
             const STORAGE_KEY_Q = 'bitymi.quality';
             const STORAGE_KEY_A = 'bitymi.atlas';
+            const STORAGE_KEY_C = 'bitymi.color';
             const qualityButtons = document.querySelectorAll('.quality-bar button[data-quality]');
             const atlasButtons   = document.querySelectorAll('.quality-bar button[data-atlas]');
+            const colorButtons   = document.querySelectorAll('.quality-bar button[data-color]');
             const cards = document.querySelectorAll('a.demo[data-scene]');
 
-            // Two viewer modes — both route to the WebSplatter-based viewer-ws
-            // (the legacy wasm Halloumi paths are temporarily disabled).
             const SUFFIX = {
                 'lite-ws': { viewer: 'viewer-ws', suffix: '_lite', extra: '' },
                 'hd-ws':   { viewer: 'viewer-ws', suffix: '',      extra: '' },
             };
             const VALID_Q = new Set(Object.keys(SUFFIX));
             const VALID_A = new Set(['bc7', 'astc']);
+            const VALID_C = new Set(['sv', 'sb']);
 
             let currentQ = 'lite-ws';
             let currentA = 'bc7';
+            let currentC = 'sv';
+
+            // Per-card data-attribute keys for the {color, atlas, quality} triple.
+            // Format: data-{color-prefix}{atlas-suffix}-{quality} (camelCased in
+            // dataset). We only need bundles for SV-bc7 (the default name),
+            // SV-astc-lite (existing), SB-bc7 (kitchen_sb.bitymi), SB-astc-hd
+            // (kitchen_sb_astc.bitymi). If a card doesn't have the attribute
+            // for the selected combo, we fall back to plain SV+BC7.
+            function lookupBundle(card, color, atlas, quality) {
+                if (color === 'sb') {
+                    if (atlas === 'astc') {
+                        return quality === 'lite-ws' ? card.dataset.sbAstcLite : card.dataset.sbAstcHd;
+                    }
+                    return quality === 'lite-ws' ? card.dataset.sbLite : card.dataset.sbHd;
+                }
+                // SV
+                if (atlas === 'astc') {
+                    return quality === 'lite-ws' ? card.dataset.astcLite : card.dataset.astcHd;
+                }
+                return null; // SV+BC7 uses the default <scene>{_lite}.bitymi convention.
+            }
 
             function refreshCards() {
                 const cfg = SUFFIX[currentQ];
@@ -301,25 +332,14 @@
                     const scene = card.dataset.scene;
                     const hdMb = parseInt(card.dataset.hdMb, 10);
 
-                    // ASTC routing: per-scene attribute names the bundle
-                    // filename for that quality tier (e.g.
-                    //   data-astc-lite="kitchen_astc_lite.bitymi"
-                    //   data-astc-hd  ="kitchen_astc.bitymi"      ).
-                    // Cards without the matching attribute fall back to BC7
-                    // silently — same UX as the existing texture-compression
-                    // probe that disables the atlas if the GPU lacks the format.
                     let filename = scene + cfg.suffix + '.bitymi';
-                    if (currentA === 'astc') {
-                        const astcName = (currentQ === 'lite-ws')
-                            ? card.dataset.astcLite
-                            : card.dataset.astcHd;
-                        if (astcName) filename = astcName;
-                    }
+                    const override = lookupBundle(card, currentC, currentA, currentQ);
+                    if (override) filename = override;
+
                     card.href = cfg.viewer + '/index.html?bundle=' + HF_BASE + filename + cfg.extra;
 
                     const sizeEl = card.querySelector('.size');
                     if (sizeEl) {
-                        // Lite is ~¼ HD; show the actual MB tier the user is about to download.
                         const mb = currentQ === 'lite-ws' ? Math.round(hdMb / 4) : hdMb;
                         sizeEl.textContent = mb + ' MB';
                     }
@@ -342,19 +362,32 @@
                 try { localStorage.setItem(STORAGE_KEY_A, a); } catch (e) {}
             }
 
+            function applyColor(c) {
+                if (!VALID_C.has(c)) c = 'sv';
+                currentC = c;
+                colorButtons.forEach(b => b.setAttribute('aria-pressed', b.dataset.color === c ? 'true' : 'false'));
+                refreshCards();
+                try { localStorage.setItem(STORAGE_KEY_C, c); } catch (e) {}
+            }
+
             qualityButtons.forEach(b => b.addEventListener('click', () => applyQuality(b.dataset.quality)));
             atlasButtons.forEach(b   => b.addEventListener('click', () => applyAtlas(b.dataset.atlas)));
+            colorButtons.forEach(b   => b.addEventListener('click', () => applyColor(b.dataset.color)));
 
             let initialQ = 'lite-ws';
             let initialA = 'bc7';
+            let initialC = 'sv';
             try {
                 const sQ = localStorage.getItem(STORAGE_KEY_Q);
                 const sA = localStorage.getItem(STORAGE_KEY_A);
+                const sC = localStorage.getItem(STORAGE_KEY_C);
                 if (VALID_Q.has(sQ)) initialQ = sQ;
                 if (VALID_A.has(sA)) initialA = sA;
+                if (VALID_C.has(sC)) initialC = sC;
             } catch (e) {}
             applyQuality(initialQ);
             applyAtlas(initialA);
+            applyColor(initialC);
         })();
     </script>
 </body>
