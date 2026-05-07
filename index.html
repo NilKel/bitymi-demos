@@ -169,7 +169,7 @@
             <button type="button" data-quality="lite" aria-pressed="false">Lite (smaller, more compatible)</button>
             <button type="button" data-quality="untex" aria-pressed="false">Untex (debug, no atlas)</button>
             <button type="button" data-quality="untex-lite" aria-pressed="false">Untex-lite (max compat)</button>
-            <button type="button" data-quality="untex-ws" aria-pressed="false">Untex (WebSplatter)</button>
+            <button type="button" data-quality="untex-ws" aria-pressed="false">Lite (WebSplatter)</button>
         </div>
         <p class="quality-note" id="quality-note">
             Lite atlases are baked at <code>max_res 32</code> — about a quarter of HD's bundle size and friendlier to phones with tight memory or older WebGPU drivers. Pick Lite if HD failed to load. Untex skips the BC7 atlas entirely (mean SH only, lower visual quality) and is a diagnostic to confirm whether the rasterizer or the atlas is the blocker on a given device. Untex-lite uses the same untex bundle but a stripped-down render pipeline (no SV/SB/snugbox/atlas/kernel-type branches) for phones whose WebGPU driver wedges on the full shader. Untex (WebSplatter) is a separate viewer built on top of <a href="https://arxiv.org/abs/2602.03207" target="_blank" rel="noopener">WebSplatter</a> with our 2DGS+SV rasterizer ported on top — wait-free hierarchical Blelloch sort instead of the spin-wait Fuchsia radix that crashes on Snapdragon-class phones.
@@ -286,7 +286,11 @@
                 'lite':       { viewer: 'viewer',    suffix: '_lite',  extra: '' },
                 'untex':      { viewer: 'viewer',    suffix: '_untex', extra: '' },
                 'untex-lite': { viewer: 'viewer',    suffix: '_untex', extra: '&lite=1' },
-                'untex-ws':   { viewer: 'viewer-ws', suffix: '_untex', extra: '' },
+                // viewer-ws now supports BC7 atlas residual sampling. Default
+                // the toggle to the Lite atlas bundle (smaller, broader
+                // device compatibility) — the viewer falls back to SV-only
+                // when texture-compression-bc isn't available on the adapter.
+                'untex-ws':   { viewer: 'viewer-ws', suffix: '_lite',  extra: '' },
             };
             const VALID = new Set(Object.keys(SUFFIX));
 
