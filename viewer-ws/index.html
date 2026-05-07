@@ -3,8 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0" />
+    <!-- Vite content-hashes the JS/CSS bundles (`index-<hash>.js`), so the
+         browser already refetches them on every deploy. The HTML itself is
+         the only file with a stable URL, so we add no-cache hints here as
+         defense-in-depth. The HF-hosted .bitymi bundles do not change once
+         uploaded, so they remain cacheable. -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>Halloumi-WS · 2DGS + SV viewer</title>
-    <script type="module" crossorigin src="./assets/index-308e38fd.js"></script>
+    <script type="module" crossorigin src="./assets/index-07a708a5.js"></script>
     <link rel="stylesheet" href="./assets/index-574f02fd.css">
   </head>
   <body>
