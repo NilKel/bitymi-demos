@@ -165,14 +165,11 @@
 
         <div class="quality-bar" role="group" aria-label="Atlas quality">
             <span class="label">Quality</span>
-            <button type="button" data-quality="hd" aria-pressed="true">HD (sharper)</button>
-            <button type="button" data-quality="lite" aria-pressed="false">Lite (smaller, more compatible)</button>
-            <button type="button" data-quality="untex" aria-pressed="false">Untex (debug, no atlas)</button>
-            <button type="button" data-quality="untex-lite" aria-pressed="false">Untex-lite (max compat)</button>
-            <button type="button" data-quality="untex-ws" aria-pressed="false">Lite (WebSplatter)</button>
+            <button type="button" data-quality="lite-ws" aria-pressed="true">Lite (WebSplatter)</button>
+            <button type="button" data-quality="hd-ws" aria-pressed="false">HD (WebSplatter)</button>
         </div>
         <p class="quality-note" id="quality-note">
-            Lite atlases are baked at <code>max_res 32</code> — about a quarter of HD's bundle size and friendlier to phones with tight memory or older WebGPU drivers. Pick Lite if HD failed to load. Untex skips the BC7 atlas entirely (mean SH only, lower visual quality) and is a diagnostic to confirm whether the rasterizer or the atlas is the blocker on a given device. Untex-lite uses the same untex bundle but a stripped-down render pipeline (no SV/SB/snugbox/atlas/kernel-type branches) for phones whose WebGPU driver wedges on the full shader. Untex (WebSplatter) is a separate viewer built on top of <a href="https://arxiv.org/abs/2602.03207" target="_blank" rel="noopener">WebSplatter</a> with our 2DGS+SV rasterizer ported on top — wait-free hierarchical Blelloch sort instead of the spin-wait Fuchsia radix that crashes on Snapdragon-class phones.
+            Both options use the new viewer built on top of <a href="https://arxiv.org/abs/2602.03207" target="_blank" rel="noopener">WebSplatter</a> with our 2DGS + Spherical-Voronoi rasterizer ported on top — wait-free hierarchical Blelloch sort instead of the spin-wait Fuchsia radix that crashes on Snapdragon-class phones. <strong>Lite</strong> bakes the residual atlas at <code>max_res 32</code> (about ¼ the bundle size, friendlier to phones with tight memory). <strong>HD</strong> uses the full <code>max_res 64</code> atlas — sharper but ~4× larger. Both stream BC7 residual textures from Hugging Face and require <code>texture-compression-bc</code> on the WebGPU adapter; on devices without it (Adreno phones), the viewer transparently falls back to SV-only color (no residual).
         </p>
 
         <!--
@@ -276,39 +273,28 @@
             const buttons = document.querySelectorAll('.quality-bar button[data-quality]');
             const cards = document.querySelectorAll('a.demo[data-scene]');
 
-            // q → which viewer to launch + bundle suffix + extra query string.
-            //   untex-lite shares the _untex.bitymi bundle but adds &lite=1
-            //     so the wasm picks the stripped-shader path.
-            //   untex-ws routes to a totally different viewer (Halloumi-WS,
-            //     built on WebSplatter) at /viewer-ws/ with its own pipeline.
+            // Two viewer modes — both route to the WebSplatter-based viewer-ws
+            // (the legacy wasm Halloumi paths are temporarily disabled). The
+            // BC7 atlas residual is sampled when texture-compression-bc is
+            // available; otherwise the viewer falls back to SV-only.
             const SUFFIX = {
-                'hd':         { viewer: 'viewer',    suffix: '',       extra: '' },
-                'lite':       { viewer: 'viewer',    suffix: '_lite',  extra: '' },
-                'untex':      { viewer: 'viewer',    suffix: '_untex', extra: '' },
-                'untex-lite': { viewer: 'viewer',    suffix: '_untex', extra: '&lite=1' },
-                // viewer-ws now supports BC7 atlas residual sampling. Default
-                // the toggle to the Lite atlas bundle (smaller, broader
-                // device compatibility) — the viewer falls back to SV-only
-                // when texture-compression-bc isn't available on the adapter.
-                'untex-ws':   { viewer: 'viewer-ws', suffix: '_lite',  extra: '' },
+                'lite-ws': { viewer: 'viewer-ws', suffix: '_lite', extra: '' },
+                'hd-ws':   { viewer: 'viewer-ws', suffix: '',      extra: '' },
             };
             const VALID = new Set(Object.keys(SUFFIX));
 
             function applyQuality(q) {
-                if (!VALID.has(q)) q = 'hd';
+                if (!VALID.has(q)) q = 'lite-ws';
                 buttons.forEach(b => b.setAttribute('aria-pressed', b.dataset.quality === q ? 'true' : 'false'));
                 const cfg = SUFFIX[q];
                 cards.forEach(card => {
                     const scene = card.dataset.scene;
                     const hdMb = parseInt(card.dataset.hdMb, 10);
-                    const untexMb = parseInt(card.dataset.untexMb, 10);
                     card.href = cfg.viewer + '/index.html?bundle=' + HF_BASE + scene + cfg.suffix + '.bitymi' + cfg.extra;
                     const sizeEl = card.querySelector('.size');
                     if (sizeEl) {
-                        let mb;
-                        if (q === 'hd')        mb = hdMb;
-                        else if (q === 'lite') mb = Math.round(hdMb / 4);
-                        else                   mb = untexMb;
+                        // Lite is ~¼ HD; show the actual MB tier the user is about to download.
+                        const mb = q === 'lite-ws' ? Math.round(hdMb / 4) : hdMb;
                         sizeEl.textContent = mb + ' MB';
                     }
                 });
@@ -317,7 +303,7 @@
 
             buttons.forEach(b => b.addEventListener('click', () => applyQuality(b.dataset.quality)));
 
-            let initial = 'hd';
+            let initial = 'lite-ws';
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (VALID.has(saved)) initial = saved;
