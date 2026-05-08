@@ -163,7 +163,10 @@
         <p>WebGPU Textured 2D surfel splatting with texture atlases baked from a neural representation.</p>
         <p>All scenes use the same model: <code>3D_SH_res</code> + <code>--feature SV</code> (per-surfel beta-scaled kernel, K=7 Spherical-Voronoi sites/surfel, BC7 residual atlas). On Wi-Fi the indoor scenes load in a couple seconds; the outdoor ones are larger so save them for a fast connection.</p>
 
-        <div class="quality-bar" role="group" aria-label="Atlas quality">
+        <!-- Quality selector hidden — HD is currently disabled while we
+             investigate phone perf at full atlas resolution. Lite is the
+             only path. JS still defaults to Lite via initialQ below. -->
+        <div class="quality-bar" role="group" aria-label="Atlas quality" style="display:none">
             <span class="label">Quality</span>
             <button type="button" data-quality="lite-ws" aria-pressed="true">Lite (WebSplatter)</button>
             <button type="button" data-quality="hd-ws" aria-pressed="false">HD (WebSplatter)</button>
@@ -407,14 +410,12 @@
             atlasButtons.forEach(b   => b.addEventListener('click', () => applyAtlas(b.dataset.atlas)));
             colorButtons.forEach(b   => b.addEventListener('click', () => applyColor(b.dataset.color)));
 
-            let initialQ = 'lite-ws';
+            let initialQ = 'lite-ws'; // HD disabled for now — Quality bar is hidden
             let initialA = 'bc7';
             let initialC = 'sv';
             try {
-                const sQ = localStorage.getItem(STORAGE_KEY_Q);
                 const sA = localStorage.getItem(STORAGE_KEY_A);
                 const sC = localStorage.getItem(STORAGE_KEY_C);
-                if (VALID_Q.has(sQ)) initialQ = sQ;
                 if (VALID_A.has(sA)) initialA = sA;
                 if (VALID_C.has(sC)) initialC = sC;
             } catch (e) {}
