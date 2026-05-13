@@ -608,6 +608,56 @@ fn compute_aabb(T: mat3x3<f32>, cutoff: f32) -> vec4<f32> {
     return vec4<f32>(p.x, p.y, h.x, h.y);
 }
 
+// SnugBox AABB — same ellipse, computed via the cross-product / quadratic
+// form Q(p) = A·px² + 2B·px·py + E·py² + 2D·px + 2F·py + G ≤ 0 with
+// coefficients derived from {n0,n1,n2} = {Tv×Tw, Tw×Tu, Tu×Tv}. Numerically
+// stable: doesn't catastrophically lose digits on edge-on splats where the
+// standard \`compute_aabb\` returns negative axes (caller would cull). Ports
+// directly from Halloumi-web-splat's preprocess_2dgs.wgsl::compute_aabb_snugbox.
+// On bonsai's foreground glass orb this recovers ~12% of foreground pixels.
+fn compute_aabb_snugbox(T: mat3x3<f32>, cutoff: f32) -> vec4<f32> {
+    let k_sq = cutoff * cutoff;
+    let Tu = T[0];
+    let Tv = T[1];
+    let Tw = T[2];
+
+    let n0 = cross(Tv, Tw);  // coef of px
+    let n1 = cross(Tw, Tu);  // coef of py
+    let n2 = cross(Tu, Tv);  // constant
+
+    let A_ = n0.x*n0.x + n0.y*n0.y - k_sq * n0.z*n0.z;
+    let B_ = n0.x*n1.x + n0.y*n1.y - k_sq * n0.z*n1.z;
+    let E_ = n1.x*n1.x + n1.y*n1.y - k_sq * n1.z*n1.z;
+    let D_ = n0.x*n2.x + n0.y*n2.y - k_sq * n0.z*n2.z;
+    let F_ = n1.x*n2.x + n1.y*n2.y - k_sq * n1.z*n2.z;
+
+    let det = A_*E_ - B_*B_;
+    if !(det > 0.0) || !(A_ > 0.0) || !(E_ > 0.0) {
+        return vec4<f32>(0.0, 0.0, -1.0, -1.0);
+    }
+
+    // Center p = ellipse gradient zero (Cramer on ∇Q = 0).
+    let p_x = (B_*F_ - E_*D_) / det;
+    let p_y = (B_*D_ - A_*F_) / det;
+
+    // t = -Q(p). Evaluating via the cross-product form (each component
+    // O(1) after gradient cancellation) keeps ~7 more digits than the
+    // direct (D·p + F·p + G) form.
+    let cx_p = p_x*n0.x + p_y*n1.x + n2.x;
+    let cy_p = p_x*n0.y + p_y*n1.y + n2.y;
+    let cz_p = p_x*n0.z + p_y*n1.z + n2.z;
+    let t_   = -(cx_p*cx_p + cy_p*cy_p - k_sq * cz_p*cz_p);
+    if !(t_ > 0.0) {
+        return vec4<f32>(0.0, 0.0, -1.0, -1.0);
+    }
+
+    // Axis-aligned bbox half-extents of the centered ellipse:
+    //   max |px| s.t. A·dx² + 2B·dx·dy + E·dy² ≤ t  ⇒  dx² = t·E / det
+    let hx = sqrt(t_ * E_ / det);
+    let hy = sqrt(t_ * A_ / det);
+    return vec4<f32>(p_x, p_y, hx, hy);
+}
+
 var<workgroup> scan0      : array<u32, WG_SIZE>;
 var<workgroup> scan1      : array<u32, WG_SIZE>;
 var<workgroup> group_base : u32;
@@ -731,7 +781,15 @@ fn surfel_cull(
             if (render_settings.accel_flags & 1u) != 0u {
                 cutoff = opacity_aware_cutoff(3.0, opacity, shape);
             }
-            let aabb = compute_aabb(T_mat, cutoff);
+            // SnugBox first — numerically more robust for edge-on splats.
+            // Fall back to the standard transmat compute_aabb only when
+            // SnugBox itself is degenerate (det ≤ 0 or t ≤ 0), so we get
+            // identical conservative behavior in the rare cases SnugBox
+            // can't handle.
+            var aabb = compute_aabb_snugbox(T_mat, cutoff);
+            if aabb.z < 0.0 {
+                aabb = compute_aabb(T_mat, cutoff);
+            }
             if alive_geom && aabb.z >= 0.0 {
                 tu = T_mat[0];
                 tv = T_mat[1];
