@@ -335,13 +335,14 @@
         <h2>Cinematic Anatomy (micro-CT)</h2>
         <div class="grid">
             <a class="demo" data-folder="himalaya_brain" data-scene="brain_clip47um" data-hd-mb="98"
+               data-true-mb="94"
                data-astc-hd="brain_clip47um_astc.bitymi"
                data-astc-lite="brain_clip47um_astc_lite.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_clip47um.bitymi">
                 <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain micro-CT scene preview" loading="lazy">
                 <div class="text">
                     <div class="title">Brain (micro-CT 47µm)</div>
-                    <div class="meta"><span class="size">98 MB</span> · cinematic-anatomy</div>
+                    <div class="meta"><span class="size">94 MB</span> · cinematic-anatomy</div>
                 </div>
             </a>
         </div>
@@ -415,7 +416,14 @@
 
                     const sizeEl = card.querySelector('.size');
                     if (sizeEl) {
-                        const mb = currentQ === 'lite-ws' ? Math.round(hdMb / 4) : hdMb;
+                        // data-true-mb: exact bundle size when all tiers serve
+                        // the same file (e.g. brain — every slot is the
+                        // full-Nyquist bundle, so the hd/4 lite heuristic would
+                        // misreport it). Otherwise use the hd / lite≈hd/4 model.
+                        const trueMb = parseInt(card.dataset.trueMb, 10);
+                        const mb = Number.isFinite(trueMb)
+                            ? trueMb
+                            : (currentQ === 'lite-ws' ? Math.round(hdMb / 4) : hdMb);
                         sizeEl.textContent = mb + ' MB';
                     }
                 });
