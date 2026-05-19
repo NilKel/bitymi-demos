@@ -154,6 +154,66 @@
             font-size: 0.85em;
             color: #c9c9c9;
         }
+
+        /* Dataset folders — one collapsible <details> per HF repo folder
+           (mip_360 / himalaya_brain / personal). Native disclosure, no JS. */
+        .folder {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #242424;
+            border-radius: 12px;
+            margin: 0.7em 0;
+            background: #131313;
+            overflow: hidden;
+        }
+
+        .folder > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 0.85em 1em;
+            display: flex;
+            align-items: center;
+            gap: 0.55em;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            color: #d8d8d8;
+            user-select: none;
+        }
+
+        .folder > summary::-webkit-details-marker { display: none; }
+
+        .folder > summary:hover { background: #181818; }
+
+        .folder > summary .chev {
+            display: inline-block;
+            transition: transform 140ms ease;
+            color: #6a6a6a;
+            font-size: 0.75rem;
+        }
+
+        .folder[open] > summary .chev { transform: rotate(90deg); }
+
+        .folder > summary .fname {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+        }
+
+        .folder > summary .fcount {
+            color: #6a6a6a;
+            font-size: 0.78rem;
+            font-weight: 400;
+            margin-left: auto;
+            font-feature-settings: "tnum";
+        }
+
+        .folder .grid { padding: 0 0.8em 0.9em 0.8em; }
+
+        .folder h2 {
+            margin: 0.9em 0 0.4em 0;
+            padding-left: 0.9em;
+        }
+
+        .folder h2:first-of-type { margin-top: 0.3em; }
     </style>
 </head>
 
@@ -195,6 +255,9 @@
             cross-origin browser fetch). HF returns Access-Control-Allow-Origin
             for our Pages domain so the viewer's fetch() works directly.
         -->
+
+        <details class="folder" open>
+        <summary><span class="chev">▸</span><span class="fname">mip_360</span><span class="fcount">11 scenes</span></summary>
 
         <h2>Indoor (light)</h2>
         <div class="grid">
@@ -331,6 +394,10 @@
                 </div>
             </a>
         </div>
+        </details>
+
+        <details class="folder" open>
+        <summary><span class="chev">▸</span><span class="fname">medical</span><span class="fcount">2 scenes</span></summary>
 
         <h2>Cinematic Anatomy (micro-CT)</h2>
         <div class="grid">
@@ -357,6 +424,22 @@
                 </div>
             </a>
         </div>
+        </details>
+
+        <details class="folder" open>
+        <summary><span class="chev">▸</span><span class="fname">personal</span><span class="fcount">1 scene</span></summary>
+        <div class="grid">
+            <a class="demo" data-folder="personal" data-scene="jhabbu" data-hd-mb="289" data-true-mb="289"
+               data-astc-lite="jhabbu_astc_lite.bitymi"
+               href="viewer-ws/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/jhabbu_lite.bitymi">
+                <img class="thumb" src="static/thumbs/jhabbu.jpg" alt="jhabbu scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">jhabbu</div>
+                    <div class="meta"><span class="size">289 MB</span> · personal</div>
+                </div>
+            </a>
+        </div>
+        </details>
 
         <p class="hint">
             Drag to orbit · pinch to zoom · two-finger / three-finger drag to pan.
