@@ -223,13 +223,14 @@
         <p>WebGPU Textured 2D surfel splatting with texture atlases baked from a neural representation.</p>
         <p>All scenes use the same model: <code>3D_SH_res</code> + <code>--feature SV</code> (per-surfel beta-scaled kernel, K=7 Spherical-Voronoi sites/surfel, BC7 residual atlas). On Wi-Fi the indoor scenes load in a couple seconds; the outdoor ones are larger so save them for a fast connection.</p>
 
-        <!-- Quality selector hidden — HD is currently disabled while we
-             investigate phone perf at full atlas resolution. Lite is the
-             only path. JS still defaults to Lite via initialQ below. -->
-        <div class="quality-bar" role="group" aria-label="Atlas quality" style="display:none">
+        <!-- mixed_3d shrinks the HD atlas from 412 MB → 245 MB mean (most
+             of the geometry is now zero-rect EWA Gausses), so HD is back
+             on the table. Lite stays as the default — `max_res 32` ¼-sized
+             bundles for mobile / slow connections. -->
+        <div class="quality-bar" role="group" aria-label="Atlas quality">
             <span class="label">Quality</span>
-            <button type="button" data-quality="lite-ws" aria-pressed="true">Lite (WebSplatter)</button>
-            <button type="button" data-quality="hd-ws" aria-pressed="false">HD (WebSplatter)</button>
+            <button type="button" data-quality="lite-ws" aria-pressed="true">Lite</button>
+            <button type="button" data-quality="hd-ws" aria-pressed="false">HD</button>
         </div>
         <div class="quality-bar" role="group" aria-label="Atlas compression format">
             <span class="label">Atlas</span>
@@ -261,7 +262,7 @@
 
         <h2>Indoor (light)</h2>
         <div class="grid">
-            <a class="demo" data-folder="mip_360" data-scene="counter" data-hd-mb="221" data-untex-mb="35"
+            <a class="demo" data-folder="mip_360" data-scene="counter" data-hd-mb="147" data-lite-mb="93"
                data-astc-hd="counter_astc.bitymi"
                data-astc-lite="counter_astc_lite.bitymi"
                data-sb-hd="counter_sb.bitymi"
@@ -270,10 +271,10 @@
                 <img class="thumb" src="static/thumbs/counter.jpg" alt="Counter scene preview" loading="lazy">
                 <div class="text">
                     <div class="title">Counter</div>
-                    <div class="meta"><span class="size">221 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">93 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="room" data-hd-mb="259" data-untex-mb="33"
+            <a class="demo" data-folder="mip_360" data-scene="room" data-hd-mb="167" data-lite-mb="92"
                data-astc-hd="room_astc.bitymi"
                data-astc-lite="room_astc_lite.bitymi"
                data-sb-hd="room_sb.bitymi"
@@ -282,10 +283,10 @@
                 <img class="thumb" src="static/thumbs/room.jpg" alt="Room scene preview" loading="lazy">
                 <div class="text">
                     <div class="title">Room</div>
-                    <div class="meta"><span class="size">259 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">92 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="kitchen" data-hd-mb="280" data-untex-mb="64"
+            <a class="demo" data-folder="mip_360" data-scene="kitchen" data-hd-mb="213" data-lite-mb="154"
                data-astc-hd="kitchen_astc.bitymi"
                data-astc-lite="kitchen_astc_lite.bitymi"
                data-sb-hd="kitchen_sb.bitymi"
@@ -294,10 +295,10 @@
                 <img class="thumb" src="static/thumbs/kitchen.jpg" alt="Kitchen scene preview" loading="lazy">
                 <div class="text">
                     <div class="title">Kitchen</div>
-                    <div class="meta"><span class="size">280 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">154 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="bonsai" data-hd-mb="334" data-untex-mb="49"
+            <a class="demo" data-folder="mip_360" data-scene="bonsai" data-hd-mb="257" data-lite-mb="133"
                data-astc-hd="bonsai_astc.bitymi"
                data-astc-lite="bonsai_astc_lite.bitymi"
                data-sb-hd="bonsai_sb.bitymi"
@@ -306,14 +307,14 @@
                 <img class="thumb" src="static/thumbs/bonsai.jpg" alt="Bonsai scene preview" loading="lazy">
                 <div class="text">
                     <div class="title">Bonsai</div>
-                    <div class="meta"><span class="size">334 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">133 MB</span> · mip-360</div>
                 </div>
             </a>
         </div>
 
         <h2>Outdoor (heavier)</h2>
         <div class="grid">
-            <a class="demo" data-folder="mip_360" data-scene="stump" data-hd-mb="379" data-untex-mb="44"
+            <a class="demo" data-folder="mip_360" data-scene="stump" data-hd-mb="291" data-lite-mb="130"
                data-astc-hd="stump_astc.bitymi"
                data-astc-lite="stump_astc_lite.bitymi"
                data-sb-hd="stump_sb.bitymi"
@@ -322,10 +323,10 @@
                 <img class="thumb" src="static/thumbs/stump.jpg" alt="Stump scene preview" loading="lazy">
                 <div class="text">
                     <div class="title">Stump</div>
-                    <div class="meta"><span class="size">379 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">130 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="garden" data-hd-mb="564" data-untex-mb="67"
+            <a class="demo" data-folder="mip_360" data-scene="garden" data-hd-mb="370" data-lite-mb="199"
                data-astc-hd="garden_astc.bitymi"
                data-astc-lite="garden_astc_lite.bitymi"
                data-sb-hd="garden_sb.bitymi"
@@ -334,10 +335,10 @@
                 <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden scene preview" loading="lazy">
                 <div class="text">
                     <div class="title">Garden</div>
-                    <div class="meta"><span class="size">564 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">199 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="bicycle" data-hd-mb="627" data-untex-mb="75"
+            <a class="demo" data-folder="mip_360" data-scene="bicycle" data-hd-mb="403" data-lite-mb="193"
                data-astc-hd="bicycle_astc.bitymi"
                data-astc-lite="bicycle_astc_lite.bitymi"
                data-sb-hd="bicycle_sb.bitymi"
@@ -346,7 +347,7 @@
                 <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle scene preview" loading="lazy">
                 <div class="text">
                     <div class="title">Bicycle</div>
-                    <div class="meta"><span class="size">627 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">193 MB</span> · mip-360</div>
                 </div>
             </a>
             <a class="demo" data-folder="mip_360" data-scene="bicycle_opaque" data-hd-mb="661"
@@ -369,7 +370,7 @@
                     <div class="meta"><span class="size">678 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="flowers" data-hd-mb="779" data-untex-mb="91"
+            <a class="demo" data-folder="mip_360" data-scene="flowers" data-hd-mb="563" data-lite-mb="244"
                data-astc-hd="flowers_astc.bitymi"
                data-astc-lite="flowers_astc_lite.bitymi"
                data-sb-hd="flowers_sb.bitymi"
@@ -378,10 +379,10 @@
                 <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers scene preview" loading="lazy">
                 <div class="text">
                     <div class="title">Flowers</div>
-                    <div class="meta"><span class="size">779 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">244 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="treehill" data-hd-mb="830" data-untex-mb="91"
+            <a class="demo" data-folder="mip_360" data-scene="treehill" data-hd-mb="560" data-lite-mb="238"
                data-astc-hd="treehill_astc.bitymi"
                data-astc-lite="treehill_astc_lite.bitymi"
                data-sb-hd="treehill_sb.bitymi"
@@ -390,7 +391,7 @@
                 <img class="thumb" src="static/thumbs/treehill.jpg" alt="Treehill scene preview" loading="lazy">
                 <div class="text">
                     <div class="title">Treehill</div>
-                    <div class="meta"><span class="size">830 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">238 MB</span> · mip-360</div>
                 </div>
             </a>
         </div>
@@ -510,14 +511,30 @@
 
                     const sizeEl = card.querySelector('.size');
                     if (sizeEl) {
-                        // data-true-mb: exact bundle size when all tiers serve
-                        // the same file (e.g. brain — every slot is the
-                        // full-Nyquist bundle, so the hd/4 lite heuristic would
-                        // misreport it). Otherwise use the hd / lite≈hd/4 model.
+                        // Per-tier size resolution (in priority order):
+                        //   data-lite-mb (mixed_3d era): exact lite bundle
+                        //     size — needed because the lite/HD ratio varies
+                        //     20–50 % across scenes (more textured Gausses ⇒
+                        //     more rects hit the cap ⇒ larger lite savings)
+                        //     so the legacy hd/4 heuristic is way off.
+                        //   data-true-mb: exact bundle size when all tiers
+                        //     serve the same file (e.g. brain — every slot
+                        //     is the full-Nyquist bundle).
+                        //   fallback: HD = data-hd-mb, Lite = hd/4 estimate
+                        //     (used by bicycle_opaque / bicycle_random_dist
+                        //     which are still on the old 3D_SH_res bake).
+                        const liteMb = parseInt(card.dataset.liteMb, 10);
                         const trueMb = parseInt(card.dataset.trueMb, 10);
-                        const mb = Number.isFinite(trueMb)
-                            ? trueMb
-                            : (currentQ === 'lite-ws' ? Math.round(hdMb / 4) : hdMb);
+                        let mb;
+                        if (currentQ === 'lite-ws' && Number.isFinite(liteMb)) {
+                            mb = liteMb;
+                        } else if (Number.isFinite(trueMb)) {
+                            mb = trueMb;
+                        } else if (currentQ === 'lite-ws') {
+                            mb = Math.round(hdMb / 4);
+                        } else {
+                            mb = hdMb;
+                        }
                         sizeEl.textContent = mb + ' MB';
                     }
                 });
