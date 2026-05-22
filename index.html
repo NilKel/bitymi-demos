@@ -223,17 +223,19 @@
         <p>WebGPU Textured 2D surfel splatting with texture atlases baked from a neural representation.</p>
         <p>All scenes use the same model: <code>3D_SH_res</code> + <code>--feature SV</code> (per-surfel beta-scaled kernel, K=7 Spherical-Voronoi sites/surfel, BC7 residual atlas). On Wi-Fi the indoor scenes load in a couple seconds; the outdoor ones are larger so save them for a fast connection.</p>
 
-        <!-- mixed_3d shrinks the HD atlas from 412 MB → 245 MB mean (most
-             of the geometry is now zero-rect EWA Gausses), so HD is back
-             on the table. Lite stays as the default — `max_res 32` ¼-sized
-             bundles for mobile / slow connections. Classic = the old
-             pure-2DGS `SV_30thr_…_c2f_Jac` bake (every Gauss textured, no
-             EWA), kept for side-by-side A/B against mixed_3d. -->
+        <!-- Lite/HD serve the new `--method mixed_3d` bake (textured 2D
+             beta-scaled surfels for the diffuse manifold + untextured 3D
+             EWA ellipsoids for the spec/volumetric half). Lite is just
+             max_res 32, HD is max_res 64 — same architecture, different
+             atlas grid cap. The third button serves the older
+             `--method 3D_SH_res` bake (same beta-scaled surfels, but
+             EVERY Gauss is textured — no EWA split, no zero-rect
+             skip-texture path), kept for side-by-side A/B. -->
         <div class="quality-bar" role="group" aria-label="Atlas quality">
             <span class="label">Quality</span>
             <button type="button" data-quality="lite-ws" aria-pressed="true">Lite</button>
             <button type="button" data-quality="hd-ws" aria-pressed="false">HD</button>
-            <button type="button" data-quality="classic-ws" aria-pressed="false">Classic (2DGS)</button>
+            <button type="button" data-quality="classic-ws" aria-pressed="false">3D_SH_res (no EWA)</button>
         </div>
         <div class="quality-bar" role="group" aria-label="Atlas compression format">
             <span class="label">Atlas</span>
