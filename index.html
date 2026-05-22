@@ -226,11 +226,14 @@
         <!-- mixed_3d shrinks the HD atlas from 412 MB → 245 MB mean (most
              of the geometry is now zero-rect EWA Gausses), so HD is back
              on the table. Lite stays as the default — `max_res 32` ¼-sized
-             bundles for mobile / slow connections. -->
+             bundles for mobile / slow connections. Classic = the old
+             pure-2DGS `SV_30thr_…_c2f_Jac` bake (every Gauss textured, no
+             EWA), kept for side-by-side A/B against mixed_3d. -->
         <div class="quality-bar" role="group" aria-label="Atlas quality">
             <span class="label">Quality</span>
             <button type="button" data-quality="lite-ws" aria-pressed="true">Lite</button>
             <button type="button" data-quality="hd-ws" aria-pressed="false">HD</button>
+            <button type="button" data-quality="classic-ws" aria-pressed="false">Classic (2DGS)</button>
         </div>
         <div class="quality-bar" role="group" aria-label="Atlas compression format">
             <span class="label">Atlas</span>
@@ -262,9 +265,10 @@
 
         <h2>Indoor (light)</h2>
         <div class="grid">
-            <a class="demo" data-folder="mip_360" data-scene="counter" data-hd-mb="147" data-lite-mb="93"
+            <a class="demo" data-folder="mip_360" data-scene="counter" data-hd-mb="147" data-lite-mb="93" data-classic-mb="221"
                data-astc-hd="counter_astc.bitymi"
                data-astc-lite="counter_astc_lite.bitymi"
+               data-astc-classic="counter_classic_astc.bitymi"
                data-sb-hd="counter_sb.bitymi"
                data-sb-astc-hd="counter_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter.bitymi">
@@ -274,9 +278,10 @@
                     <div class="meta"><span class="size">93 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="room" data-hd-mb="167" data-lite-mb="92"
+            <a class="demo" data-folder="mip_360" data-scene="room" data-hd-mb="167" data-lite-mb="92" data-classic-mb="259"
                data-astc-hd="room_astc.bitymi"
                data-astc-lite="room_astc_lite.bitymi"
+               data-astc-classic="room_classic_astc.bitymi"
                data-sb-hd="room_sb.bitymi"
                data-sb-astc-hd="room_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room.bitymi">
@@ -286,9 +291,10 @@
                     <div class="meta"><span class="size">92 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="kitchen" data-hd-mb="213" data-lite-mb="154"
+            <a class="demo" data-folder="mip_360" data-scene="kitchen" data-hd-mb="213" data-lite-mb="154" data-classic-mb="280"
                data-astc-hd="kitchen_astc.bitymi"
                data-astc-lite="kitchen_astc_lite.bitymi"
+               data-astc-classic="kitchen_classic_astc.bitymi"
                data-sb-hd="kitchen_sb.bitymi"
                data-sb-astc-hd="kitchen_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen.bitymi">
@@ -298,9 +304,10 @@
                     <div class="meta"><span class="size">154 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="bonsai" data-hd-mb="257" data-lite-mb="133"
+            <a class="demo" data-folder="mip_360" data-scene="bonsai" data-hd-mb="257" data-lite-mb="133" data-classic-mb="333"
                data-astc-hd="bonsai_astc.bitymi"
                data-astc-lite="bonsai_astc_lite.bitymi"
+               data-astc-classic="bonsai_classic_astc.bitymi"
                data-sb-hd="bonsai_sb.bitymi"
                data-sb-astc-hd="bonsai_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai.bitymi">
@@ -314,9 +321,10 @@
 
         <h2>Outdoor (heavier)</h2>
         <div class="grid">
-            <a class="demo" data-folder="mip_360" data-scene="stump" data-hd-mb="291" data-lite-mb="130"
+            <a class="demo" data-folder="mip_360" data-scene="stump" data-hd-mb="291" data-lite-mb="130" data-classic-mb="378"
                data-astc-hd="stump_astc.bitymi"
                data-astc-lite="stump_astc_lite.bitymi"
+               data-astc-classic="stump_classic_astc.bitymi"
                data-sb-hd="stump_sb.bitymi"
                data-sb-astc-hd="stump_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump.bitymi">
@@ -326,9 +334,10 @@
                     <div class="meta"><span class="size">130 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="garden" data-hd-mb="370" data-lite-mb="199"
+            <a class="demo" data-folder="mip_360" data-scene="garden" data-hd-mb="370" data-lite-mb="199" data-classic-mb="563"
                data-astc-hd="garden_astc.bitymi"
                data-astc-lite="garden_astc_lite.bitymi"
+               data-astc-classic="garden_classic_astc.bitymi"
                data-sb-hd="garden_sb.bitymi"
                data-sb-astc-hd="garden_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden.bitymi">
@@ -338,9 +347,10 @@
                     <div class="meta"><span class="size">199 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="bicycle" data-hd-mb="403" data-lite-mb="193"
+            <a class="demo" data-folder="mip_360" data-scene="bicycle" data-hd-mb="403" data-lite-mb="193" data-classic-mb="626"
                data-astc-hd="bicycle_astc.bitymi"
                data-astc-lite="bicycle_astc_lite.bitymi"
+               data-astc-classic="bicycle_classic_astc.bitymi"
                data-sb-hd="bicycle_sb.bitymi"
                data-sb-astc-hd="bicycle_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle.bitymi">
@@ -370,9 +380,10 @@
                     <div class="meta"><span class="size">678 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="flowers" data-hd-mb="563" data-lite-mb="244"
+            <a class="demo" data-folder="mip_360" data-scene="flowers" data-hd-mb="563" data-lite-mb="244" data-classic-mb="779"
                data-astc-hd="flowers_astc.bitymi"
                data-astc-lite="flowers_astc_lite.bitymi"
+               data-astc-classic="flowers_classic_astc.bitymi"
                data-sb-hd="flowers_sb.bitymi"
                data-sb-astc-hd="flowers_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers.bitymi">
@@ -382,9 +393,10 @@
                     <div class="meta"><span class="size">244 MB</span> · mip-360</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="treehill" data-hd-mb="560" data-lite-mb="238"
+            <a class="demo" data-folder="mip_360" data-scene="treehill" data-hd-mb="560" data-lite-mb="238" data-classic-mb="829"
                data-astc-hd="treehill_astc.bitymi"
                data-astc-lite="treehill_astc_lite.bitymi"
+               data-astc-classic="treehill_classic_astc.bitymi"
                data-sb-hd="treehill_sb.bitymi"
                data-sb-astc-hd="treehill_sb_astc.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill.bitymi">
@@ -461,8 +473,10 @@
             const cards = document.querySelectorAll('a.demo[data-scene]');
 
             const SUFFIX = {
-                'lite-ws': { viewer: 'viewer-ws', suffix: '_lite', extra: '' },
-                'hd-ws':   { viewer: 'viewer-ws', suffix: '',      extra: '' },
+                'lite-ws':    { viewer: 'viewer-ws', suffix: '_lite',    extra: '' },
+                'hd-ws':      { viewer: 'viewer-ws', suffix: '',         extra: '' },
+                // Classic = the pre-mixed_3d 2DGS bake (one tier, HD-equivalent).
+                'classic-ws': { viewer: 'viewer-ws', suffix: '_classic', extra: '' },
             };
             const VALID_Q = new Set(Object.keys(SUFFIX));
             const VALID_A = new Set(['bc7', 'astc']);
@@ -487,9 +501,10 @@
                 }
                 // SV
                 if (atlas === 'astc') {
+                    if (quality === 'classic-ws') return card.dataset.astcClassic;
                     return quality === 'lite-ws' ? card.dataset.astcLite : card.dataset.astcHd;
                 }
-                return null; // SV+BC7 uses the default <scene>{_lite}.bitymi convention.
+                return null; // SV+BC7 uses the default <scene>{_lite|_classic|}.bitymi convention.
             }
 
             function refreshCards() {
@@ -523,15 +538,20 @@
                         //   fallback: HD = data-hd-mb, Lite = hd/4 estimate
                         //     (used by bicycle_opaque / bicycle_random_dist
                         //     which are still on the old 3D_SH_res bake).
-                        const liteMb = parseInt(card.dataset.liteMb, 10);
-                        const trueMb = parseInt(card.dataset.trueMb, 10);
+                        const liteMb    = parseInt(card.dataset.liteMb, 10);
+                        const classicMb = parseInt(card.dataset.classicMb, 10);
+                        const trueMb    = parseInt(card.dataset.trueMb, 10);
                         let mb;
-                        if (currentQ === 'lite-ws' && Number.isFinite(liteMb)) {
+                        if (currentQ === 'classic-ws' && Number.isFinite(classicMb)) {
+                            mb = classicMb;
+                        } else if (currentQ === 'lite-ws' && Number.isFinite(liteMb)) {
                             mb = liteMb;
                         } else if (Number.isFinite(trueMb)) {
                             mb = trueMb;
                         } else if (currentQ === 'lite-ws') {
                             mb = Math.round(hdMb / 4);
+                        } else if (currentQ === 'classic-ws') {
+                            mb = hdMb;  // fallback: assume classic ~ HD MB
                         } else {
                             mb = hdMb;
                         }
