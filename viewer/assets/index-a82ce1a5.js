@@ -357,27 +357,7 @@ fn vs_main(
         case 6u  { offset = vec2<f32>(-1.0,    S2_M1); }
         default  { offset = vec2<f32>(-1.0,   -S2_M1); }  // case 7u
     }
-
-    // \`--method mixed_3d\` untextured: extent_pix holds the half-extents
-    // along the ellipse's PRINCIPAL AXES, and splat.tv carries
-    // (cos θ, sin θ) of the rotation from principal frame → screen.
-    // Scale offset by half-extents in principal frame, then rotate to screen.
-    // For textured 2DGS surfels the bbox is screen-axis-aligned, so we skip
-    // the rotation (cos=1, sin=0) and the math reduces to the original
-    // \`offset * half\`.
-    let offset_local = offset * half;
-    var corner_pix : vec2<f32>;
-    if (splat.gauss_id & 0x80000000u) != 0u {
-        let cos_t = splat.tv_x;
-        let sin_t = splat.tv_y;
-        let rotated = vec2<f32>(
-            cos_t * offset_local.x - sin_t * offset_local.y,
-            sin_t * offset_local.x + cos_t * offset_local.y,
-        );
-        corner_pix = center_pix + rotated;
-    } else {
-        corner_pix = center_pix + offset_local;
-    }
+    let corner_pix = center_pix + offset * half;
 
     // Pixel → NDC. Framebuffer y grows downward; clip y grows upward.
     let vp = vec2<f32>(f32(render_settings.canvas_size.x), f32(render_settings.canvas_size.y));
@@ -754,7 +734,6 @@ fn compute_ewa_cov2d_pixel(
     camspace: vec3<f32>,         // camera-space position (camera.view * xyz).xyz
     opacity: f32,
     out_conic: ptr<function, vec3<f32>>,
-    out_cs: ptr<function, vec2<f32>>,   // .x = cos(θ), .y = sin(θ) — principal-axis rotation
 ) -> vec4<f32> {
     // World covariance Σw = R · diag(sx²,sy²,sz²) · Rᵀ. Quat → R.
     let R = quat_to_rotmat(rot);
@@ -816,7 +795,6 @@ fn compute_ewa_cov2d_pixel(
     let det = sxx * syy - sxy * sxy;
     if !(det > 0.0) {
         *out_conic = vec3<f32>(0.0);
-        *out_cs    = vec2<f32>(1.0, 0.0);
         return vec4<f32>(0.0, 0.0, -1.0, -1.0);
     }
 
@@ -831,29 +809,14 @@ fn compute_ewa_cov2d_pixel(
     let t_cut = max(0.5, 2.0 * log(255.0 * max(opacity, 1.0 / 255.0)));
     let r_cut = sqrt(t_cut);
 
-    // Principal-axis decomposition of the 2x2 screen-space cov Σs = [[sxx, sxy],
-    // [sxy, syy]]. Solve the 2×2 eigenproblem in closed form:
-    //   trace = sxx + syy,  d = √((sxx - syy)²/4 + sxy²)
-    //   λ₁ = trace/2 + d   (larger semi-axis²)
-    //   λ₂ = trace/2 − d   (smaller semi-axis²)
-    //   2θ = atan2(2·sxy, sxx − syy)   ← principal-axis angle
-    // Per-axis tight half-extents along the rotated frame are r_cut·√λᵢ. The
-    // resulting (cx, cy, h1, h2) + (cos θ, sin θ) lets the vertex shader stamp
-    // an OCTAGON ALIGNED TO THE ELLIPSE'S PRINCIPAL AXES, which for elongated
-    // diagonal ellipsoids covers ~½ the pixels a screen-axis-aligned octagon
-    // would — same fragment-discard saving AccuTile gives the CUDA tile
-    // renderer for arbitrary ellipses.
-    let mean_diag = 0.5 * (sxx + syy);
-    let diff_diag = 0.5 * (sxx - syy);
-    let d         = sqrt(diff_diag * diff_diag + sxy * sxy);
-    let lambda1   = max(mean_diag + d, 0.0);
-    let lambda2   = max(mean_diag - d, 0.0);
-    let theta     = 0.5 * atan2(2.0 * sxy, sxx - syy);
-    *out_cs       = vec2<f32>(cos(theta), sin(theta));
-
-    // Half-extents along the principal axes (NOT along screen axes).
-    let hx = r_cut * sqrt(lambda1);
-    let hy = r_cut * sqrt(lambda2);
+    // Per-axis tight half-extents at the cutoff iso-line. Σs.xx == sxx, so
+    // half_w = r_cut · √Σs.xx (no inverse-roundtrip needed). Screen-axis-
+    // aligned bbox is slightly loose for rotated EWA ellipses (vs. tight
+    // principal-axes bbox), but the per-surfel atan2+cos+sin cost of computing
+    // the principal-axis rotation in WGSL outweighs the saved fragments in
+    // practice. Sticking with the simpler axis-aligned form.
+    let hx = r_cut * sqrt(sxx);
+    let hy = r_cut * sqrt(syy);
 
     // Pixel-space center in CUDA convention (matches compute_aabb_snugbox).
     // Use proj_raw (Y-flip undone) so wgpu's NDC matches the CUDA-convention
@@ -1064,7 +1027,6 @@ fn surfel_cull(
                 view_dir = normalize(xyz - camera_pos);
 
                 var conic : vec3<f32>;
-                var cs    : vec2<f32>;
                 let aabb_e = compute_ewa_cov2d_pixel(
                     xyz,
                     vec3<f32>(sx, sy, sz),
@@ -1072,17 +1034,10 @@ fn surfel_cull(
                     camspace.xyz,
                     opacity,
                     &conic,
-                    &cs,
                 );
                 if aabb_e.z >= 0.0 {
                     tu = conic;
-                    // Tv repurposed for untextured: .xy = (cos θ, sin θ) of the
-                    // principal-axis rotation. .z stays 0. Vertex shader reads
-                    // these to rotate the octagon onto the ellipse's principal
-                    // axes (AccuTile-equivalent tight bound for diagonal EWA
-                    // ellipsoids). Textured path keeps Tv as the 2DGS transmat
-                    // row — gated by the top-bit flag in gauss_id.
-                    tv = vec3<f32>(cs.x, cs.y, 0.0);
+                    tv = vec3<f32>(0.0);
                     tw = vec3<f32>(0.0);
                     center_pix = aabb_e.xy;
                     extent_pix = aabb_e.zw;
