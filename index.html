@@ -313,7 +313,7 @@
                     <div class="meta"><span class="size">92 MB</span> · mip-360 · mixed_3d texsplit_tex_frac=0.99</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="room_rvqply" data-hd-mb="74"
+            <a class="demo" data-invariant="true"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_rvqply.bitymi">
                 <img class="thumb" src="static/thumbs/room.jpg" alt="Room (RVQ-paired) preview" loading="lazy">
                 <div class="text">
@@ -596,6 +596,13 @@
             function refreshCards() {
                 const cfg = SUFFIX[currentQ];
                 cards.forEach(card => {
+                    // Invariant cards opt out of the quality/atlas/color
+                    // switcher entirely — their href + size text are
+                    // hand-authored and must survive page load. Used by
+                    // single-bundle showcases (e.g. Room RVQ — a
+                    // standalone paired-RVQ atlas with no _lite/_classic
+                    // or ASTC sibling).
+                    if (card.dataset.invariant === 'true') return;
                     const scene = card.dataset.scene;
                     const hdMb = parseInt(card.dataset.hdMb, 10);
 
