@@ -223,36 +223,23 @@
         <p>WebGPU Textured 2D surfel splatting with texture atlases baked from a neural representation.</p>
         <p>All scenes use the same model: <code>3D_SH_res</code> + <code>--feature SV</code> (per-surfel beta-scaled kernel, K=7 Spherical-Voronoi sites/surfel, BC7 residual atlas). On Wi-Fi the indoor scenes load in a couple seconds; the outdoor ones are larger so save them for a fast connection.</p>
 
-        <!-- Lite/HD serve the new `--method mixed_3d` bake (textured 2D
-             beta-scaled surfels for the diffuse manifold + untextured 3D
-             EWA ellipsoids for the spec/volumetric half). Lite is just
-             max_res 32, HD is max_res 64 — same architecture, different
-             atlas grid cap. The third button serves the older
-             `--method 3D_SH_res` bake (same beta-scaled surfels, but
-             EVERY Gauss is textured — no EWA split, no zero-rect
-             skip-texture path), kept for side-by-side A/B. -->
-        <div class="quality-bar" role="group" aria-label="Atlas quality">
-            <span class="label">Quality</span>
-            <button type="button" data-quality="lite-ws" aria-pressed="true">Lite</button>
-            <button type="button" data-quality="hd-ws" aria-pressed="false">HD</button>
-            <button type="button" data-quality="classic-ws" aria-pressed="false">3D_SH_res (no EWA)</button>
-        </div>
+        <!-- mip_360 scenes ship as a single tier: paired-RVQ atlas
+             (atlas_format=5, in-shader 4-tap bilinear decode over a 1024×2048
+             rgba8 codebook texture). No more Lite/HD split, no BC7-vs-ASTC
+             toggle (RVQ doesn't need a hw-compressed texture), no SV-vs-SB
+             toggle (SV is the only supported color encoding on the RVQ path).
+             Medical / personal scenes below still honor the Atlas toggle. -->
         <div class="quality-bar" role="group" aria-label="Atlas compression format">
             <span class="label">Atlas</span>
             <button type="button" data-atlas="bc7"  aria-pressed="true">BC7 (desktop / iOS)</button>
             <button type="button" data-atlas="astc" aria-pressed="false">ASTC 4×4 (Android)</button>
         </div>
-        <div class="quality-bar" role="group" aria-label="Color encoding">
-            <span class="label">Color</span>
-            <button type="button" data-color="sv" aria-pressed="true">SV (K=7 Voronoi)</button>
-            <button type="button" data-color="sb" aria-pressed="false">SB (SH + β lobes)</button>
-        </div>
         <p class="quality-note" id="quality-note">
-            Both options use the new viewer built on top of <a href="https://arxiv.org/abs/2602.03207" target="_blank" rel="noopener">WebSplatter</a> with our 2DGS rasterizer ported on top — wait-free hierarchical Blelloch sort instead of the spin-wait Fuchsia radix that crashes on Snapdragon-class phones. <strong>Lite</strong> bakes the residual atlas at <code>max_res 32</code> (¼ the bundle size, friendlier to phones with tight memory). <strong>HD</strong> uses the full <code>max_res 64</code> atlas — sharper but ~4× larger.
+            Viewer = our fork of <a href="https://arxiv.org/abs/2602.03207" target="_blank" rel="noopener">WebSplatter</a> with the 2DGS rasterizer ported on top: wait-free hierarchical Blelloch sort instead of the spin-wait Fuchsia radix that crashes on Snapdragon-class phones.
             <br><br>
-            <strong>Atlas format:</strong> <code>BC7</code> ships everywhere desktop / iOS Safari / iPad Pro support <code>texture-compression-bc</code>. <code>ASTC</code> is the Adreno / Mali Android equivalent — pick this on a Snapdragon Android phone if BC7 falls back to color-only (no residual).
+            <strong>mip-360 scenes:</strong> paired-RVQ atlas (L=4 → L=2 collapsed K²=65536 codebooks, in-shader decode). Bit-equivalent quality to the BC7 baseline at ~3.5× less GPU memory; uses ~1.2× the fragment-shader cost.
             <br><br>
-            <strong>Color encoding:</strong> <code>SV</code> = Spherical-Voronoi softmax over K=7 sites per surfel. <code>SB</code> = SH-DC + K=2 spherical-beta directional lobes (sharper view-dependent specular). All 9 mip-360 scenes ship both SV and SB at HD in BC7 and ASTC; Lite is SV-only. SV/SB params are FP16-quantized in every HD bundle — empirically lossless (PSNR > 84 dB, SSIM ≈ 1.0 vs FP32 reference).
+            <strong>Atlas format (medical / personal):</strong> <code>BC7</code> ships everywhere desktop / iOS Safari / iPad Pro support <code>texture-compression-bc</code>. <code>ASTC</code> is the Adreno / Mali Android equivalent — pick this on a Snapdragon Android phone if BC7 falls back to color-only (no residual).
         </p>
 
         <!--
@@ -263,177 +250,93 @@
         -->
 
         <details class="folder" open>
-        <summary><span class="chev">▸</span><span class="fname">mip_360</span><span class="fcount">12 scenes</span></summary>
+        <summary><span class="chev">▸</span><span class="fname">mip_360</span><span class="fcount">9 scenes · paired-RVQ</span></summary>
 
         <h2>Indoor (light)</h2>
         <div class="grid">
-            <a class="demo" data-folder="mip_360" data-scene="counter" data-hd-mb="147" data-lite-mb="93" data-classic-mb="221"
-               data-astc-hd="counter_astc.bitymi"
-               data-astc-lite="counter_astc_lite.bitymi"
-               data-astc-classic="counter_classic_astc.bitymi"
-               data-sb-hd="counter_sb.bitymi"
-               data-sb-astc-hd="counter_sb_astc.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter.bitymi">
-                <img class="thumb" src="static/thumbs/counter.jpg" alt="Counter scene preview" loading="lazy">
+            <a class="demo" data-invariant="true"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_rvqply.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_rvqply.bitymi">
+                <img class="thumb" src="static/thumbs/counter.jpg" alt="Counter (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Counter</div>
-                    <div class="meta"><span class="size">93 MB</span> · mip-360</div>
-                </div>
-            </a>
-            <a class="demo" data-folder="mip_360" data-scene="room" data-hd-mb="167" data-lite-mb="92" data-classic-mb="259"
-               data-astc-hd="room_astc.bitymi"
-               data-astc-lite="room_astc_lite.bitymi"
-               data-astc-classic="room_classic_astc.bitymi"
-               data-sb-hd="room_sb.bitymi"
-               data-sb-astc-hd="room_sb_astc.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room.bitymi">
-                <img class="thumb" src="static/thumbs/room.jpg" alt="Room scene preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Room</div>
-                    <div class="meta"><span class="size">92 MB</span> · mip-360</div>
-                </div>
-            </a>
-            <a class="demo" data-folder="mip_360" data-scene="room_quant" data-hd-mb="259" data-lite-mb="259"
-               data-astc-hd="room_quant_astc.bitymi"
-               data-astc-lite="room_quant_astc_lite.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_quant.bitymi">
-                <img class="thumb" src="static/thumbs/room.jpg" alt="Room (shape-quantized) preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Room (quant)</div>
-                    <div class="meta"><span class="size">259 MB</span> · shape-quant · no pow()</div>
-                </div>
-            </a>
-            <a class="demo" data-folder="mip_360" data-scene="099sp" data-hd-mb="228" data-lite-mb="92"
-               data-astc-hd="099sp_astc.bitymi"
-               data-astc-lite="099sp_astc_lite.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/099sp.bitymi">
-                <img class="thumb" src="static/thumbs/room.jpg" alt="Room (099sp mixed_3d) preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Room (099sp)</div>
-                    <div class="meta"><span class="size">92 MB</span> · mip-360 · mixed_3d texsplit_tex_frac=0.99</div>
+                    <div class="meta"><span class="size">102 MB</span> · paired-RVQ atlas</div>
                 </div>
             </a>
             <a class="demo" data-invariant="true"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_rvqply.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_rvqply.bitymi">
                 <img class="thumb" src="static/thumbs/room.jpg" alt="Room (RVQ-paired) preview" loading="lazy">
                 <div class="text">
-                    <div class="title">Room (RVQ)</div>
-                    <div class="meta"><span class="size">114 MB</span> · paired-RVQ atlas · in-shader decode</div>
+                    <div class="title">Room</div>
+                    <div class="meta"><span class="size">114 MB</span> · paired-RVQ atlas</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="kitchen" data-hd-mb="213" data-lite-mb="154" data-classic-mb="280"
-               data-astc-hd="kitchen_astc.bitymi"
-               data-astc-lite="kitchen_astc_lite.bitymi"
-               data-astc-classic="kitchen_classic_astc.bitymi"
-               data-sb-hd="kitchen_sb.bitymi"
-               data-sb-astc-hd="kitchen_sb_astc.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen.bitymi">
-                <img class="thumb" src="static/thumbs/kitchen.jpg" alt="Kitchen scene preview" loading="lazy">
+            <a class="demo" data-invariant="true"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_rvqply.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_rvqply.bitymi">
+                <img class="thumb" src="static/thumbs/kitchen.jpg" alt="Kitchen (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Kitchen</div>
-                    <div class="meta"><span class="size">154 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">133 MB</span> · paired-RVQ atlas</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="bonsai" data-hd-mb="257" data-lite-mb="133" data-classic-mb="333"
-               data-astc-hd="bonsai_astc.bitymi"
-               data-astc-lite="bonsai_astc_lite.bitymi"
-               data-astc-classic="bonsai_classic_astc.bitymi"
-               data-sb-hd="bonsai_sb.bitymi"
-               data-sb-astc-hd="bonsai_sb_astc.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai.bitymi">
-                <img class="thumb" src="static/thumbs/bonsai.jpg" alt="Bonsai scene preview" loading="lazy">
+            <a class="demo" data-invariant="true"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_rvqply.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_rvqply.bitymi">
+                <img class="thumb" src="static/thumbs/bonsai.jpg" alt="Bonsai (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Bonsai</div>
-                    <div class="meta"><span class="size">133 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">142 MB</span> · paired-RVQ atlas</div>
                 </div>
             </a>
         </div>
 
         <h2>Outdoor (heavier)</h2>
         <div class="grid">
-            <a class="demo" data-folder="mip_360" data-scene="stump" data-hd-mb="291" data-lite-mb="130" data-classic-mb="378"
-               data-astc-hd="stump_astc.bitymi"
-               data-astc-lite="stump_astc_lite.bitymi"
-               data-astc-classic="stump_classic_astc.bitymi"
-               data-sb-hd="stump_sb.bitymi"
-               data-sb-astc-hd="stump_sb_astc.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump.bitymi">
-                <img class="thumb" src="static/thumbs/stump.jpg" alt="Stump scene preview" loading="lazy">
+            <a class="demo" data-invariant="true"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_rvqply.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_rvqply.bitymi">
+                <img class="thumb" src="static/thumbs/stump.jpg" alt="Stump (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Stump</div>
-                    <div class="meta"><span class="size">130 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">143 MB</span> · paired-RVQ atlas</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="garden" data-hd-mb="370" data-lite-mb="199" data-classic-mb="563"
-               data-astc-hd="garden_astc.bitymi"
-               data-astc-lite="garden_astc_lite.bitymi"
-               data-astc-classic="garden_classic_astc.bitymi"
-               data-sb-hd="garden_sb.bitymi"
-               data-sb-astc-hd="garden_sb_astc.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden.bitymi">
-                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden scene preview" loading="lazy">
+            <a class="demo" data-invariant="true"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_rvqply.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_rvqply.bitymi">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Garden</div>
-                    <div class="meta"><span class="size">199 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">236 MB</span> · paired-RVQ atlas</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="bicycle" data-hd-mb="403" data-lite-mb="193" data-classic-mb="626"
-               data-astc-hd="bicycle_astc.bitymi"
-               data-astc-lite="bicycle_astc_lite.bitymi"
-               data-astc-classic="bicycle_classic_astc.bitymi"
-               data-sb-hd="bicycle_sb.bitymi"
-               data-sb-astc-hd="bicycle_sb_astc.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle.bitymi">
-                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle scene preview" loading="lazy">
+            <a class="demo" data-invariant="true"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_rvqply.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_rvqply.bitymi">
+                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Bicycle</div>
-                    <div class="meta"><span class="size">193 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">240 MB</span> · paired-RVQ atlas</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="bicycle_opaque" data-hd-mb="661"
-               data-astc-hd="bicycle_opaque_astc.bitymi"
-               data-astc-lite="bicycle_opaque_astc_lite.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_opaque.bitymi">
-                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle opaque scene preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Bicycle Opaque</div>
-                    <div class="meta"><span class="size">661 MB</span> · mip-360</div>
-                </div>
-            </a>
-            <a class="demo" data-folder="mip_360" data-scene="bicycle_random_dist" data-hd-mb="678"
-               data-astc-hd="bicycle_random_dist_astc.bitymi"
-               data-astc-lite="bicycle_random_dist_astc_lite.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_random_dist.bitymi">
-                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle random dist scene preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Bicycle Random Dist</div>
-                    <div class="meta"><span class="size">678 MB</span> · mip-360</div>
-                </div>
-            </a>
-            <a class="demo" data-folder="mip_360" data-scene="flowers" data-hd-mb="563" data-lite-mb="244" data-classic-mb="779"
-               data-astc-hd="flowers_astc.bitymi"
-               data-astc-lite="flowers_astc_lite.bitymi"
-               data-astc-classic="flowers_classic_astc.bitymi"
-               data-sb-hd="flowers_sb.bitymi"
-               data-sb-astc-hd="flowers_sb_astc.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers.bitymi">
-                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers scene preview" loading="lazy">
+            <a class="demo" data-invariant="true"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_rvqply.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_rvqply.bitymi">
+                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Flowers</div>
-                    <div class="meta"><span class="size">244 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">246 MB</span> · paired-RVQ atlas</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="treehill" data-hd-mb="560" data-lite-mb="238" data-classic-mb="829"
-               data-astc-hd="treehill_astc.bitymi"
-               data-astc-lite="treehill_astc_lite.bitymi"
-               data-astc-classic="treehill_classic_astc.bitymi"
-               data-sb-hd="treehill_sb.bitymi"
-               data-sb-astc-hd="treehill_sb_astc.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill.bitymi">
-                <img class="thumb" src="static/thumbs/treehill.jpg" alt="Treehill scene preview" loading="lazy">
+            <a class="demo" data-invariant="true"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_rvqply.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_rvqply.bitymi">
+                <img class="thumb" src="static/thumbs/treehill.jpg" alt="Treehill (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Treehill</div>
-                    <div class="meta"><span class="size">238 MB</span> · mip-360</div>
+                    <div class="meta"><span class="size">303 MB</span> · paired-RVQ atlas</div>
                 </div>
             </a>
         </div>
