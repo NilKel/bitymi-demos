@@ -10,8 +10,15 @@ Thumbs.db
 .cache/
 
 # Heavy bundled scenes — keep them OUT of git. >100 MB blobs would be
-# rejected by the GitHub Pages branch anyway. We host them as Release
-# assets (gh release upload …); index.html links to the Releases CDN URL.
+# rejected by the GitHub Pages branch anyway. Bundles are hosted on
+# HuggingFace datasets; index.html links to the HF CDN URL. Patterns use
+# ** to recurse into subdirs (scenes/mip_360/*.bitymi etc).
+scenes/**/*.bitymi
+scenes/**/*.ply
+scenes/**/*.npz
+scenes/**/*.nat2
+scenes/**/*.bc7
+# legacy top-level patterns kept for safety
 scenes/*.bitymi
 scenes/*.ply
 scenes/*.npz

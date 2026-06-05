@@ -221,7 +221,7 @@
     <main>
         <h1>BITYMI demos</h1>
         <p>WebGPU Textured 2D surfel splatting with texture atlases baked from a neural representation.</p>
-        <p>All scenes use the same model: <code>3D_SH_res</code> + <code>--feature SV</code> (per-surfel beta-scaled kernel, K=7 Spherical-Voronoi sites/surfel, BC7 residual atlas). On Wi-Fi the indoor scenes load in a couple seconds; the outdoor ones are larger so save them for a fast connection.</p>
+        <p>WebGPU 2D-surfel splatting with texture atlases baked from a neural representation. mip-360 ships in two flavours — <code>Mixed</code> (textured 2D surfels + untextured 3D EWA ellipsoids, the new default) and <code>Original</code> (textured 2D surfels only). Both use <code>--feature SV</code> (K=7 Spherical-Voronoi sites/surfel) and a paired-RVQ residual atlas. On Wi-Fi the indoor scenes load in a couple seconds; the outdoor ones are larger so save them for a fast connection.</p>
 
         <!-- mip_360 scenes ship as a single tier: paired-RVQ atlas
              (atlas_format=5, in-shader 4-tap bilinear decode over a 1024×2048
@@ -249,103 +249,118 @@
             for our Pages domain so the viewer's fetch() works directly.
         -->
 
+        <div class="quality-bar variant-bar" role="group" aria-label="mip_360 model variant">
+            <span class="label">mip_360 model</span>
+            <button type="button" data-variant="mixed"    aria-pressed="true">Mixed (res_3d_paired)</button>
+            <button type="button" data-variant="original" aria-pressed="false">Original (3D_SH_res)</button>
+        </div>
+
         <details class="folder" open>
-        <summary><span class="chev">▸</span><span class="fname">mip_360</span><span class="fcount">10 scenes · paired-RVQ</span></summary>
+        <summary><span class="chev">▸</span><span class="fname">mip_360</span><span class="fcount">9 scenes · paired-RVQ</span></summary>
 
         <h2>Indoor (light)</h2>
         <div class="grid">
-            <a class="demo" data-invariant="true"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_rvqply.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_rvqply.bitymi">
+            <a class="demo" data-invariant="true" data-variant-set="mip360"
+               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_rvqply.bitymi" data-original-size="39"
+               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_mixed.bitymi" data-mixed-size="37"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_mixed.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_mixed.bitymi">
                 <img class="thumb" src="static/thumbs/counter.jpg" alt="Counter (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Counter</div>
-                    <div class="meta"><span class="size">39 MB</span></div>
-                </div>
-            </a>
-            <a class="demo" data-invariant="true"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_rvqply.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_rvqply.bitymi">
-                <img class="thumb" src="static/thumbs/room.jpg" alt="Room preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Room</div>
-                    <div class="meta"><span class="size">45 MB</span></div>
-                </div>
-            </a>
-            <a class="demo" data-invariant="true"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_mixed.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_mixed.bitymi">
-                <img class="thumb" src="static/thumbs/room.jpg" alt="Room (mixed res_3d_paired) preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Mixed</div>
                     <div class="meta"><span class="size">37 MB</span></div>
                 </div>
             </a>
-            <a class="demo" data-invariant="true"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_rvqply.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_rvqply.bitymi">
+            <a class="demo" data-invariant="true" data-variant-set="mip360"
+               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_rvqply.bitymi" data-original-size="45"
+               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_mixed.bitymi" data-mixed-size="39"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_mixed.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_mixed.bitymi">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Room</div>
+                    <div class="meta"><span class="size">39 MB</span></div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" data-variant-set="mip360"
+               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_rvqply.bitymi" data-original-size="48"
+               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_mixed.bitymi" data-mixed-size="56"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_mixed.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_mixed.bitymi">
                 <img class="thumb" src="static/thumbs/kitchen.jpg" alt="Kitchen (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Kitchen</div>
-                    <div class="meta"><span class="size">48 MB</span></div>
+                    <div class="meta"><span class="size">56 MB</span></div>
                 </div>
             </a>
-            <a class="demo" data-invariant="true"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_rvqply.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_rvqply.bitymi">
+            <a class="demo" data-invariant="true" data-variant-set="mip360"
+               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_rvqply.bitymi" data-original-size="55"
+               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_mixed.bitymi" data-mixed-size="59"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_mixed.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_mixed.bitymi">
                 <img class="thumb" src="static/thumbs/bonsai.jpg" alt="Bonsai (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Bonsai</div>
-                    <div class="meta"><span class="size">55 MB</span></div>
+                    <div class="meta"><span class="size">59 MB</span></div>
                 </div>
             </a>
         </div>
 
         <h2>Outdoor (heavier)</h2>
         <div class="grid">
-            <a class="demo" data-invariant="true"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_rvqply.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_rvqply.bitymi">
+            <a class="demo" data-invariant="true" data-variant-set="mip360"
+               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_rvqply.bitymi" data-original-size="57"
+               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_mixed.bitymi" data-mixed-size="58"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_mixed.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_mixed.bitymi">
                 <img class="thumb" src="static/thumbs/stump.jpg" alt="Stump (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Stump</div>
-                    <div class="meta"><span class="size">57 MB</span></div>
+                    <div class="meta"><span class="size">58 MB</span></div>
                 </div>
             </a>
-            <a class="demo" data-invariant="true"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_rvqply.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_rvqply.bitymi">
+            <a class="demo" data-invariant="true" data-variant-set="mip360"
+               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_rvqply.bitymi" data-original-size="96"
+               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_mixed.bitymi" data-mixed-size="88"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_mixed.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_mixed.bitymi">
                 <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Garden</div>
-                    <div class="meta"><span class="size">96 MB</span></div>
+                    <div class="meta"><span class="size">88 MB</span></div>
                 </div>
             </a>
-            <a class="demo" data-invariant="true"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_rvqply.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_rvqply.bitymi">
+            <a class="demo" data-invariant="true" data-variant-set="mip360"
+               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_rvqply.bitymi" data-original-size="98"
+               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_mixed.bitymi" data-mixed-size="94"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_mixed.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_mixed.bitymi">
                 <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Bicycle</div>
-                    <div class="meta"><span class="size">98 MB</span></div>
+                    <div class="meta"><span class="size">94 MB</span></div>
                 </div>
             </a>
-            <a class="demo" data-invariant="true"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_rvqply.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_rvqply.bitymi">
+            <a class="demo" data-invariant="true" data-variant-set="mip360"
+               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_rvqply.bitymi" data-original-size="100"
+               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_mixed.bitymi" data-mixed-size="122"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_mixed.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_mixed.bitymi">
                 <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Flowers</div>
-                    <div class="meta"><span class="size">100 MB</span></div>
+                    <div class="meta"><span class="size">122 MB</span></div>
                 </div>
             </a>
-            <a class="demo" data-invariant="true"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_rvqply.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_rvqply.bitymi">
+            <a class="demo" data-invariant="true" data-variant-set="mip360"
+               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_rvqply.bitymi" data-original-size="125"
+               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_mixed.bitymi" data-mixed-size="121"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_mixed.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_mixed.bitymi">
                 <img class="thumb" src="static/thumbs/treehill.jpg" alt="Treehill (RVQ-paired) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Treehill</div>
-                    <div class="meta"><span class="size">125 MB</span></div>
+                    <div class="meta"><span class="size">121 MB</span></div>
                 </div>
             </a>
         </div>
@@ -447,7 +462,40 @@
             const qualityButtons = document.querySelectorAll('.quality-bar button[data-quality]');
             const atlasButtons   = document.querySelectorAll('.quality-bar button[data-atlas]');
             const colorButtons   = document.querySelectorAll('.quality-bar button[data-color]');
+            const variantButtons = document.querySelectorAll('.variant-bar button[data-variant]');
             const cards = document.querySelectorAll('a.demo[data-scene]');
+            const variantCards = document.querySelectorAll('a.demo[data-variant-set="mip360"]');
+
+            // mip_360 model variant toggle: each card carries both
+            //   data-original-hf / data-original-size  (3D_SH_res baseline)
+            //   data-mixed-hf    / data-mixed-size     (res_3d_paired G2 — default)
+            // The button swaps href + size text + data-hf in-place.
+            const STORAGE_KEY_V = 'bitymi.variant';
+            const VALID_V = new Set(['mixed', 'original']);
+            let currentV = 'mixed';
+            function applyVariant(v) {
+                if (!VALID_V.has(v)) v = 'mixed';
+                currentV = v;
+                variantButtons.forEach(b => b.setAttribute('aria-pressed', b.dataset.variant === v ? 'true' : 'false'));
+                variantCards.forEach(card => {
+                    const hf = card.dataset[v + 'Hf'];
+                    const size = card.dataset[v + 'Size'];
+                    if (hf) {
+                        card.href = 'viewer/index.html?bundle=' + hf;
+                        card.dataset.hf = hf;
+                    }
+                    const sizeEl = card.querySelector('.size');
+                    if (sizeEl && size) sizeEl.textContent = size + ' MB';
+                });
+                try { localStorage.setItem(STORAGE_KEY_V, v); } catch (e) {}
+            }
+            variantButtons.forEach(b => b.addEventListener('click', () => applyVariant(b.dataset.variant)));
+            let initialV = 'mixed';
+            try {
+                const sV = localStorage.getItem(STORAGE_KEY_V);
+                if (VALID_V.has(sV)) initialV = sV;
+            } catch (e) {}
+            applyVariant(initialV);
 
             const SUFFIX = {
                 'lite-ws':    { viewer: 'viewer-ws', suffix: '_lite',    extra: '' },
