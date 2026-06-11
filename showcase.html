@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>BITYMI showcase</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            color: #eee;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8vh 6vw 6vh 6vw;
+            box-sizing: border-box;
+            max-width: 880px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-weight: 300;
+            letter-spacing: 0.08em;
+            margin: 0 0 0.3em 0;
+            font-size: 2.0rem;
+        }
+
+        p.lede {
+            color: #a8a8a8;
+            margin: 0 0 2.4em 0;
+            line-height: 1.55;
+            font-size: 1.0rem;
+            text-align: center;
+            max-width: 640px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.0em;
+            width: 100%;
+        }
+
+        @media (max-width: 720px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        a.demo {
+            display: block;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 14px;
+            text-decoration: none;
+            color: #eee;
+            transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        a.demo:hover {
+            background: #1f1f1f;
+            border-color: #3a4870;
+            transform: translateY(-2px);
+        }
+
+        a.demo .thumb {
+            width: 100%;
+            aspect-ratio: 3 / 2;
+            object-fit: cover;
+            display: block;
+            background: #0d0d0d;
+        }
+
+        a.demo .text {
+            padding: 0.9em 1.0em 1.0em 1.0em;
+        }
+
+        a.demo .title {
+            font-size: 1.05rem;
+            font-weight: 500;
+            margin-bottom: 0.25em;
+        }
+
+        a.demo .meta {
+            color: #888;
+            font-size: 0.82rem;
+            font-feature-settings: "tnum";
+        }
+
+        a.demo .desc {
+            color: #777;
+            font-size: 0.82rem;
+            margin-top: 0.45em;
+            line-height: 1.45;
+        }
+
+        .hint {
+            color: #5a5a5a;
+            font-size: 0.82rem;
+            margin-top: 2.2em;
+            text-align: center;
+        }
+
+        .hint a {
+            color: #7a8aa8;
+            text-decoration: none;
+        }
+
+        .hint a:hover { color: #a0b0d0; }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>BITYMI showcase</h1>
+        <p class="lede">WebGPU 2D-surfel splatting with neural texture atlases.
+            Three scenes baked with <code style="color:#c9c9c9">res_3d_paired</code> — textured 2D
+            beta-scaled surfels + untextured 3D EWA ellipsoids. Click to open in the viewer; mouse-drag
+            to orbit, scroll to zoom.</p>
+
+        <div class="grid">
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_mixed.bitymi">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Garden</div>
+                    <div class="meta">88 MB · mip-360</div>
+                    <div class="desc">Outdoor scene. 288k surfels (50/50 textured / EWA).</div>
+                </div>
+            </a>
+
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_lung/mixed.bitymi">
+                <img class="thumb" src="static/thumbs/lung.jpg" alt="Lung photon-counting CT preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Lung (photon-counting CT)</div>
+                    <div class="meta">54 MB · medical</div>
+                    <div class="desc">Siemens photon-counting CT volume. 295k surfels.</div>
+                </div>
+            </a>
+
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/jhabbu_mixed.bitymi">
+                <img class="thumb" src="static/thumbs/jhabbu.jpg" alt="jhabbu scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">jhabbu</div>
+                    <div class="meta">39 MB · personal capture</div>
+                    <div class="desc">Phone-camera capture, COLMAP'd. 129k surfels.</div>
+                </div>
+            </a>
+        </div>
+
+        <p class="hint">Full demo gallery: <a href="index.html">index</a></p>
+    </main>
+</body>
+
+</html>
