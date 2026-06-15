@@ -45,7 +45,7 @@
 
         .grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 1.0em;
             width: 100%;
         }
@@ -123,7 +123,7 @@
     <main>
         <h1>BITYMI showcase</h1>
         <p class="lede">WebGPU 2D-surfel splatting with neural texture atlases.
-            Three scenes baked with <code style="color:#c9c9c9">res_3d_paired</code> — textured 2D
+            Four scenes baked with <code style="color:#c9c9c9">res_3d_paired</code> — textured 2D
             beta-scaled surfels + untextured 3D EWA ellipsoids. Click to open in the viewer; mouse-drag
             to orbit, scroll to zoom.</p>
 
@@ -145,6 +145,16 @@
                     <div class="title">Lung (photon-counting CT)</div>
                     <div class="meta">54 MB · medical</div>
                     <div class="desc">Siemens photon-counting CT volume. 295k surfels.</div>
+                </div>
+            </a>
+
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_mixed.bitymi">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain micro-CT preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Brain (micro-CT 47µm)</div>
+                    <div class="meta">42 MB · medical</div>
+                    <div class="desc">Cinematic Anatomy brain volume. 134k surfels.</div>
                 </div>
             </a>
 
