@@ -249,8 +249,8 @@
             for our Pages domain so the viewer's fetch() works directly.
         -->
 
-        <div class="quality-bar variant-bar" role="group" aria-label="mip_360 model variant">
-            <span class="label">mip_360 model</span>
+        <div class="quality-bar variant-bar" role="group" aria-label="Model variant">
+            <span class="label">Model</span>
             <button type="button" data-variant="mixed"    aria-pressed="true">Mixed (res_3d_paired)</button>
             <button type="button" data-variant="original" aria-pressed="false">Original (3D_SH_res)</button>
         </div>
@@ -393,12 +393,15 @@
                     <div class="meta"><span class="size">155 MB</span> · cinematic-anatomy</div>
                 </div>
             </a>
-            <a class="demo" data-invariant="true"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k.bitymi">
+            <a class="demo" data-invariant="true" data-variant-set="mip360"
+               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k.bitymi" data-original-size="63"
+               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_mixed.bitymi" data-mixed-size="42"
+               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_mixed.bitymi"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_mixed.bitymi">
                 <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain micro-CT (2k iters, himn2) preview" loading="lazy">
                 <div class="text">
                     <div class="title">Brain 2k</div>
-                    <div class="meta"><span class="size">63 MB</span> · cinematic-anatomy</div>
+                    <div class="meta"><span class="size">42 MB</span> · cinematic-anatomy</div>
                 </div>
             </a>
         </div>
