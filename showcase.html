@@ -45,11 +45,13 @@
 
         .grid {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 1.0em;
             width: 100%;
-            max-width: 460px;
-            margin: 0 auto;
+        }
+
+        @media (max-width: 720px) {
+            .grid { grid-template-columns: 1fr; }
         }
 
         a.demo {
@@ -120,20 +122,52 @@
 <body>
     <main>
         <h1>BITYMI showcase</h1>
-        <p class="lede">WebGPU 2D-surfel splatting with a neural texture atlas.
-            Click to open the viewer; mouse-drag to orbit, scroll to zoom.</p>
+        <p class="lede">WebGPU 2D-surfel splatting with neural texture atlases.
+            Click a scene to open it in the viewer; mouse-drag to orbit, scroll to zoom.</p>
 
         <div class="grid">
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_mixed.bitymi">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Garden</div>
+                    <div class="meta">88 MB · mip-360</div>
+                    <div class="desc">Outdoor scene. 288k surfels (50/50 textured / EWA).</div>
+                </div>
+            </a>
+
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_lung/mixed.bitymi">
+                <img class="thumb" src="static/thumbs/lung.jpg" alt="Lung photon-counting CT preview" loading="lazy">
+                <div class="text">
+                    <div class="title">Lung (photon-counting CT)</div>
+                    <div class="meta">54 MB · medical</div>
+                    <div class="desc">Siemens photon-counting CT volume. 295k surfels.</div>
+                </div>
+            </a>
+
             <a class="demo"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k.bitymi">
                 <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain micro-CT preview" loading="lazy">
                 <div class="text">
                     <div class="title">Brain (micro-CT 47µm)</div>
-                    <div class="meta">72 MB · Cinematic Anatomy</div>
-                    <div class="desc">131k surfels, 3D_SH_res bake. Baked at 573 FPS / 25.97 dB PSNR (12× speedup vs neural).</div>
+                    <div class="meta">63 MB · medical</div>
+                    <div class="desc">Cinematic Anatomy brain volume. 115k surfels.</div>
+                </div>
+            </a>
+
+            <a class="demo"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/jhabbu_mixed.bitymi">
+                <img class="thumb" src="static/thumbs/jhabbu.jpg" alt="jhabbu scene preview" loading="lazy">
+                <div class="text">
+                    <div class="title">jhabbu</div>
+                    <div class="meta">39 MB · personal capture</div>
+                    <div class="desc">Phone-camera capture, COLMAP'd. 129k surfels.</div>
                 </div>
             </a>
         </div>
+
+        <p class="hint">Full demo gallery: <a href="index.html">index</a></p>
     </main>
 </body>
 
