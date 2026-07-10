@@ -48,17 +48,30 @@
      and it opens the door to Quest-specific features (foveated rendering, controller
      tracking, spatial anchors).</p>
 
-  <div class="warn"><strong>🔎 Reference APK for diagnostic testing</strong> ·
-     Halloumi-Quest is still hanging on Meta's loading dots for at least one
-     tester. To isolate whether the problem is our code or the device/setup,
-     try the reference APK below (a known-working minimal Vulkan+OpenXR sample
-     from <a href="https://github.com/artyom-beilis/Quest-XR" target="_blank" rel="noopener">Quest-XR</a>).
-     If <em>this</em> reference APK also hangs on loading dots, the issue is
-     upstream of our code (dev mode setup, OS version, Meta runtime config).
-     If it works but Halloumi doesn't, the fault is in our code and we can
-     iterate.<br><br>
-     <a class="apk" href="quest-xr-reference.apk" style="opacity:1;pointer-events:auto;background:#603060;margin-top:0;">⬇ quest-xr-reference.apk <span style="opacity:0.7">(20 MB · Meta OpenXR loader + minimal Vulkan)</span></a>
-     <br><small style="color:#a0a0a0">Expected behaviour: a purple gradient in both eyes with a small triangle. If you see anything (even a solid colour), the reference works — that tells us the problem is Halloumi-specific.</small>
+  <div class="aside" style="border-left-color:#60c090"><strong>🧭 Diagnostic result</strong>:
+     the reference <a href="quest-xr-reference.apk">quest-xr-reference.apk</a>
+     opens instantly on Quest 2 — <strong>the device + Meta runtime + loader are
+     all fine</strong>. Halloumi-Quest v0.1.3-dev (below) still hangs on the loading
+     dots. So the bug is in Halloumi's code, upstream of any rendering.
+     Rather than more speculative patches on our tree, we <strong>forked
+     Quest-XR entirely</strong> as the new base — same OpenXR+Vulkan
+     bring-up path that already boots on your headset. The splat renderer
+     will splice into that fork, not the other way around.
+  </div>
+
+  <div class="warn"><strong>🥽 Current best-bet APK</strong> — Quest-XR
+     forked as Halloumi-Quest, package renamed but code otherwise verbatim.
+     Should boot exactly like <code>quest-xr-reference.apk</code> (purple
+     gradient + coloured cubes). If it does, we know the fork approach is
+     right and the next commit swaps in the splat renderer. If it doesn't,
+     something goes wrong in the rename step and we bisect.<br><br>
+     <a class="apk" href="halloumi-quest-fork.apk" style="opacity:1;pointer-events:auto;background:#306050;margin-top:0;">⬇ halloumi-quest-fork.apk <span style="opacity:0.7">(20 MB · fork of Quest-XR)</span></a>
+     <br><small style="color:#a0a0a0">Package: <code>com.bitymi.halloumi_quest_fork</code> (installs alongside both original Quest-XR and the Halloumi phase1 build). Native lib: <code>halloumi-quest-fork</code>. Nothing to do with the splat renderer yet.</small>
+  </div>
+
+  <div class="aside" style="border-left-color:#906060;font-size:0.85rem"><strong>Reference APKs still available for comparison:</strong> ·
+     <a href="quest-xr-reference.apk">quest-xr-reference.apk</a> (Quest-XR upstream, known-working) ·
+     <a href="halloumi-quest-phase1-dev.apk">halloumi-quest-phase1-dev.apk</a> (v0.1.3-dev, our old broken build with the splat renderer — kept as the failing baseline)
   </div>
 
   <h2>Get the APK</h2>
