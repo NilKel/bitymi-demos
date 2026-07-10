@@ -130,6 +130,23 @@ async function loadPLY(url) {
   const opacRaw   = new Float32Array(count);
   const scaleRaw  = new Float32Array(count * 2);
   const rotRaw    = new Float32Array(count * 4);
+  // SH rest — degree-3 = 45 coefficients per Gauss. Layout matches the
+  // standard 3DGS save_ply: `_features_rest.transpose(1,2).flatten()`, i.e.
+  //   f_rest_0..14   = R bands 1..15
+  //   f_rest_15..29  = G bands 1..15
+  //   f_rest_30..44  = B bands 1..15
+  // If the PLY only stores DC (some bakes), the buffer stays zero and we
+  // silently degrade to DC-only shading.
+  const shRest = new Float32Array(count * 45);
+  const hasSH  = nameToIdx.has('f_rest_0');
+  let shOffs   = null;
+  if (hasSH) {
+    shOffs = new Int32Array(45);
+    for (let k = 0; k < 45; ++k) {
+      const p = nameToIdx.get(`f_rest_${k}`);
+      shOffs[k] = p ? p.offset : -1;
+    }
+  }
 
   const oX  = nameToIdx.get('x').offset;
   const oY  = nameToIdx.get('y').offset;
@@ -160,6 +177,13 @@ async function loadPLY(url) {
     rotRaw[i*4+1]    = dv.getFloat32(base + oR1, true);
     rotRaw[i*4+2]    = dv.getFloat32(base + oR2, true);
     rotRaw[i*4+3]    = dv.getFloat32(base + oR3, true);
+    if (shOffs) {
+      const shBase = i * 45;
+      for (let k = 0; k < 45; ++k) {
+        const o = shOffs[k];
+        if (o >= 0) shRest[shBase + k] = dv.getFloat32(base + o, true);
+      }
+    }
   }
 
   let minX =  Infinity, minY =  Infinity, minZ =  Infinity;
@@ -171,9 +195,10 @@ async function loadPLY(url) {
     if (z < minZ) minZ = z; else if (z > maxZ) maxZ = z;
   }
   const t1 = performance.now();
-  setHud(`PLY parsed: ${count} Gauss · ${((t1-t0)/1000).toFixed(1)} s`);
+  setHud(`PLY parsed: ${count} Gauss · SH ${hasSH ? 'deg-3' : 'DC-only'} · ${((t1-t0)/1000).toFixed(1)} s`);
   return {
     count, positions, dc, opacRaw, scaleRaw, rotRaw,
+    shRest, hasSH,
     aabb: { min: [minX, minY, minZ], max: [maxX, maxY, maxZ] },
   };
 }
@@ -476,10 +501,70 @@ class SplatRenderer {
       const lambdaMax = 0.5 * tr + disc;
       const extent    = Math.min(256, Math.ceil(3 * Math.sqrt(Math.max(0, lambdaMax))));
 
-      // SH DC → RGB (3DGS activation).
-      const r = Math.max(0, Math.min(1, 0.5 + 0.28209479 * gauss.dc[i*3+0]));
-      const g = Math.max(0, Math.min(1, 0.5 + 0.28209479 * gauss.dc[i*3+1]));
-      const b = Math.max(0, Math.min(1, 0.5 + 0.28209479 * gauss.dc[i*3+2]));
+      // ------ view-dependent SH → RGB ------
+      // Direction from camera → Gauss, in the PLY/world frame. Camera-space
+      // direction is normalize(tx,ty,tz); rotate by view3x3^T to get the
+      // world-frame direction (works with uniform-scaled view — we re-normalise).
+      const invLenC = 1 / Math.hypot(tx, ty, tz);
+      const dxE = tx * invLenC, dyE = ty * invLenC, dzE = tz * invLenC;
+      let dwx = viewMatrix[0]*dxE + viewMatrix[1]*dyE + viewMatrix[2] *dzE;
+      let dwy = viewMatrix[4]*dxE + viewMatrix[5]*dyE + viewMatrix[6] *dzE;
+      let dwz = viewMatrix[8]*dxE + viewMatrix[9]*dyE + viewMatrix[10]*dzE;
+      const invLenW = 1 / Math.hypot(dwx, dwy, dwz);
+      dwx *= invLenW; dwy *= invLenW; dwz *= invLenW;
+
+      // SH basis functions — evaluated once per Gauss, reused for RGB. Sign
+      // conventions and band constants match the 3DGS reference
+      // (`computeColorFromSH` in Kerbl's forward.cu).
+      const shXX = dwx*dwx, shYY = dwy*dwy, shZZ = dwz*dwz;
+      const shXY = dwx*dwy, shYZ = dwy*dwz, shXZ = dwx*dwz;
+      const B1_0 = -0.4886025119029199 * dwy;
+      const B1_1 =  0.4886025119029199 * dwz;
+      const B1_2 = -0.4886025119029199 * dwx;
+      const B2_0 =  1.0925484305920792  * shXY;
+      const B2_1 = -1.0925484305920792  * shYZ;
+      const B2_2 =  0.31539156525252005 * (2*shZZ - shXX - shYY);
+      const B2_3 = -1.0925484305920792  * shXZ;
+      const B2_4 =  0.5462742152960396  * (shXX - shYY);
+      const B3_0 = -0.5900435899266435  * dwy * (3*shXX - shYY);
+      const B3_1 =  2.890611442640554   * shXY * dwz;
+      const B3_2 = -0.4570457994644658  * dwy * (4*shZZ - shXX - shYY);
+      const B3_3 =  0.3731763325901154  * dwz * (2*shZZ - 3*shXX - 3*shYY);
+      const B3_4 = -0.4570457994644658  * dwx * (4*shZZ - shXX - shYY);
+      const B3_5 =  1.445305721320277   * dwz * (shXX - shYY);
+      const B3_6 = -0.5900435899266435  * dwx * (shXX - 3*shYY);
+
+      const SH_C0 = 0.28209479177387814;
+      const shR   = gauss.shRest;   // zero-filled if the PLY had no f_rest_*
+      const shOff = i * 45;
+
+      const r_sh = SH_C0 * gauss.dc[i*3+0]
+        + B1_0*shR[shOff+ 0] + B1_1*shR[shOff+ 1] + B1_2*shR[shOff+ 2]
+        + B2_0*shR[shOff+ 3] + B2_1*shR[shOff+ 4] + B2_2*shR[shOff+ 5]
+        + B2_3*shR[shOff+ 6] + B2_4*shR[shOff+ 7]
+        + B3_0*shR[shOff+ 8] + B3_1*shR[shOff+ 9] + B3_2*shR[shOff+10]
+        + B3_3*shR[shOff+11] + B3_4*shR[shOff+12] + B3_5*shR[shOff+13]
+        + B3_6*shR[shOff+14];
+
+      const g_sh = SH_C0 * gauss.dc[i*3+1]
+        + B1_0*shR[shOff+15] + B1_1*shR[shOff+16] + B1_2*shR[shOff+17]
+        + B2_0*shR[shOff+18] + B2_1*shR[shOff+19] + B2_2*shR[shOff+20]
+        + B2_3*shR[shOff+21] + B2_4*shR[shOff+22]
+        + B3_0*shR[shOff+23] + B3_1*shR[shOff+24] + B3_2*shR[shOff+25]
+        + B3_3*shR[shOff+26] + B3_4*shR[shOff+27] + B3_5*shR[shOff+28]
+        + B3_6*shR[shOff+29];
+
+      const b_sh = SH_C0 * gauss.dc[i*3+2]
+        + B1_0*shR[shOff+30] + B1_1*shR[shOff+31] + B1_2*shR[shOff+32]
+        + B2_0*shR[shOff+33] + B2_1*shR[shOff+34] + B2_2*shR[shOff+35]
+        + B2_3*shR[shOff+36] + B2_4*shR[shOff+37]
+        + B3_0*shR[shOff+38] + B3_1*shR[shOff+39] + B3_2*shR[shOff+40]
+        + B3_3*shR[shOff+41] + B3_4*shR[shOff+42] + B3_5*shR[shOff+43]
+        + B3_6*shR[shOff+44];
+
+      const r = Math.max(0, Math.min(1, 0.5 + r_sh));
+      const g = Math.max(0, Math.min(1, 0.5 + g_sh));
+      const b = Math.max(0, Math.min(1, 0.5 + b_sh));
       const a = 1 / (1 + Math.exp(-gauss.opacRaw[i]));
 
       const off = i * instanceStride;
