@@ -26,7 +26,7 @@
 <body>
 <main>
   <h1>🥽 Halloumi-Quest · native Vulkan + OpenXR</h1>
-  <p><span class="status dev">Phase 1 · splat renderer live</span></p>
+  <p><span class="status dev">Phase 1.3 · v0.1.2-dev</span></p>
 
   <p>Native Android APK for Meta Quest 2 that renders 2DGS + SV Gaussian scenes
      in immersive VR — same asset format as the flat viewer (<code>.bitymi</code>
@@ -49,14 +49,26 @@
      tracking, spatial anchors).</p>
 
   <h2>Get the APK</h2>
-  <a class="apk" href="halloumi-quest-phase1-dev.apk" style="opacity:1;pointer-events:auto;">⬇ Download halloumi-quest-phase1-dev.apk <span style="opacity:0.7">(4.9 MB)</span></a>
-  <p class="apk-note"><strong>Phase 1 build.</strong> Renders the tiny brain
+  <a class="apk" href="halloumi-quest-phase1-dev.apk" style="opacity:1;pointer-events:auto;">⬇ Download halloumi-quest-phase1-dev.apk <span style="opacity:0.7">(4.9 MB · v0.1.2-dev)</span></a>
+  <p class="apk-note"><strong>Phase 1.3 build.</strong> Renders the tiny brain
      (15k Gauss, bundled as an APK asset) in immersive VR — full 2DGS pipeline
-     with Spherical Voronoi colour, per-eye projection, CPU radix sort, Vulkan
-     graphics pipeline with premultiplied-alpha blending. The whole per-Gauss
-     compute (cov3D, view Jacobian → cov2D, SV softmax) runs on the CPU in
-     native C++ and hands off to a thin Vulkan graphics pipeline. Scene
-     appears ~2.5 m in front at eye height.</p>
+     with Spherical Voronoi colour, per-eye projection, CPU 16-bit radix sort,
+     Vulkan graphics pipeline with premultiplied-alpha blending. The whole
+     per-Gauss compute (cov3D, view Jacobian → cov2D, SV softmax) runs on the
+     CPU in native C++ and hands off to a thin Vulkan graphics pipeline.
+     Scene appears ~2.5 m in front at eye height.</p>
+  <p class="apk-note"><strong>Debug menu built-in.</strong> The app boots into
+     a blue "menu" state and either advances to splats after 10 s or on a
+     controller-trigger press. If either eye shows red, init failed — grab a
+     logcat and check the <code>halloumi-quest</code> / <code>halloumi-scene</code>
+     / <code>halloumi-render</code> tags to see which step aborted. If it hangs
+     on Meta's loading dots after ~30 s, that's before our code runs at all
+     (unlikely as of v0.1.2-dev after the OpenXR 1.0 apiVersion fix).</p>
+  <p class="apk-note">
+     <strong>Version check</strong>: after install, App Info screen should read
+     versionName <code>0.1.2-dev</code>. If it says an older version, delete
+     first — Meta caches installs by package name.
+  </p>
   <p class="apk-note"><strong>Phase 0 still available:</strong>
      <a href="halloumi-quest-phase0-dev.apk">halloumi-quest-phase0-dev.apk</a>
      (1.1 MB) — just clears the swapchain, useful only for verifying the
@@ -76,38 +88,69 @@
     <li>Reboot the headset once.</li>
   </ol>
 
-  <h3>Step 2 · Allow installs from the Quest browser (recommended)</h3>
-  <p>This makes future installs a single tap on this download link, right from the headset.</p>
+  <h3>Step 2 · Install via SideQuest from your PC</h3>
+  <p>Meta locked down browser-based APK installs on recent OS builds — the
+     Quest browser can download an APK but the built-in file manager refuses
+     to hand it to the installer with an "unsupported file type" error. So
+     we install from a PC:</p>
   <ol>
-    <li>On the headset, open <strong>Settings → Apps</strong>.</li>
-    <li>Find <em>Meta Quest Browser</em> → toggle <strong>"install unknown apps"</strong> on.</li>
+    <li>On your PC, install <a href="https://sidequestvr.com/setup-howto" target="_blank" rel="noopener">SideQuest</a>.</li>
+    <li>Plug the Quest into your PC via a USB-C <strong>data</strong> cable
+        (charge-only cables won't work — SideQuest shows "device not
+        connected").</li>
+    <li>Put the Quest on and approve the "Allow USB debugging" prompt when
+        it appears. Check "Always allow from this computer".</li>
+    <li>In SideQuest, top-right toolbar → the <strong>"Install APK file from
+        folder on your computer"</strong> icon (box with down-arrow) → pick
+        the APK you downloaded above.</li>
+    <li>In the Quest, App library → filter dropdown (top-right) →
+        <strong>Unknown Sources</strong> → launch <strong>Halloumi-Quest</strong>.</li>
   </ol>
+  <p><strong>ADB variant (if you already have platform-tools)</strong>:
+     <code>adb install halloumi-quest-phase1-dev.apk</code>.</p>
 
-  <h3>Step 3 · Install</h3>
-  <p><strong>Option A · From the Quest browser (once above is done)</strong>:
-     open this page inside the headset, tap the download link, tap "install" when Android prompts.
-     That's it.</p>
-  <p><strong>Option B · From a PC via SideQuest</strong>:
-     download <a href="https://sidequestvr.com/" target="_blank" rel="noopener">SideQuest</a>,
-     plug your Quest in via USB-C, drag the APK onto the headset icon.</p>
-  <p><strong>Option C · From a PC via ADB (advanced)</strong>:
-     <code>adb install halloumi-quest.apk</code>.</p>
-
-  <h2>What's under the hood</h2>
-  <p>Full pipeline reworked to Vulkan compute shaders + OpenXR. Same conceptual passes
-     as Halloumi-WS (cull → preprocess → radix sort → tile raster) but as GLSL/SPIR-V
-     compute shaders on Vulkan, with stereo rendering via OpenXR's projection layer + view
-     matrices. Asset format unchanged — the same <code>.bitymi</code> bundles served
-     to the flat viewer load directly. BC7 / ASTC atlas support handled by native texture
-     compression paths that Vulkan supports directly.</p>
+  <h2>What's under the hood as of v0.1.2-dev</h2>
+  <ul>
+    <li><strong>OpenXR 1.0</strong> session against Meta's Quest 2 runtime;
+        <code>XR_KHR_vulkan_enable2</code> for the Vulkan binding; local-floor
+        reference space with local fallback; one <code>immersive-vr</code>
+        projection layer with two eye views.</li>
+    <li><strong>Vulkan 1.1</strong> graphics pipeline — single-attachment
+        colour render pass (format enumerated at runtime, SRGB preferred),
+        static-quad vertex binding + per-instance <code>(ndc.xy, conic.xyz,
+        rgba, extent_px)</code> binding, premultiplied-alpha blend, dynamic
+        viewport/scissor, <code>vec2 viewport_px</code> push constant.
+        Framebuffers cached per XR swapchain <code>VkImage</code>.</li>
+    <li><strong>CPU splat pipeline</strong> in native C++: SV-aware binary
+        PLY parser (ports the JS loader), per-frame per-eye projection
+        (cov3D → cov2D via perspective Jacobian → conic + extent), SV eval
+        (softmax over −τ·|site−dir| chord distance), frustum-culled + 16-bit
+        radix sort back-to-front. Persistently-mapped host-visible instance
+        buffer for zero-copy per-frame upload.</li>
+    <li><strong>Debug state machine</strong> — Menu (blue) / Splats /
+        Error (red); trigger click or 10 s timeout advances. Any XR/Vulkan
+        failure is logged at ERROR level via the <code>halloumi-quest</code>
+        logcat tag (no more silent aborts).</li>
+  </ul>
 
   <div class="aside">Reference implementation lives at
-  <code>/home/nilkel/Projects/Halloumi-Quest</code> — see <code>docs/PLAN.md</code> for
-  the full port plan and phase breakdown.</div>
+  <code>/home/nilkel/Projects/Halloumi-Quest</code>. Structural comparison
+  point: <code>/home/nilkel/Projects/Quest-OpenXR-Vulkan</code>
+  (danwillm's minimal Vulkan+OpenXR sample) — used to diagnose the OpenXR
+  1.1 → 1.0 API-version issue that killed Phase 1.0–1.2 startup.</div>
 
-  <h2>Timeline</h2>
-  <p>~6-8 weeks of focused work for one dev with Vulkan + OpenXR experience. Milestones
-     will be published here as they land.</p>
+  <h2>Next up</h2>
+  <ul>
+    <li>Controller thumbstick pan / dolly / rotate — currently only physical
+        head tracking is wired; OpenXR action set already has trigger, needs
+        stick + pose actions added.</li>
+    <li><code>.bitymi</code> container + BPLY decoder in native C++ so we can
+        load production bundles instead of the bundled tiny brain.</li>
+    <li>Vulkan compute preprocess pass — mirror the WebGL2 preprocess-to-MRT
+        pattern. Only if CPU perf becomes the bottleneck on brain_2k etc.</li>
+    <li>Store submission — release keystore, icon + splash, signing config,
+        App Lab review. Independent of the above pipeline work.</li>
+  </ul>
 
   <p style="margin-top:3em"><a href="../">← back to bitymi demos</a></p>
 </main>
