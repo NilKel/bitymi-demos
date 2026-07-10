@@ -1,13 +1,18 @@
-// Halloumi-GL — self-contained WebGL2 splat viewer.
+// Halloumi-GL — self-contained WebGL2 splat viewer + WebXR immersive-vr entry.
 //
-// Goal: prove out the WebGL2 render path on Meta Quest 2, where WebXR+WebGPU
-// interop (XRGPUBinding) is not exposed in the browser. WebGL2's XRWebGLLayer
-// is available on the same devices without any flag flipping, so once this
-// flat-viewer proves out we can bolt on immersive-vr.
+// Uses XRWebGLLayer (not XRGPUBinding), so it works on Meta Quest Browser
+// without any chrome://flags flip.
 //
-// First-cut scope: untextured 2DGS PLY (no atlas, no residual, no RVQ), all
-// CPU preprocess (project + sort per frame) + a WebGL2 hardware rasterizer.
-// Optimisation happens later; correctness first.
+// Coord conventions:
+//   • Camera-space: right-handed, camera looks down -z (tz < 0 for front).
+//   • Depth for sort: `-tz` (larger positive = further).
+//   • Splat "center" is stored in NDC in the instance buffer; deltas are in
+//     viewport-pixel space, converted to NDC by the vertex shader via a
+//     u_viewport_px uniform. This keeps sizes independent of the projection
+//     matrix so the same instance buffer works for XR eyes with different
+//     asymmetric FOVs.
+//   • y-up throughout — matches WebGL native, avoids the sign gymnastics that
+//     bit the earlier flat-only version.
 
 // -------------- HUD / error surface --------------
 const hud = document.getElementById('hud');
@@ -24,19 +29,18 @@ const params = new URLSearchParams(location.search);
 const bundleURL = params.get('bundle') || '../test-data/brain_tiny.ply';
 
 // -------------- Tiny linear-algebra helpers --------------
-// All matrices are column-major Float32Array(16). All vectors are Float32Array or plain arrays.
-
 function mat4Identity() {
   const m = new Float32Array(16);
   m[0] = m[5] = m[10] = m[15] = 1;
   return m;
 }
+// C = A * B (column-major). If out is omitted, allocates.
 function mat4Multiply(a, b, out) {
   out ||= new Float32Array(16);
-  for (let i = 0; i < 4; ++i) for (let j = 0; j < 4; ++j) {
+  for (let c = 0; c < 4; ++c) for (let r = 0; r < 4; ++r) {
     let s = 0;
-    for (let k = 0; k < 4; ++k) s += a[k*4+j] * b[i*4+k];
-    out[i*4+j] = s;
+    for (let k = 0; k < 4; ++k) s += a[k*4 + r] * b[c*4 + k];
+    out[c*4 + r] = s;
   }
   return out;
 }
@@ -51,8 +55,7 @@ function mat4Perspective(fovyRad, aspect, near, far) {
   m[14] = 2 * far * near * nf;
   return m;
 }
-// Orbit-style view matrix: place camera at `eye` looking at `center` with up = +Y.
-// Standard right-handed lookAt (camera looks down -z in camera space).
+// Orbit-style view matrix (right-handed, camera looks down -z).
 function lookAt(eye, center, up) {
   const [ex, ey, ez] = eye;
   const [cx, cy, cz] = center;
@@ -80,8 +83,6 @@ function lookAt(eye, center, up) {
 }
 
 // -------------- PLY parser --------------
-// Reads a binary_little_endian PLY. Auto-discovers the vertex property list
-// so we don't have to hardcode the 112-field layout of this specific file.
 async function loadPLY(url) {
   setHud(`fetching ${url} …`);
   const t0 = performance.now();
@@ -91,7 +92,6 @@ async function loadPLY(url) {
   });
   setHud(`fetched (${(buf.byteLength/1e6).toFixed(1)} MB), parsing…`);
 
-  // Find "end_header\n" boundary.
   const bytes = new Uint8Array(buf);
   let headerEnd = -1;
   for (let i = 0; i < bytes.length - 11; ++i) {
@@ -124,14 +124,12 @@ async function loadPLY(url) {
   const need = ['x', 'y', 'z', 'f_dc_0', 'f_dc_1', 'f_dc_2', 'opacity', 'scale_0', 'scale_1', 'rot_0', 'rot_1', 'rot_2', 'rot_3'];
   for (const n of need) if (!nameToIdx.has(n)) throw new Error(`PLY missing property: ${n}`);
 
-  // Extract per-Gauss data into flat typed arrays. Faster + easier to iterate
-  // than re-parsing per-frame.
   const dv = new DataView(buf, headerEnd);
   const positions = new Float32Array(count * 3);
-  const dc        = new Float32Array(count * 3);       // raw SH DC (activation deferred)
+  const dc        = new Float32Array(count * 3);
   const opacRaw   = new Float32Array(count);
-  const scaleRaw  = new Float32Array(count * 2);        // 2DGS: only 2 axes
-  const rotRaw    = new Float32Array(count * 4);        // (r, x, y, z) NOT normalised
+  const scaleRaw  = new Float32Array(count * 2);
+  const rotRaw    = new Float32Array(count * 4);
 
   const oX  = nameToIdx.get('x').offset;
   const oY  = nameToIdx.get('y').offset;
@@ -164,7 +162,6 @@ async function loadPLY(url) {
     rotRaw[i*4+3]    = dv.getFloat32(base + oR3, true);
   }
 
-  // Bounding box for camera framing.
   let minX =  Infinity, minY =  Infinity, minZ =  Infinity;
   let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
   for (let i = 0; i < count; ++i) {
@@ -181,16 +178,7 @@ async function loadPLY(url) {
   };
 }
 
-// -------------- Activation helpers --------------
-// Standard 3DGS activation. Kept as inlined snippets in the hot loop, but
-// documented here for reference.
-//   opac    = 1 / (1 + exp(-opacRaw))          (sigmoid)
-//   scale_i = exp(scaleRaw_i)                  (positive)
-//   color_c = 0.5 + 0.28209479 * dc_c          (SH DC → RGB)
-
-// -------------- Orbit camera --------------
-// Simple orbit around a pivot. Drag = rotate, wheel = zoom, right-drag = pan.
-// Touch: 1-finger drag rotate, 2-finger pinch zoom.
+// -------------- Orbit camera (flat viewer only) --------------
 class OrbitCam {
   constructor(canvas, pivot, dist) {
     this.canvas = canvas;
@@ -226,11 +214,9 @@ class OrbitCam {
         this.yaw   -= dx * 0.006;
         this.pitch = Math.max(-1.55, Math.min(1.55, this.pitch - dy * 0.006));
       } else if (panning) {
-        // pan in the camera's screen plane
         const s = this.dist * 0.0016;
         const cp = Math.cos(this.pitch), sp = Math.sin(this.pitch);
         const cy = Math.cos(this.yaw),   sy = Math.sin(this.yaw);
-        // right = (cos(yaw), 0, -sin(yaw)); up = (-sp*sy, cp, -sp*cy)
         this.pivot[0] += -dx * s * cy - dy * s * (-sp * sy);
         this.pivot[1] += dy * s * cp;
         this.pivot[2] +=  dx * s * sy - dy * s * (-sp * cy);
@@ -248,7 +234,6 @@ class OrbitCam {
     }, { passive: false });
   }
   _bindTouch() {
-    // Pinch-to-zoom: track two-finger distance.
     let lastPinch = null;
     this.canvas.addEventListener('touchmove', e => {
       if (e.touches.length !== 2) { lastPinch = null; return; }
@@ -264,48 +249,46 @@ class OrbitCam {
 }
 
 // -------------- WebGL2 renderer --------------
-// Instanced quad shader. Per-instance attributes carry the projected 2D splat
-// (screen-space centre, conic, colour, screen-space bounding extent).
+// Vertex takes per-instance centre in NDC + conic + colour + pixel extent.
+// u_viewport_px converts pixel deltas to NDC. This means the same instance
+// buffer is portable across viewports (XR eyes) without re-scaling.
 const VERT_SRC = `#version 300 es
-layout(location = 0) in vec2  a_corner;   // static: 2-tri strip, (-1,-1) .. (1,1)
-layout(location = 1) in vec2  a_center;   // per-instance: screen-space pixel
-layout(location = 2) in vec3  a_conic;    // per-instance: inverse-cov (a, b, c)
-layout(location = 3) in vec4  a_color;    // per-instance: rgba (a = opacity)
-layout(location = 4) in float a_extent;   // per-instance: bounding radius in pixels
+layout(location = 0) in vec2  a_corner;      // static: quad corner in [-1..1]
+layout(location = 1) in vec2  a_center_ndc;  // per-instance: splat centre in NDC
+layout(location = 2) in vec3  a_conic;       // per-instance: inverse-cov (a, b, c) in pixel⁻²
+layout(location = 3) in vec4  a_color;       // per-instance: premultiply source (rgb, alpha)
+layout(location = 4) in float a_extent_px;   // per-instance: bounding radius in viewport pixels
 
-uniform vec2 u_viewport;
+uniform vec2 u_viewport_px;
 
-out vec2 v_delta;   // pixel offset from splat centre
+out vec2 v_delta_px;
 out vec3 v_conic;
 out vec4 v_color;
 
 void main() {
-    vec2 delta = a_corner * a_extent;
-    vec2 pixel = a_center + delta;
-    vec2 ndc   = pixel / u_viewport * 2.0 - 1.0;
-    ndc.y      = -ndc.y;                     // pixel origin top-left → NDC origin centre
-    gl_Position = vec4(ndc, 0.0, 1.0);
-    v_delta = delta;
-    v_conic = a_conic;
-    v_color = a_color;
+    vec2 delta_px  = a_corner * a_extent_px;
+    vec2 delta_ndc = (delta_px / u_viewport_px) * 2.0;
+    gl_Position    = vec4(a_center_ndc + delta_ndc, 0.0, 1.0);
+    v_delta_px = delta_px;
+    v_conic    = a_conic;
+    v_color    = a_color;
 }`;
 
 const FRAG_SRC = `#version 300 es
 precision highp float;
-in vec2 v_delta;
+in vec2 v_delta_px;
 in vec3 v_conic;
 in vec4 v_color;
 out vec4 out_color;
 
 void main() {
-    // Gauss falloff via the 2D conic.
-    float d = 0.5 * ( v_conic.x * v_delta.x * v_delta.x
-                    + 2.0 * v_conic.y * v_delta.x * v_delta.y
-                    + v_conic.z * v_delta.y * v_delta.y );
-    if (d < 0.0 || d > 8.0) discard;         // ~4σ cutoff; guard against negative-def
+    float d = 0.5 * ( v_conic.x * v_delta_px.x * v_delta_px.x
+                    + 2.0 * v_conic.y * v_delta_px.x * v_delta_px.y
+                    + v_conic.z * v_delta_px.y * v_delta_px.y );
+    if (d < 0.0 || d > 8.0) discard;
     float alpha = v_color.a * exp(-d);
     if (alpha < 1.0/255.0) discard;
-    out_color = vec4(v_color.rgb * alpha, alpha);   // premultiplied
+    out_color = vec4(v_color.rgb * alpha, alpha);
 }`;
 
 function compile(gl, type, src) {
@@ -336,23 +319,25 @@ class SplatRenderer {
     this.gauss = gauss;
     this.N = gauss.count;
 
-    // Program + quad.
     const vs = compile(gl, gl.VERTEX_SHADER,   VERT_SRC);
     const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG_SRC);
     this.prog = link(gl, vs, fs);
-    this.uViewport = gl.getUniformLocation(this.prog, 'u_viewport');
+    this.uViewportPx = gl.getUniformLocation(this.prog, 'u_viewport_px');
 
     this.vao = gl.createVertexArray();
     gl.bindVertexArray(this.vao);
 
-    // Static quad-strip: (-1,-1), (1,-1), (-1,1), (1,1)
     const quadVBO = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, quadVBO);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
-    // Per-instance interleaved: center(2) conic(3) color(4) extent(1) = 10 floats = 40 bytes
+    // Instance layout (10 floats / 40 bytes):
+    //   [0..1]  center_ndc (x, y)
+    //   [2..4]  conic (a, b, c)
+    //   [5..8]  color (r, g, b, a)
+    //   [9]     extent_px
     this.instanceStride = 10;
     this.instanceBytes  = this.N * this.instanceStride * 4;
     this.instanceData   = new Float32Array(this.N * this.instanceStride);
@@ -360,77 +345,66 @@ class SplatRenderer {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.instanceVBO);
     gl.bufferData(gl.ARRAY_BUFFER, this.instanceBytes, gl.DYNAMIC_DRAW);
     const s = this.instanceStride * 4;
-    // a_center (location 1)
-    gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 2, gl.FLOAT, false, s, 0);
-    gl.vertexAttribDivisor(1, 1);
-    // a_conic  (location 2)
-    gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 3, gl.FLOAT, false, s, 8);
-    gl.vertexAttribDivisor(2, 1);
-    // a_color  (location 3)
-    gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3, 4, gl.FLOAT, false, s, 20);
-    gl.vertexAttribDivisor(3, 1);
-    // a_extent (location 4)
-    gl.enableVertexAttribArray(4); gl.vertexAttribPointer(4, 1, gl.FLOAT, false, s, 36);
-    gl.vertexAttribDivisor(4, 1);
+    gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 2, gl.FLOAT, false, s,  0); gl.vertexAttribDivisor(1, 1);
+    gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 3, gl.FLOAT, false, s,  8); gl.vertexAttribDivisor(2, 1);
+    gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3, 4, gl.FLOAT, false, s, 20); gl.vertexAttribDivisor(3, 1);
+    gl.enableVertexAttribArray(4); gl.vertexAttribPointer(4, 1, gl.FLOAT, false, s, 36); gl.vertexAttribDivisor(4, 1);
 
     gl.bindVertexArray(null);
 
-    // Sort scratch. Depth-per-Gauss and an index array reused each frame.
-    this.depths  = new Float32Array(this.N);
-    this.indices = new Uint32Array(this.N);
-    for (let i = 0; i < this.N; ++i) this.indices[i] = i;
-    // JS Array for sort — TypedArrays sort with comparator but returning fresh
-    // allocations each frame would churn GC. We reuse this scratch Array.
-    this.sortScratch = Array.from(this.indices);
+    this.depths      = new Float32Array(this.N);
+    this.sortScratch = new Array(this.N);
+    for (let i = 0; i < this.N; ++i) this.sortScratch[i] = i;
+    this.sortedInstance = new Float32Array(this.instanceData.length);
   }
 
-  // Per-frame: CPU-project every Gauss, sort back-to-front, upload, draw.
-  // Returns a stats object.
-  render(view, focalX, focalY, viewW, viewH) {
-    const { gl, N, gauss, instanceData, instanceStride, depths, sortScratch } = this;
+  // Per-frame render into (framebuffer, viewport) using view + projection.
+  //   viewMatrix:  Float32Array(16), column-major, world → eye
+  //   projMatrix:  Float32Array(16), column-major, standard perspective
+  //   viewport:    {x, y, width, height} in framebuffer pixels
+  //   framebuffer: WebGLFramebuffer or null (default backbuffer)
+  //   clear:       whether to clear the framebuffer viewport rectangle first
+  render({ viewMatrix, projMatrix, viewport, framebuffer, clear = true }) {
+    const { gl, N, gauss, instanceData, instanceStride, depths, sortScratch, sortedInstance } = this;
+    const vpW = viewport.width, vpH = viewport.height;
 
-    const halfW = 0.5 * viewW, halfH = 0.5 * viewH;
+    // Effective focal lengths in viewport pixels — for the Cov2D Jacobian.
+    // Derived from the projection matrix so asymmetric-FOV XR eyes work too.
+    const fx = 0.5 * projMatrix[0] * vpW;
+    const fy = 0.5 * projMatrix[5] * vpH;
+    const P0 = projMatrix[0], P5 = projMatrix[5], P8 = projMatrix[8], P9 = projMatrix[9];
+
     const t0 = performance.now();
 
-    // -------- pass 1: project, compute cov2d, build unsorted instance record
-    // We compute depth here so sorting can happen after. Discard/mask splats
-    // that fall behind the camera by writing a giant depth (they'll cluster
-    // at the "back" of the sort and skip via extent-check in the vertex loop).
-    // Actually: instead of masking, we simply cull them by writing a zero
-    // extent → discard in the fragment.
     let visible = 0;
     for (let i = 0; i < N; ++i) {
       const x = gauss.positions[i*3+0], y = gauss.positions[i*3+1], z = gauss.positions[i*3+2];
-      // Camera-space position: t = view * (x, y, z, 1)
-      const tx = view[0]*x + view[4]*y + view[8] *z + view[12];
-      const ty = view[1]*x + view[5]*y + view[9] *z + view[13];
-      const tz = view[2]*x + view[6]*y + view[10]*z + view[14];
-      // OpenGL right-hand convention: camera looks down -z, so points in
-      // front have tz < 0. Depth for sort = -tz (positive, larger = further).
+      // world → eye
+      const tx = viewMatrix[0]*x + viewMatrix[4]*y + viewMatrix[8] *z + viewMatrix[12];
+      const ty = viewMatrix[1]*x + viewMatrix[5]*y + viewMatrix[9] *z + viewMatrix[13];
+      const tz = viewMatrix[2]*x + viewMatrix[6]*y + viewMatrix[10]*z + viewMatrix[14];
       const depth = -tz;
       depths[i] = depth;
       if (depth <= 0.05) {
-        // Behind camera or too close — mark degenerate.
-        instanceData[i*instanceStride + 9] = 0; // extent = 0 → fragment discards
+        instanceData[i*instanceStride + 9] = 0;    // extent 0 → fragment discards
+        continue;
+      }
+      const invTz  = 1 / tz;
+      const invTz2 = invTz * invTz;
+
+      // Centre in NDC.
+      const ndcX = -P0 * tx * invTz - P8;
+      const ndcY = -P5 * ty * invTz - P9;
+      if (ndcX < -1.4 || ndcX > 1.4 || ndcY < -1.4 || ndcY > 1.4) {
+        instanceData[i*instanceStride + 9] = 0;
         continue;
       }
 
-      // Screen-space centre (pixels, top-left origin).
-      // Perspective projection: x_screen = fx * (-tx / -tz) = fx * tx / tz.
-      // With tz < 0 in front, and screen y flipped from GL to top-left.
-      const invTz = 1 / tz;
-      const projX = -focalX * tx * invTz;   // negate for OpenGL RH-space sign flip
-      const projY = -focalY * ty * invTz;
-      const sx    = halfW + projX;
-      const sy    = halfH - projY;
-
-      // 3D covariance: Sigma = R * S * S^T * R^T
-      // Scale (activated): sx = exp(scaleRaw_0), sy = exp(scaleRaw_1), sz small
+      // 3D covariance from activated scale + normalised quat.
       const s0 = Math.exp(gauss.scaleRaw[i*2+0]);
       const s1 = Math.exp(gauss.scaleRaw[i*2+1]);
-      const s2 = Math.min(s0, s1) * 0.05;    // thin 3rd axis for 2DGS discs
+      const s2 = Math.min(s0, s1) * 0.05;    // thin disc for 2DGS
 
-      // Rotation matrix from unnormalised quaternion (r, x, y, z).
       let qr = gauss.rotRaw[i*4+0], qx = gauss.rotRaw[i*4+1], qy = gauss.rotRaw[i*4+2], qz = gauss.rotRaw[i*4+3];
       const qn = 1 / Math.hypot(qr, qx, qy, qz);
       qr *= qn; qx *= qn; qy *= qn; qz *= qn;
@@ -444,8 +418,7 @@ class SplatRenderer {
       const R21 = 2*(qy*qz + qr*qx);
       const R22 = 1 - 2*(qx*qx + qy*qy);
 
-      // M = R * diag(s0, s1, s2). Cov3D = M * M^T.
-      // Only need the 6 unique entries.
+      // Cov3D = M M^T where M = R * diag(s0, s1, s2)
       const M00 = R00 * s0, M01 = R01 * s1, M02 = R02 * s2;
       const M10 = R10 * s0, M11 = R11 * s1, M12 = R12 * s2;
       const M20 = R20 * s0, M21 = R21 * s1, M22 = R22 * s2;
@@ -456,12 +429,10 @@ class SplatRenderer {
       const c12 = M10*M20 + M11*M21 + M12*M22;
       const c22 = M20*M20 + M21*M21 + M22*M22;
 
-      // View-space covariance: W * Cov3D * W^T, W is view's 3x3 rotation.
-      // W rows = view rows[0..2][0..2] transposed for column-major. i.e. W[i][j] = view[j*4+i].
-      const W00 = view[0],  W01 = view[4],  W02 = view[8];
-      const W10 = view[1],  W11 = view[5],  W12 = view[9];
-      const W20 = view[2],  W21 = view[6],  W22 = view[10];
-      // T = W * Cov3D
+      // View-space covariance = W Cov3D W^T, W = viewMatrix's 3×3 rotation.
+      const W00 = viewMatrix[0], W01 = viewMatrix[4], W02 = viewMatrix[8];
+      const W10 = viewMatrix[1], W11 = viewMatrix[5], W12 = viewMatrix[9];
+      const W20 = viewMatrix[2], W21 = viewMatrix[6], W22 = viewMatrix[10];
       const T00 = W00*c00 + W01*c01 + W02*c02;
       const T01 = W00*c01 + W01*c11 + W02*c12;
       const T02 = W00*c02 + W01*c12 + W02*c22;
@@ -471,7 +442,6 @@ class SplatRenderer {
       const T20 = W20*c00 + W21*c01 + W22*c02;
       const T21 = W20*c01 + W21*c11 + W22*c12;
       const T22 = W20*c02 + W21*c12 + W22*c22;
-      // Cov_view = T * W^T (only need 6 unique entries)
       const v00 = T00*W00 + T01*W01 + T02*W02;
       const v01 = T00*W10 + T01*W11 + T02*W12;
       const v02 = T00*W20 + T01*W21 + T02*W22;
@@ -479,53 +449,42 @@ class SplatRenderer {
       const v12 = T10*W20 + T11*W21 + T12*W22;
       const v22 = T20*W20 + T21*W21 + T22*W22;
 
-      // 2D screen-space covariance via Jacobian of perspective projection.
-      // Screen mapping (matches projX/projY above): sx = -fx*tx/tz, sy = -fy*ty/tz.
-      // Partial derivatives:
-      //   ∂sx/∂tx = -fx/tz    ∂sx/∂tz = fx*tx/tz²
-      //   ∂sy/∂ty = -fy/tz    ∂sy/∂tz = fy*ty/tz²
-      const invTz2 = invTz * invTz;
-      const J00 = -focalX * invTz;
-      const J02 =  focalX * tx * invTz2;
-      const J11 = -focalY * invTz;
-      const J12 =  focalY * ty * invTz2;
-      // Cov2D = J * Cov_view * J^T   (2x2, symmetric)
-      // J is 2×3 with a zero column layout: J[0] = (J00, 0, J02), J[1] = (0, J11, J12).
-      // Expand analytically for the 3 unique entries.
+      // Jacobian of pixel-space projection (in y-up viewport pixels).
+      //   ∂sx/∂tx = -fx/tz     ∂sx/∂tz =  fx·tx/tz²
+      //   ∂sy/∂ty = -fy/tz     ∂sy/∂tz =  fy·ty/tz²
+      const J00 = -fx * invTz;
+      const J02 =  fx * tx * invTz2;
+      const J11 = -fy * invTz;
+      const J12 =  fy * ty * invTz2;
+      // Cov2D = J · Cov_view · J^T (2×2, symmetric). J has the zero-column
+      // layout J[0] = (J00, 0, J02), J[1] = (0, J11, J12).
       let cov2d_a = J00*(J00*v00 + J02*v02) + J02*(J00*v02 + J02*v22);
       let cov2d_b = J00*(J11*v01 + J12*v02) + J02*(J11*v12 + J12*v22);
       let cov2d_c = J11*(J11*v11 + J12*v12) + J12*(J11*v12 + J12*v22);
-
-      // Low-pass filter (~0.3 pixel²) — matches the 3DGS reference.
       cov2d_a += 0.3;
       cov2d_c += 0.3;
 
       const det = cov2d_a * cov2d_c - cov2d_b * cov2d_b;
-      if (!(det > 1e-6)) {
-        instanceData[i*instanceStride + 9] = 0;
-        continue;
-      }
+      if (!(det > 1e-6)) { instanceData[i*instanceStride + 9] = 0; continue; }
       const invDet = 1 / det;
       const conicA =  cov2d_c * invDet;
       const conicB = -cov2d_b * invDet;
       const conicC =  cov2d_a * invDet;
 
-      // Bounding radius = 3σ along major axis. Eigenvalues of a symmetric 2x2:
-      //   λ = 0.5*(tr ± sqrt(tr² - 4·det))
-      const tr = cov2d_a + cov2d_c;
-      const disc = Math.sqrt(Math.max(0, tr * tr * 0.25 - det));
+      const tr    = cov2d_a + cov2d_c;
+      const disc  = Math.sqrt(Math.max(0, tr * tr * 0.25 - det));
       const lambdaMax = 0.5 * tr + disc;
-      const extent = Math.min(256, Math.ceil(3 * Math.sqrt(Math.max(0, lambdaMax))));
+      const extent    = Math.min(256, Math.ceil(3 * Math.sqrt(Math.max(0, lambdaMax))));
 
-      // SH DC → RGB. 3DGS activation: c = 0.5 + 0.28209479 * f_dc
+      // SH DC → RGB (3DGS activation).
       const r = Math.max(0, Math.min(1, 0.5 + 0.28209479 * gauss.dc[i*3+0]));
       const g = Math.max(0, Math.min(1, 0.5 + 0.28209479 * gauss.dc[i*3+1]));
       const b = Math.max(0, Math.min(1, 0.5 + 0.28209479 * gauss.dc[i*3+2]));
       const a = 1 / (1 + Math.exp(-gauss.opacRaw[i]));
 
       const off = i * instanceStride;
-      instanceData[off + 0] = sx;
-      instanceData[off + 1] = sy;
+      instanceData[off + 0] = ndcX;
+      instanceData[off + 1] = ndcY;
       instanceData[off + 2] = conicA;
       instanceData[off + 3] = conicB;
       instanceData[off + 4] = conicC;
@@ -538,18 +497,13 @@ class SplatRenderer {
     }
     const tProj = performance.now();
 
-    // -------- pass 2: sort indices back-to-front (larger depth first).
+    // Back-to-front sort: larger depth first.
     for (let i = 0; i < N; ++i) sortScratch[i] = i;
     sortScratch.sort((a, b) => depths[b] - depths[a]);
     const tSort = performance.now();
 
-    // -------- pass 3: repack into sorted instance buffer in-place.
-    // We can't sort instanceData in-place efficiently, so scatter into a
-    // separate buffer. Allocate lazily once.
-    if (!this.sortedInstance || this.sortedInstance.length !== instanceData.length) {
-      this.sortedInstance = new Float32Array(instanceData.length);
-    }
-    const dst = this.sortedInstance;
+    // Scatter into a sorted, contiguous buffer for a single glBufferSubData.
+    const dst = sortedInstance;
     for (let k = 0; k < N; ++k) {
       const srcOff = sortScratch[k] * instanceStride;
       const dstOff = k * instanceStride;
@@ -557,19 +511,25 @@ class SplatRenderer {
     }
     const tPack = performance.now();
 
-    // -------- pass 4: upload + draw.
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer || null);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.instanceVBO);
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, dst);
-
-    gl.viewport(0, 0, viewW, viewH);
-    gl.clearColor(0.02, 0.02, 0.03, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.viewport(viewport.x | 0, viewport.y | 0, vpW | 0, vpH | 0);
+    if (clear) {
+      // Enable scissor so we only clear our own viewport rect (matters for XR
+      // where both eyes share the framebuffer).
+      gl.enable(gl.SCISSOR_TEST);
+      gl.scissor(viewport.x | 0, viewport.y | 0, vpW | 0, vpH | 0);
+      gl.clearColor(0.02, 0.02, 0.03, 1.0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.disable(gl.SCISSOR_TEST);
+    }
     gl.disable(gl.DEPTH_TEST);
     gl.enable(gl.BLEND);
-    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);   // premultiplied
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.useProgram(this.prog);
-    gl.uniform2f(this.uViewport, viewW, viewH);
+    gl.uniform2f(this.uViewportPx, vpW, vpH);
     gl.bindVertexArray(this.vao);
     gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, N);
     gl.bindVertexArray(null);
@@ -586,6 +546,16 @@ class SplatRenderer {
   }
 }
 
+// -------------- WebXR presentation status pill --------------
+function makePill() {
+  const p = document.createElement('div');
+  p.style.cssText =
+    'position:fixed;top:8px;right:8px;padding:4px 10px;border-radius:12px;' +
+    'font:11px ui-monospace,SFMono-Regular,Menlo,monospace;z-index:9997;';
+  document.body.appendChild(p);
+  return (bg, fg, txt) => { p.style.background = bg; p.style.color = fg; p.textContent = txt; };
+}
+
 // -------------- Main --------------
 (async () => {
   try {
@@ -598,12 +568,13 @@ class SplatRenderer {
     resize();
     window.addEventListener('resize', resize);
 
-    const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'high-performance' });
+    // xrCompatible=true so the same context can bind XRWebGLLayer's framebuffer
+    // without a later makeXRCompatible() round-trip.
+    const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, xrCompatible: true, powerPreference: 'high-performance' });
     if (!gl) { showErr('WebGL2 not available.'); return; }
 
     const gauss = await loadPLY(bundleURL);
 
-    // Frame the AABB centre by placing camera 2×diagonal away along +Z.
     const cx = 0.5 * (gauss.aabb.min[0] + gauss.aabb.max[0]);
     const cy = 0.5 * (gauss.aabb.min[1] + gauss.aabb.max[1]);
     const cz = 0.5 * (gauss.aabb.min[2] + gauss.aabb.max[2]);
@@ -614,20 +585,135 @@ class SplatRenderer {
     const cam = new OrbitCam(canvas, [cx, cy, cz], diag * 1.3);
 
     const renderer = new SplatRenderer(gl, gauss);
+    const setPill  = makePill();
 
-    // FOV: 60° vertical → focal (in pixels) = 0.5 * height / tan(fov/2)
+    // XR world placement: at entry, position the scene so its AABB centre
+    // sits at (0, 1.4, -2.5) in the local reference space (eye height, ~2.5 m
+    // in front of user), and uniformly scale so the diagonal is ~2 m.
+    const targetPos    = [0, 1.4, -2.5];
+    const targetDiag_m = 2.0;
+    const sceneScale   = targetDiag_m / diag;
+    const worldMatrix = mat4Identity();
+    worldMatrix[0]  = sceneScale;
+    worldMatrix[5]  = sceneScale;
+    worldMatrix[10] = sceneScale;
+    worldMatrix[12] = targetPos[0] - cx * sceneScale;
+    worldMatrix[13] = targetPos[1] - cy * sceneScale;
+    worldMatrix[14] = targetPos[2] - cz * sceneScale;
+
+    // -------- XR entry --------
+    let xrSession = null;
+    let xrRefSpace = null;
+    let xrLayer = null;
+    let xrComposedView = new Float32Array(16);   // scratch: view.inverse.matrix · worldMatrix
+
+    async function tryEnterXR() {
+      if (xrSession) return;
+      try {
+        setPill('#204020', '#a0f0a0', '⏳ entering VR…');
+        const session = await navigator.xr.requestSession('immersive-vr', {
+          requiredFeatures: ['local'],
+          optionalFeatures: ['local-floor'],
+        });
+        xrLayer = new XRWebGLLayer(session, gl);
+        session.updateRenderState({ baseLayer: xrLayer });
+        try {
+          xrRefSpace = await session.requestReferenceSpace('local-floor');
+        } catch {
+          xrRefSpace = await session.requestReferenceSpace('local');
+        }
+        xrSession = session;
+        session.addEventListener('end', () => {
+          xrSession = null; xrRefSpace = null; xrLayer = null;
+          setPill('#204830', '#a0f0a0', '✅ XR ready · tap to enter');
+          armEnter();   // re-arm the one-shot pointerdown so re-entry works
+        });
+        session.requestAnimationFrame(xrOnFrame);
+        setPill('#182030', '#a0c8ff', '🥽 in VR');
+      } catch (e) {
+        console.error('[XR]', e);
+        setPill('#502020', '#ffb0b0', '❌ XR failed: ' + (e.message || e));
+        showErr('XR enter failed: ' + (e.stack || e));
+      }
+    }
+
+    function xrOnFrame(_t, frame) {
+      if (!xrSession) return;
+      xrSession.requestAnimationFrame(xrOnFrame);
+      const pose = frame.getViewerPose(xrRefSpace);
+      if (!pose) return;
+
+      const fb  = xrLayer.framebuffer;
+      // Clear once before per-eye render — scissor is per-viewport inside render().
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      gl.viewport(0, 0, xrLayer.framebufferWidth, xrLayer.framebufferHeight);
+      gl.disable(gl.SCISSOR_TEST);
+      gl.clearColor(0.02, 0.02, 0.03, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      for (const view of pose.views) {
+        const vp = xrLayer.getViewport(view);
+        // viewMatrix (world→eye) = xrEyeMatrix · worldMatrix
+        mat4Multiply(view.transform.inverse.matrix, worldMatrix, xrComposedView);
+        renderer.render({
+          viewMatrix: xrComposedView,
+          projMatrix: view.projectionMatrix,
+          viewport:   { x: vp.x, y: vp.y, width: vp.width, height: vp.height },
+          framebuffer: fb,
+          clear: false,
+        });
+      }
+    }
+
+    // Any pointerdown while NOT in XR triggers entry. Hoisted so the session
+    // 'end' handler can re-arm on exit.
+    function armEnter() {
+      if (xrSession) return;
+      document.addEventListener('pointerdown', () => {
+        if (xrSession) return;
+        tryEnterXR();
+      }, { once: true });
+    }
+
+    // Advertise XR readiness + wire tap-to-enter.
+    (async () => {
+      if (!navigator.xr) {
+        setPill('#502020', '#ffb0b0', '❌ WebXR API missing');
+        return;
+      }
+      let supported = false;
+      try { supported = await navigator.xr.isSessionSupported('immersive-vr'); } catch {}
+      if (!supported) {
+        setPill('#503820', '#ffdc80', '❌ immersive-vr not supported');
+        return;
+      }
+      setPill('#204830', '#a0f0a0', '✅ XR ready · tap to enter');
+      armEnter();
+    })();
+
+    // -------- Flat viewer loop --------
     const FOV_Y = 60 * Math.PI / 180;
     let frame = 0;
     let lastReport = performance.now();
     let sumStats = { msProj: 0, msSort: 0, msPack: 0, msDraw: 0, msTotal: 0, count: 0 };
 
     const loop = () => {
+      if (xrSession) {
+        // XR owns rendering — pause the flat loop.
+        requestAnimationFrame(loop);
+        return;
+      }
       const W = canvas.width, H = canvas.height;
-      const focalY = 0.5 * H / Math.tan(FOV_Y / 2);
-      const focalX = focalY;      // square pixels; aspect handled by W/H below
-      const view = cam.viewMatrix();
+      const aspect = W / Math.max(1, H);
+      const projMatrix = mat4Perspective(FOV_Y, aspect, 0.05, 200.0);
+      const viewMatrix = cam.viewMatrix();
 
-      const s = renderer.render(view, focalX, focalY, W, H);
+      const s = renderer.render({
+        viewMatrix, projMatrix,
+        viewport: { x: 0, y: 0, width: W, height: H },
+        framebuffer: null,
+        clear: true,
+      });
       sumStats.msProj  += s.msProj;
       sumStats.msSort  += s.msSort;
       sumStats.msPack  += s.msPack;
