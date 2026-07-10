@@ -688,11 +688,15 @@ class SplatRenderer {
     gl.vertexAttribDivisor(1, 1);
     gl.bindVertexArray(null);
 
-    // Sort scratch
-    this.depths      = new Float32Array(this.N);
-    this.sortScratch = new Array(this.N);
-    for (let i = 0; i < this.N; ++i) this.sortScratch[i] = i;
-    this.sortedIndex = new Float32Array(this.N);
+    // Sort scratch — radix sort over a *visible* subset. All typed arrays
+    // are preallocated once so no per-frame GC pressure.
+    this.visibleIds    = new Uint32Array(this.N);
+    this.visibleDepths = new Float32Array(this.N);
+    this.sortKeys      = new Uint16Array(this.N);
+    this.tmpIds        = new Uint32Array(this.N);
+    this.tmpKeys       = new Uint16Array(this.N);
+    this.radixCounts   = new Uint32Array(256);
+    this.sortedIndex   = new Float32Array(this.N);
   }
 
   _makeTex(w, h) {
@@ -800,25 +804,71 @@ class SplatRenderer {
     const tPrep = performance.now();
 
     // -------- DEPTH + SORT (CPU) --------
-    // Also cheap-cull behind-near-plane Gauss by setting depth = -Inf.
-    let visible = 0;
+    // 1) One dot product per Gauss for view-space z; behind-near-plane Gauss
+    //    are skipped entirely (never added to the visible list).
+    const positions = gauss.positions;
+    const vm2 = viewMatrix[2], vm6 = viewMatrix[6], vm10 = viewMatrix[10], vm14 = viewMatrix[14];
+    const visIds   = this.visibleIds;
+    const visDepth = this.visibleDepths;
+    let V = 0, maxDepth = 0;
     for (let i = 0; i < N; ++i) {
-      const x = gauss.positions[i*3+0], y = gauss.positions[i*3+1], z = gauss.positions[i*3+2];
-      const tz = viewMatrix[2]*x + viewMatrix[6]*y + viewMatrix[10]*z + viewMatrix[14];
-      if (tz >= -0.05) { depths[i] = -Infinity; continue; }
-      depths[i] = -tz;
-      ++visible;
+      const tz = vm2*positions[i*3] + vm6*positions[i*3+1] + vm10*positions[i*3+2] + vm14;
+      if (tz >= -0.05) continue;
+      const d = -tz;
+      visIds[V]   = i;
+      visDepth[V] = d;
+      if (d > maxDepth) maxDepth = d;
+      ++V;
     }
     const tDepth = performance.now();
 
-    for (let i = 0; i < N; ++i) sortScratch[i] = i;
-    sortScratch.sort((a, b) => depths[b] - depths[a]);
+    // 2) Radix sort: 16-bit key (quantised depth, inverted so ascending sort
+    //    yields back-to-front), 2 passes of 8 bits. Reuses preallocated
+    //    typed arrays — zero GC per frame.
+    //
+    //    Why radix vs. Array.sort(comparator)?  V8's TimSort with a JS
+    //    comparator does N log N callbacks, each ~100 ns of interpreter
+    //    overhead. For 500k Gauss that's ~1 s. Radix over Uint16 keys is a
+    //    single-digit ms.  (The WebGPU pipeline does the same idea, but the
+    //    hierarchical Blelloch radix runs in a compute shader on GPU.
+    //    WebGL2 has no compute, so we do the equivalent on CPU — the reason
+    //    this stage is a few ms instead of sub-ms.)
+    const keys = this.sortKeys;
+    const scale = maxDepth > 1e-6 ? 65535 / maxDepth : 0;
+    for (let i = 0; i < V; ++i) {
+      let k = (visDepth[i] * scale) | 0;
+      if (k > 65535) k = 65535;
+      keys[i] = 65535 - k;   // invert for descending depth (back-to-front)
+    }
+    const counts = this.radixCounts;
+    const tmpIds = this.tmpIds, tmpKeys = this.tmpKeys;
+    // Pass 1 — low byte
+    counts.fill(0);
+    for (let i = 0; i < V; ++i) counts[keys[i] & 0xFF]++;
+    { let acc = 0; for (let b = 0; b < 256; ++b) { const c = counts[b]; counts[b] = acc; acc += c; } }
+    for (let i = 0; i < V; ++i) {
+      const dst = counts[keys[i] & 0xFF]++;
+      tmpIds[dst]  = visIds[i];
+      tmpKeys[dst] = keys[i];
+    }
+    // Pass 2 — high byte
+    counts.fill(0);
+    for (let i = 0; i < V; ++i) counts[(tmpKeys[i] >> 8) & 0xFF]++;
+    { let acc = 0; for (let b = 0; b < 256; ++b) { const c = counts[b]; counts[b] = acc; acc += c; } }
+    for (let i = 0; i < V; ++i) {
+      const dst = counts[(tmpKeys[i] >> 8) & 0xFF]++;
+      visIds[dst] = tmpIds[i];
+      keys[dst]   = tmpKeys[i];
+    }
     const tSort = performance.now();
 
-    for (let k = 0; k < N; ++k) sortedIndex[k] = sortScratch[k];
+    // 3) Push the sorted VISIBLE-only index list to the GPU. Culled Gauss
+    //    never make it into the draw call.
+    for (let k = 0; k < V; ++k) sortedIndex[k] = visIds[k];
     gl.bindBuffer(gl.ARRAY_BUFFER, this.indexVBO);
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, sortedIndex);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, sortedIndex.subarray(0, V));
     const tPack = performance.now();
+    const visible = V;
 
     // -------- DRAW PASS --------
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer || null);
@@ -842,7 +892,7 @@ class SplatRenderer {
     gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, this.prep1); gl.uniform1i(this.uDrawPrep1, u++);
     gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, this.prep2); gl.uniform1i(this.uDrawPrep2, u++);
     gl.bindVertexArray(this.drawVAO);
-    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, N);
+    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, visible);
     gl.bindVertexArray(null);
     const tDraw = performance.now();
 
