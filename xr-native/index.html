@@ -26,7 +26,7 @@
 <body>
 <main>
   <h1>🥽 Halloumi-Quest · native Vulkan + OpenXR</h1>
-  <p><span class="status dev">Phase 0 · boot APK live</span></p>
+  <p><span class="status dev">Phase 1 · splat renderer live</span></p>
 
   <p>Native Android APK for Meta Quest 2 that renders 2DGS + SV Gaussian scenes
      in immersive VR — same asset format as the flat viewer (<code>.bitymi</code>
@@ -49,15 +49,18 @@
      tracking, spatial anchors).</p>
 
   <h2>Get the APK</h2>
-  <a class="apk" href="halloumi-quest-phase0-dev.apk" style="opacity:1;pointer-events:auto;">⬇ Download halloumi-quest-phase0-dev.apk <span style="opacity:0.7">(1.1 MB)</span></a>
-  <p class="apk-note"><strong>Phase 0 build.</strong> Boots into an OpenXR session,
-     initialises Vulkan against the runtime, and clears each eye's swapchain to
-     dark blue every frame. Confirms the toolchain, distribution path, and
-     Vulkan + OpenXR binding all work end-to-end on Quest 2 hardware. No 2DGS
-     rendering yet — that's Phase 1 (see <a href="https://github.com/nilkel/Halloumi-Quest/blob/main/docs/PLAN.md" target="_blank" rel="noopener"><code>docs/PLAN.md</code></a>).</p>
-  <p class="apk-note">Expected behaviour on the headset: launcher shows "Halloumi-Quest"
-     under Unknown Sources, launching it → immersive view with both eyes
-     dark blue. Home-button exits cleanly.</p>
+  <a class="apk" href="halloumi-quest-phase1-dev.apk" style="opacity:1;pointer-events:auto;">⬇ Download halloumi-quest-phase1-dev.apk <span style="opacity:0.7">(4.9 MB)</span></a>
+  <p class="apk-note"><strong>Phase 1 build.</strong> Renders the tiny brain
+     (15k Gauss, bundled as an APK asset) in immersive VR — full 2DGS pipeline
+     with Spherical Voronoi colour, per-eye projection, CPU radix sort, Vulkan
+     graphics pipeline with premultiplied-alpha blending. The whole per-Gauss
+     compute (cov3D, view Jacobian → cov2D, SV softmax) runs on the CPU in
+     native C++ and hands off to a thin Vulkan graphics pipeline. Scene
+     appears ~2.5 m in front at eye height.</p>
+  <p class="apk-note"><strong>Phase 0 still available:</strong>
+     <a href="halloumi-quest-phase0-dev.apk">halloumi-quest-phase0-dev.apk</a>
+     (1.1 MB) — just clears the swapchain, useful only for verifying the
+     Vulkan+OpenXR bring-up works on your headset.</p>
 
   <h2>How to install (one-time setup)</h2>
   <p>You only need to do this <em>once per headset</em>. After that, every future APK
