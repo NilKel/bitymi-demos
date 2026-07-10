@@ -284,6 +284,30 @@
                     <div class="meta">6.6 MB · 15k Gauss raw PLY · SH-only render · isolates whether the viewer works on Quest without any texture path</div>
                 </div>
             </a>
+            <a class="demo" data-invariant="true"
+               href="xr/index.html?bundle=https://nilkel.github.io/bitymi-demos/test-data/brain_tiny.ply&nosort=1">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain tiny with sort disabled" loading="lazy" style="filter: grayscale(0.7) hue-rotate(30deg);">
+                <div class="text">
+                    <div class="title">🧪 Brain tiny · nosort</div>
+                    <div class="meta">Same PLY, radix sort SKIPPED · tests whether the sort's shared-mem atomics are what crashes Adreno</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true"
+               href="xr/index.html?bundle=https://nilkel.github.io/bitymi-demos/test-data/brain_tiny.ply&nosort=1&noprep=1">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain tiny with sort + preprocess disabled" loading="lazy" style="filter: grayscale(0.7) hue-rotate(60deg);">
+                <div class="text">
+                    <div class="title">🧪 Brain tiny · no sort + noprep</div>
+                    <div class="meta">Sort AND preprocess SKIPPED · if THIS still crashes, cull is the killer</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true"
+               href="xr/index.html?bundle=https://nilkel.github.io/bitymi-demos/test-data/brain_tiny.ply&nosort=1&noprep=1&nocull=1">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain tiny with all compute passes disabled" loading="lazy" style="filter: grayscale(0.7) hue-rotate(90deg);">
+                <div class="text">
+                    <div class="title">🧪 Brain tiny · render only</div>
+                    <div class="meta">All 3 compute passes SKIPPED · if this ALSO crashes, it's the render pipeline itself</div>
+                </div>
+            </a>
         </div>
 
         <details class="folder" open>
