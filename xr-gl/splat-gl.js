@@ -1,31 +1,38 @@
 // Halloumi-GL — WebGL2 + WebXR splat viewer for `.bitymi` bundles and raw PLYs.
 //
-// GPU-side compute: per-Gauss data (position, quat, scales, opacity, SV sites +
-// colours + taus) lives in RGBA32F data textures, one texel-cluster per Gauss.
-// The vertex shader is where the entire per-Gauss pipeline runs — it fetches
-// the raw parameters by instance id, computes the 3D covariance, projects into
-// screen space with the eye's projection matrix, evaluates the SV softmax
-// against the world-space view direction, and emits the bounding quad + conic.
-// The CPU per-frame job is just depth + sort + a small u32 index-buffer upload.
+// Pipeline (mirrors the WebGPU compute-preprocess pattern):
+//   1. Load time: upload per-Gauss static data (pos+opac, quat, scale, SV sites,
+//      SV colours, SV taus, DC fallback) into RGBA32F data textures.
+//   2. Per frame (per eye):
+//      a. PREPROCESS PASS. Bind an off-screen FBO with 3 RGBA32F MRT attachments
+//         sized (W × ceil(N/W)). Fragment shader runs once per Gauss (per pixel),
+//         does the WHOLE per-Gauss job:
+//            world → eye, 3D cov from quat+scale, view Jacobian → 2D cov,
+//            conic + bounding extent, SV softmax → per-Gauss RGBA.
+//         Writes prepared[gid] = (ndc.xy, extent, opac) / (conic.xyz, valid) /
+//         (rgb, unused).
+//      b. DEPTH + SORT on CPU. One dot product per Gauss for view-space z,
+//         frustum cull marks culled Gauss with -Inf, sort indices back-to-front,
+//         glBufferSubData the sorted u32 index buffer.
+//      c. DRAW PASS. Vertex shader indexed by sorted gid does 3 tiny texelFetches
+//         to read the prepared row and emits the quad; fragment shader does
+//         Gauss falloff. Trivial.
 //
-// Colour model = Spherical Voronoi (SV), matching nest-splatting's
-// `computeColorFromVoronoi` in diff_surfel_bake_render_rvq/forward.cu:
+// vs. the previous "one big vertex shader" that ran 4× per Gauss (once per quad
+// corner). Preprocess runs the expensive per-Gauss work once and the vertex
+// shader shrinks to a fetch + a couple of muls.
+//
+// Colour model = Spherical Voronoi (SV) — matches computeColorFromVoronoi in
+// diff_surfel_bake_render_rvq/forward.cu.
 //   dir       = normalize(gauss_world_pos − cam_world_pos)
 //   logits[k] = −exp(sv_tau_raw[k]) · |site_k_normalised − dir|
 //   w         = softmax(logits)
 //   feat_c    = Σ w[k]·sv_col[k,c]
 //   rgb_c     = clamp(feat_c + 0.5, 0, 1)
 //
-// Container support:
-//   `.bitymi` bundle → { magic BITYMI01, u32 n_chunks, TOC of {kind u32, off u64,
-//                        size u64}, chunks[] }.  We read the PLY/BPLY chunk and
-//                        ignore atlas / cameras.
-//   BPLY inside a bundle: min-max quantised u8 columns + FP16 xyz.
-//   Raw `.ply`         → binary_little_endian, standard 3DGS-2DGS layout with
-//                        sv_site_0..20 / sv_col_0..20 / sv_tau_0..6.
-//
-// Frustum cull runs in the CPU depth pass (skip any Gauss whose world position
-// projects outside a padded ±1.4 NDC box or falls behind the near plane).
+// Containers: raw `.ply` OR `.bitymi` (magic 'BITYMI01' + TOC + chunks[]).
+// Inside a bundle we pick chunk kind CHUNK_PLY (0) or CHUNK_BPLY (5); atlas
+// / cameras chunks are ignored for now.
 
 // ---------------- HUD / error surface ----------------
 const hud    = document.getElementById('hud');
@@ -81,14 +88,11 @@ function lookAt(eye, center, up) {
 }
 
 // ---------------- Container decoders ----------------
-// .bitymi is a chunked container with a 12-byte fixed header + TOC.
-// See Halloumi-WS parseBitymi in src/splat-app.ts.
-const BITYMI_MAGIC     = 'BITYMI01';
-const CHUNK_PLY        = 0;
-const CHUNK_CAMERAS    = 2;
-const CHUNK_NAT2       = 3;
-const CHUNK_NATL       = 4;
-const CHUNK_BPLY       = 5;
+const BITYMI_MAGIC = 'BITYMI01';
+const CHUNK_PLY   = 0;
+const CHUNK_BPLY  = 5;
+const CHUNK_NAT2  = 3;
+const CHUNK_NATL  = 4;
 
 function isBitymi(buf) {
   if (buf.byteLength < 8) return false;
@@ -112,8 +116,6 @@ function parseBitymi(buf) {
   return { ply, atlas };
 }
 
-// FP16 → FP32. WebXR / recent Chromium have DataView.getFloat16 but not all
-// mobile builds; keep the fallback inline.
 function halfToFloat(h) {
   const s = (h & 0x8000) >> 15;
   const e = (h & 0x7C00) >> 10;
@@ -123,9 +125,6 @@ function halfToFloat(h) {
   return (s ? -1 : 1) * Math.pow(2, e - 15) * (1 + f / 1024);
 }
 
-// BPLY: 8-bit min-max column-quantised PLY (+ FP16 xyz). Expands to a synthetic
-// binary_little_endian PLY so the same PLY parser handles both codecs. Mirrors
-// Halloumi-WS's BplyDecoder.
 function decodeBply(buf) {
   const dv = new DataView(buf);
   const magic = new TextDecoder('ascii').decode(new Uint8Array(buf, 0, 4));
@@ -202,7 +201,6 @@ async function loadScene(url) {
     return r.arrayBuffer();
   });
   setHud(`fetched (${(raw.byteLength/1e6).toFixed(1)} MB), decoding…`);
-
   let plyBuf = raw;
   let container = 'ply';
   if (isBitymi(raw)) {
@@ -243,9 +241,6 @@ function parsePLY(buf, container, tStart) {
   const need = ['x','y','z','opacity','scale_0','scale_1','rot_0','rot_1','rot_2','rot_3'];
   for (const n of need) if (!nameToOff.has(n)) throw new Error(`PLY missing property: ${n}`);
 
-  // SV fields — 7 sites × 3, 7 colours × 3, 7 taus. Some old / DC-only bakes may
-  // ship a scene without SV; fall back to a DC-only path in that case
-  // (f_dc_0..2 → constant colour, no view dep).
   const K = 7;
   const hasSV = nameToOff.has('sv_site_0') && nameToOff.has('sv_col_0') && nameToOff.has('sv_tau_0');
   const hasDC = nameToOff.has('f_dc_0');
@@ -258,7 +253,7 @@ function parsePLY(buf, container, tStart) {
   const svSite    = new Float32Array(count * K * 3);
   const svCol     = new Float32Array(count * K * 3);
   const svTauRaw  = new Float32Array(count * K);
-  const dcRaw     = new Float32Array(count * 3);   // used only in fallback
+  const dcRaw     = new Float32Array(count * 3);
 
   const oX  = nameToOff.get('x'),        oY  = nameToOff.get('y'),        oZ  = nameToOff.get('z');
   const oOp = nameToOff.get('opacity');
@@ -302,7 +297,6 @@ function parsePLY(buf, container, tStart) {
     }
   }
 
-  // Normalise sites once — the CUDA path does `sites / (|sites|+1e-12)`.
   if (hasSV) {
     for (let i = 0; i < count; ++i) {
       for (let k = 0; k < K; ++k) {
@@ -395,75 +389,49 @@ class OrbitCam {
   }
 }
 
-// ---------------- WebGL2 renderer (GPU-side vertex compute) ----------------
-// Every per-Gauss datum lives in a data texture. The vertex shader looks each
-// item up by gl_InstanceID and does:
-//   1) world → eye (uniform u_view · fetched position)
-//   2) NDC via uniform u_proj
-//   3) 3D covariance from quat + scale, projected to Cov2D via the perspective
-//      Jacobian; conic + bounding radius
-//   4) direction (world) = view3x3^T · normalized(camera-space delta), then
-//      soft-min chord distance → softmax weights over 7 sites → weighted colour.
-//
-// This means the CPU per-frame job is: (i) compute view-space z per Gauss,
-// (ii) sort indices back-to-front, (iii) glBufferSubData the u32 index buffer.
-// Everything else is one drawArraysInstanced.
-const VERT_SRC = `#version 300 es
-layout(location = 0) in vec2  a_corner;      // -1..1 quad corner
-layout(location = 1) in float a_gauss_idf;   // instance → gauss id (u32-in-f32)
+// ---------------- Shaders ----------------
+// Preprocess pass — fullscreen quad + fragment does the per-Gauss work ONCE.
+const PREP_VERT_SRC = `#version 300 es
+layout(location = 0) in vec2 a_quad;
+void main() { gl_Position = vec4(a_quad, 0.0, 1.0); }`;
 
-uniform mat4 u_view;                          // world → eye
-uniform mat4 u_proj;                          // eye → clip (perspective, y-up NDC)
+const PREP_FRAG_SRC = `#version 300 es
+precision highp float;
+precision highp int;
+precision highp sampler2D;
+
+uniform mat4 u_view;
+uniform mat4 u_proj;
 uniform vec2 u_viewport_px;
-uniform int  u_tex_w;                         // data-texture width, texels
-uniform int  u_has_sv;                        // 1 if SV present, else DC-only
+uniform int  u_tex_w;
+uniform int  u_n;
+uniform int  u_has_sv;
 
-// Data textures (all RGBA32F). Layouts documented next to the fetches below.
-uniform sampler2D u_geom_a;     // 1 texel/gauss: (x, y, z, opac_raw)
-uniform sampler2D u_geom_b;     // 1 texel/gauss: (rot_r, rot_x, rot_y, rot_z)
-uniform sampler2D u_geom_c;     // 1 texel/gauss: (scale_0_raw, scale_1_raw, 0, 0)
-uniform sampler2D u_sv_sites;   // 6 texels/gauss: 7 vec3 (packed, last texel has 1 site + pad)
-uniform sampler2D u_sv_colors;  // 6 texels/gauss: 7 vec3 (packed like sites)
-uniform sampler2D u_sv_taus;    // 2 texels/gauss: 7 floats + 1 pad (RGBA layout)
-uniform sampler2D u_dc;         // 1 texel/gauss: (r_dc, g_dc, b_dc, 0) — fallback
+uniform sampler2D u_geom_a;    // (x, y, z, opac_raw)         — 1 texel/gauss
+uniform sampler2D u_geom_b;    // (rot_r, rot_x, rot_y, rot_z) — 1 texel/gauss
+uniform sampler2D u_geom_c;    // (scale_0_raw, scale_1_raw, 0, 0) — 1 texel/gauss
 
-out vec2 v_delta_px;
-out vec3 v_conic;
-out vec4 v_color;
+// Repacked so each site's 3 floats + tau fit in ONE texel; each colour vec3 +
+// pad also fits in one texel. This gives us K fetches per attribute instead
+// of the 2K fetches the previous packing needed.
+//   u_sv_st: 7 texels/gauss, (site.x, site.y, site.z, tau_raw) each
+//   u_sv_cl: 7 texels/gauss, (r, g, b, unused) each
+uniform sampler2D u_sv_st;
+uniform sampler2D u_sv_cl;
+
+uniform sampler2D u_dc;        // (r, g, b, 0) — 1 texel/gauss (DC fallback)
+
+layout(location = 0) out vec4 out_ndc_ext_opac;   // (ndc.x, ndc.y, extent_px, opac)
+layout(location = 1) out vec4 out_conic_valid;    // (conic.a, conic.b, conic.c, valid_flag)
+layout(location = 2) out vec4 out_rgb;            // (r, g, b, 0)
 
 ivec2 idx2xy(int i) { return ivec2(i % u_tex_w, i / u_tex_w); }
 vec4  fetch(sampler2D t, int i) { return texelFetch(t, idx2xy(i), 0); }
 
-// Read the k-th (0..6) SV vec3 for gauss gid from one of the packed textures.
-vec3 fetch_sv3(sampler2D t, int gid, int k) {
-    int base = gid * 6;
-    // Layout: t[base+j] carries (v_{2j}.xyz, v_{2j+1}.x); t[base+j+1] shifted;
-    // i.e. floats are packed contiguously across texels, 4 floats per texel.
-    // For k in 0..6 → float offsets kf..kf+2, kf = k*3.
-    int f0 = k * 3;
-    int t0 = f0 >> 2, l0 = f0 & 3;    // start texel + lane
-    vec4 a = fetch(t, base + t0);
-    vec4 b = fetch(t, base + t0 + 1); // safe because we allocate 6 texels
-    // Gather three consecutive floats starting at lane l0 across (a, b).
-    float f[8];
-    f[0] = a.x; f[1] = a.y; f[2] = a.z; f[3] = a.w;
-    f[4] = b.x; f[5] = b.y; f[6] = b.z; f[7] = b.w;
-    return vec3(f[l0], f[l0 + 1], f[l0 + 2]);
-}
-// Read one SV scalar (tau, 0..6) — packed as 7 floats + pad across 2 texels.
-float fetch_sv1(sampler2D t, int gid, int k) {
-    int base = gid * 2;
-    vec4 a = fetch(t, base + 0);
-    vec4 b = fetch(t, base + 1);
-    float f[8];
-    f[0] = a.x; f[1] = a.y; f[2] = a.z; f[3] = a.w;
-    f[4] = b.x; f[5] = b.y; f[6] = b.z; f[7] = b.w;
-    return f[k];
-}
-
 mat3 quat_to_rot(vec4 q) {
     q = normalize(q);
     float r = q.x, x = q.y, y = q.z, z = q.w;
+    // column-major: mat3(col0, col1, col2)
     return mat3(
         1.0 - 2.0*(y*y + z*z), 2.0*(x*y + r*z),       2.0*(x*z - r*y),
         2.0*(x*y - r*z),       1.0 - 2.0*(x*x + z*z), 2.0*(y*z + r*x),
@@ -472,83 +440,80 @@ mat3 quat_to_rot(vec4 q) {
 }
 
 void main() {
-    int gid = int(a_gauss_idf + 0.5);
+    ivec2 fc = ivec2(gl_FragCoord.xy);
+    int gid = fc.y * u_tex_w + fc.x;
+    if (gid >= u_n) discard;
 
-    vec4 gA = fetch(u_geom_a, gid);          // pos + opac
-    vec4 gB = fetch(u_geom_b, gid);          // quat
-    vec4 gC = fetch(u_geom_c, gid);          // scale
+    vec4 gA = fetch(u_geom_a, gid);      // pos + opac
+    vec4 gB = fetch(u_geom_b, gid);      // quat
+    vec4 gC = fetch(u_geom_c, gid);      // scale
     vec3 p_world = gA.xyz;
     float opac   = 1.0 / (1.0 + exp(-gA.w));
 
-    // world → eye
     vec4 p_eye4 = u_view * vec4(p_world, 1.0);
     vec3 t = p_eye4.xyz;
-    // Behind-camera: emit degenerate quad by setting extent=0 later.
-    // (We can't discard in the vertex shader; instead push the quad off-clip.)
 
-    // Cov3D = R · S² · Rᵀ
+    // Behind-camera → mark invalid + zero extent.
+    bool bad = t.z >= -0.05;
+
     float s0 = exp(gC.x);
     float s1 = exp(gC.y);
     float s2 = min(s0, s1) * 0.05;
     mat3 R = quat_to_rot(gB);
-    mat3 M = mat3(R[0] * s0, R[1] * s1, R[2] * s2);
-    // Cov3D = M · Mᵀ; column-major glsl mat3 is column-major, transpose flips.
+    mat3 M = mat3(R[0]*s0, R[1]*s1, R[2]*s2);
     mat3 Cov3D = M * transpose(M);
 
-    // View-space covariance = W · Cov3D · Wᵀ, W = view.rot (3x3).
     mat3 W = mat3(u_view);
     mat3 CovView = W * Cov3D * transpose(W);
 
-    // Effective focals from the projection matrix + viewport.
     float fx = 0.5 * u_proj[0][0] * u_viewport_px.x;
     float fy = 0.5 * u_proj[1][1] * u_viewport_px.y;
 
-    // Perspective Jacobian on eye-space (tx,ty,tz):
-    //   ∂sx/∂tx = -fx/tz    ∂sx/∂tz = fx·tx/tz²
-    //   ∂sy/∂ty = -fy/tz    ∂sy/∂tz = fy·ty/tz²
     float invTz = 1.0 / t.z;
     float J00 = -fx * invTz, J02 = fx * t.x * invTz * invTz;
     float J11 = -fy * invTz, J12 = fy * t.y * invTz * invTz;
-    mat2 Cov2D = mat2(
-        J00*(J00*CovView[0][0] + J02*CovView[0][2]) + J02*(J00*CovView[0][2] + J02*CovView[2][2]),
-        J00*(J11*CovView[0][1] + J12*CovView[0][2]) + J02*(J11*CovView[1][2] + J12*CovView[2][2]),
-        J00*(J11*CovView[0][1] + J12*CovView[0][2]) + J02*(J11*CovView[1][2] + J12*CovView[2][2]),
-        J11*(J11*CovView[1][1] + J12*CovView[1][2]) + J12*(J11*CovView[1][2] + J12*CovView[2][2])
-    );
-    // Low-pass +0.3 pixel² on the diagonal.
-    Cov2D[0][0] += 0.3;
-    Cov2D[1][1] += 0.3;
 
-    float det = Cov2D[0][0]*Cov2D[1][1] - Cov2D[0][1]*Cov2D[1][0];
-    // Behind camera or degenerate → collapse to a zero-extent point.
-    bool bad = (t.z >= -0.05) || !(det > 1e-6);
+    float A = J00*(J00*CovView[0][0] + J02*CovView[0][2]) + J02*(J00*CovView[0][2] + J02*CovView[2][2]);
+    float B = J00*(J11*CovView[0][1] + J12*CovView[0][2]) + J02*(J11*CovView[1][2] + J12*CovView[2][2]);
+    float C = J11*(J11*CovView[1][1] + J12*CovView[1][2]) + J12*(J11*CovView[1][2] + J12*CovView[2][2]);
+    A += 0.3; C += 0.3;
 
+    float det = A*C - B*B;
+    bad = bad || !(det > 1e-6);
     float invDet = bad ? 0.0 : 1.0 / det;
-    vec3 conic = vec3(Cov2D[1][1] * invDet, -Cov2D[0][1] * invDet, Cov2D[0][0] * invDet);
+    vec3 conic = vec3(C * invDet, -B * invDet, A * invDet);
 
-    float trc  = Cov2D[0][0] + Cov2D[1][1];
+    float trc  = A + C;
     float disc = sqrt(max(0.0, trc*trc*0.25 - det));
     float lambdaMax = 0.5 * trc + disc;
     float extent    = bad ? 0.0 : min(256.0, ceil(3.0 * sqrt(max(0.0, lambdaMax))));
 
-    // View direction in world frame — cam-space normalized(t) rotated by Wᵀ.
+    // Clip to viewport: mark invalid if outside padded NDC box.
+    vec4 clip = u_proj * vec4(t, 1.0);
+    vec2 ndc  = clip.xy / clip.w;
+    if (ndc.x < -1.4 || ndc.x > 1.4 || ndc.y < -1.4 || ndc.y > 1.4) {
+        bad = true;
+        extent = 0.0;
+    }
+
+    // World-frame view direction (camera → gauss).
     vec3 dEye = normalize(t);
     vec3 dWld = normalize(transpose(W) * dEye);
 
     vec3 rgb;
     if (u_has_sv == 1) {
-        // Pass 1: max logit
+        int base = gid * 7;
+        // Pass 1: max logit for numerical stability.
         float maxLogit = -1.0e30;
         float logits[7];
         for (int k = 0; k < 7; ++k) {
-            vec3 site = fetch_sv3(u_sv_sites, gid, k);
-            float tau  = exp(fetch_sv1(u_sv_taus, gid, k));
-            float dist = length(site - dWld);
-            float lg   = -tau * dist;
+            vec4 sk = fetch(u_sv_st, base + k);
+            float dist = length(sk.xyz - dWld);
+            float lg   = -exp(sk.w) * dist;
             logits[k]  = lg;
             if (lg > maxLogit) maxLogit = lg;
         }
-        // Pass 2: exp & sum
+        // Pass 2: exp & accumulate weights.
         float sumExp = 0.0;
         float w[7];
         for (int k = 0; k < 7; ++k) {
@@ -559,8 +524,8 @@ void main() {
         float invSum = 1.0 / sumExp;
         vec3 feat = vec3(0.0);
         for (int k = 0; k < 7; ++k) {
-            vec3 col = fetch_sv3(u_sv_colors, gid, k);
-            feat += (w[k] * invSum) * col;
+            vec4 ck = fetch(u_sv_cl, base + k);
+            feat += (w[k] * invSum) * ck.xyz;
         }
         rgb = clamp(feat + 0.5, 0.0, 1.0);
     } else {
@@ -568,19 +533,50 @@ void main() {
         rgb = clamp(0.5 + 0.28209479 * dc.xyz, 0.0, 1.0);
     }
 
-    // Splat quad in NDC.
-    vec4 clip = u_proj * vec4(t, 1.0);
-    vec2 ndc  = clip.xy / clip.w;
-    vec2 delta_px  = a_corner * extent;
+    out_ndc_ext_opac = vec4(ndc, extent, opac);
+    out_conic_valid  = vec4(conic, bad ? 0.0 : 1.0);
+    out_rgb          = vec4(rgb, 0.0);
+}`;
+
+// Draw pass — thin vertex shader that reads prepared[gid] and emits the quad.
+const DRAW_VERT_SRC = `#version 300 es
+layout(location = 0) in vec2  a_corner;      // -1..1
+layout(location = 1) in float a_gauss_idf;   // sorted gauss id
+
+uniform sampler2D u_prep0;   // (ndc.x, ndc.y, extent_px, opac)
+uniform sampler2D u_prep1;   // (conic.xyz, valid)
+uniform sampler2D u_prep2;   // (r, g, b, _)
+uniform vec2 u_viewport_px;
+uniform int  u_tex_w;
+
+out vec2 v_delta_px;
+out vec3 v_conic;
+out vec4 v_color;
+
+void main() {
+    int gid = int(a_gauss_idf + 0.5);
+    ivec2 tc = ivec2(gid % u_tex_w, gid / u_tex_w);
+    vec4 p0 = texelFetch(u_prep0, tc, 0);
+    vec4 p1 = texelFetch(u_prep1, tc, 0);
+    vec4 p2 = texelFetch(u_prep2, tc, 0);
+
+    vec2  ndc    = p0.xy;
+    float extent = p0.z;
+    float opac   = p0.w;
+    vec3  conic  = p1.xyz;
+    float valid  = p1.w;
+    vec3  rgb    = p2.xyz;
+
+    // Collapse invalid quads to a zero-size point.
+    vec2 delta_px  = a_corner * extent * valid;
     vec2 delta_ndc = (delta_px / u_viewport_px) * 2.0;
     gl_Position = vec4(ndc + delta_ndc, 0.0, 1.0);
-
     v_delta_px = delta_px;
     v_conic    = conic;
     v_color    = vec4(rgb, opac);
 }`;
 
-const FRAG_SRC = `#version 300 es
+const DRAW_FRAG_SRC = `#version 300 es
 precision highp float;
 in vec2 v_delta_px;
 in vec3 v_conic;
@@ -599,47 +595,89 @@ void main() {
 function compile(gl, type, src) {
   const s = gl.createShader(type);
   gl.shaderSource(s, src); gl.compileShader(s);
-  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(`shader compile: ${gl.getShaderInfoLog(s)}`);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(`shader compile:\n${gl.getShaderInfoLog(s)}`);
   return s;
 }
 function link(gl, vs, fs) {
   const p = gl.createProgram();
   gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p);
-  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(`program link: ${gl.getProgramInfoLog(p)}`);
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(`program link:\n${gl.getProgramInfoLog(p)}`);
   return p;
 }
 
+// ---------------- Renderer ----------------
 class SplatRenderer {
   constructor(gl, gauss) {
     this.gl = gl; this.gauss = gauss; this.N = gauss.count;
+    this.texW  = 2048;
+    this.prepH = Math.ceil(this.N / this.texW);
 
-    const vs = compile(gl, gl.VERTEX_SHADER,   VERT_SRC);
-    const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG_SRC);
-    this.prog = link(gl, vs, fs);
+    // Programs
+    const pv = compile(gl, gl.VERTEX_SHADER,   PREP_VERT_SRC);
+    const pf = compile(gl, gl.FRAGMENT_SHADER, PREP_FRAG_SRC);
+    this.prepProg = link(gl, pv, pf);
+    const dv = compile(gl, gl.VERTEX_SHADER,   DRAW_VERT_SRC);
+    const df = compile(gl, gl.FRAGMENT_SHADER, DRAW_FRAG_SRC);
+    this.drawProg = link(gl, dv, df);
 
-    this.uView       = gl.getUniformLocation(this.prog, 'u_view');
-    this.uProj       = gl.getUniformLocation(this.prog, 'u_proj');
-    this.uViewportPx = gl.getUniformLocation(this.prog, 'u_viewport_px');
-    this.uTexW       = gl.getUniformLocation(this.prog, 'u_tex_w');
-    this.uHasSV      = gl.getUniformLocation(this.prog, 'u_has_sv');
-    this.uGeomA      = gl.getUniformLocation(this.prog, 'u_geom_a');
-    this.uGeomB      = gl.getUniformLocation(this.prog, 'u_geom_b');
-    this.uGeomC      = gl.getUniformLocation(this.prog, 'u_geom_c');
-    this.uSites      = gl.getUniformLocation(this.prog, 'u_sv_sites');
-    this.uColors     = gl.getUniformLocation(this.prog, 'u_sv_colors');
-    this.uTaus       = gl.getUniformLocation(this.prog, 'u_sv_taus');
-    this.uDC         = gl.getUniformLocation(this.prog, 'u_dc');
+    // Preprocess uniforms
+    this.uPrepView       = gl.getUniformLocation(this.prepProg, 'u_view');
+    this.uPrepProj       = gl.getUniformLocation(this.prepProg, 'u_proj');
+    this.uPrepViewportPx = gl.getUniformLocation(this.prepProg, 'u_viewport_px');
+    this.uPrepTexW       = gl.getUniformLocation(this.prepProg, 'u_tex_w');
+    this.uPrepN          = gl.getUniformLocation(this.prepProg, 'u_n');
+    this.uPrepHasSV      = gl.getUniformLocation(this.prepProg, 'u_has_sv');
+    this.uPrepGeomA      = gl.getUniformLocation(this.prepProg, 'u_geom_a');
+    this.uPrepGeomB      = gl.getUniformLocation(this.prepProg, 'u_geom_b');
+    this.uPrepGeomC      = gl.getUniformLocation(this.prepProg, 'u_geom_c');
+    this.uPrepSt         = gl.getUniformLocation(this.prepProg, 'u_sv_st');
+    this.uPrepCl         = gl.getUniformLocation(this.prepProg, 'u_sv_cl');
+    this.uPrepDC         = gl.getUniformLocation(this.prepProg, 'u_dc');
 
-    this.vao = gl.createVertexArray();
-    gl.bindVertexArray(this.vao);
+    // Draw uniforms
+    this.uDrawPrep0      = gl.getUniformLocation(this.drawProg, 'u_prep0');
+    this.uDrawPrep1      = gl.getUniformLocation(this.drawProg, 'u_prep1');
+    this.uDrawPrep2      = gl.getUniformLocation(this.drawProg, 'u_prep2');
+    this.uDrawViewportPx = gl.getUniformLocation(this.drawProg, 'u_viewport_px');
+    this.uDrawTexW       = gl.getUniformLocation(this.drawProg, 'u_tex_w');
 
-    const quadVBO = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, quadVBO);
+    // Static per-Gauss textures
+    this._createStaticTextures();
+    this._uploadStaticData();
+
+    // Preprocess output textures + FBO (MRT with 3 RGBA32F attachments).
+    this.prep0 = this._makeTex(this.texW, this.prepH);
+    this.prep1 = this._makeTex(this.texW, this.prepH);
+    this.prep2 = this._makeTex(this.texW, this.prepH);
+    this.prepFBO = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.prepFBO);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.prep0, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, this.prep1, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT2, gl.TEXTURE_2D, this.prep2, 0);
+    gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1, gl.COLOR_ATTACHMENT2]);
+    const st = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    if (st !== gl.FRAMEBUFFER_COMPLETE) throw new Error(`prep FBO incomplete: 0x${st.toString(16)}`);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    // Preprocess VAO — fullscreen quad
+    this.prepVAO = gl.createVertexArray();
+    gl.bindVertexArray(this.prepVAO);
+    const prepQuadVBO = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, prepQuadVBO);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.bindVertexArray(null);
+
+    // Draw VAO — instanced quad + per-instance sorted gauss id
+    this.drawVAO = gl.createVertexArray();
+    gl.bindVertexArray(this.drawVAO);
+    const drawQuadVBO = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, drawQuadVBO);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
-    // Per-instance: gauss id (f32-encoded u32). Updated every frame.
     this.indexData = new Float32Array(this.N);
     for (let i = 0; i < this.N; ++i) this.indexData[i] = i;
     this.indexVBO = gl.createBuffer();
@@ -650,13 +688,7 @@ class SplatRenderer {
     gl.vertexAttribDivisor(1, 1);
     gl.bindVertexArray(null);
 
-    // Choose a texture width that keeps things well under 4096-wide limits.
-    // The texel counts per-Gauss vary — pick per-texture heights.
-    this.texW = 2048;
-    this._createTextures();
-    this._uploadStaticData();
-
-    // Sort scratch.
+    // Sort scratch
     this.depths      = new Float32Array(this.N);
     this.sortScratch = new Array(this.N);
     for (let i = 0; i < this.N; ++i) this.sortScratch[i] = i;
@@ -679,79 +711,59 @@ class SplatRenderer {
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, w, h, gl.RGBA, gl.FLOAT, data);
   }
-  _createTextures() {
-    const gl = this.gl, N = this.N, W = this.texW;
-    // Assert EXT_color_buffer_float / OES_texture_float_linear are enabled;
-    // uploading FLOAT samples requires renderable-float support in some drivers.
-    const ext = gl.getExtension('EXT_color_buffer_float');
-    if (!ext) console.warn('EXT_color_buffer_float not exposed; float textures may be sample-only');
 
-    const geomH  = Math.ceil(N            / W);       // 1 texel / gauss
-    const svH    = Math.ceil((N * 6)      / W);       // 6 texels / gauss (sites+colors)
-    const tauH   = Math.ceil((N * 2)      / W);       // 2 texels / gauss (taus)
-
-    this.geomA = this._makeTex(W, geomH);
-    this.geomB = this._makeTex(W, geomH);
-    this.geomC = this._makeTex(W, geomH);
-    this.sitesTex  = this._makeTex(W, svH);
-    this.colorsTex = this._makeTex(W, svH);
-    this.tausTex   = this._makeTex(W, tauH);
-    this.dcTex     = this._makeTex(W, geomH);
-
-    this.geomH = geomH; this.svH = svH; this.tauH = tauH;
+  _createStaticTextures() {
+    const { texW, N } = this;
+    const geomH = Math.ceil(N / texW);
+    const svH   = Math.ceil((N * 7) / texW);
+    this.geomA    = this._makeTex(texW, geomH);
+    this.geomB    = this._makeTex(texW, geomH);
+    this.geomC    = this._makeTex(texW, geomH);
+    this.sitesTex = this._makeTex(texW, svH);
+    this.colsTex  = this._makeTex(texW, svH);
+    this.dcTex    = this._makeTex(texW, geomH);
+    this.geomH = geomH; this.svH = svH;
   }
   _uploadStaticData() {
-    const { N, texW, gauss } = this;
-    // geom A = (x, y, z, opac_raw)
-    const A = new Float32Array(texW * this.geomH * 4);
-    const B = new Float32Array(texW * this.geomH * 4);
-    const C = new Float32Array(texW * this.geomH * 4);
-    const DC = new Float32Array(texW * this.geomH * 4);
+    const { texW, N, gauss } = this;
+    const geomTexels = texW * this.geomH;
+    const svTexels   = texW * this.svH;
+    const A  = new Float32Array(geomTexels * 4);
+    const B  = new Float32Array(geomTexels * 4);
+    const C  = new Float32Array(geomTexels * 4);
+    const DC = new Float32Array(geomTexels * 4);
     for (let i = 0; i < N; ++i) {
       A[i*4+0] = gauss.positions[i*3+0];
       A[i*4+1] = gauss.positions[i*3+1];
       A[i*4+2] = gauss.positions[i*3+2];
       A[i*4+3] = gauss.opacRaw[i];
-      B[i*4+0] = gauss.rotRaw[i*4+0];
-      B[i*4+1] = gauss.rotRaw[i*4+1];
-      B[i*4+2] = gauss.rotRaw[i*4+2];
-      B[i*4+3] = gauss.rotRaw[i*4+3];
-      C[i*4+0] = gauss.scaleRaw[i*2+0];
-      C[i*4+1] = gauss.scaleRaw[i*2+1];
-      C[i*4+2] = 0; C[i*4+3] = 0;
-      DC[i*4+0] = gauss.dcRaw[i*3+0];
-      DC[i*4+1] = gauss.dcRaw[i*3+1];
-      DC[i*4+2] = gauss.dcRaw[i*3+2];
-      DC[i*4+3] = 0;
+      B[i*4+0] = gauss.rotRaw[i*4+0]; B[i*4+1] = gauss.rotRaw[i*4+1];
+      B[i*4+2] = gauss.rotRaw[i*4+2]; B[i*4+3] = gauss.rotRaw[i*4+3];
+      C[i*4+0] = gauss.scaleRaw[i*2+0]; C[i*4+1] = gauss.scaleRaw[i*2+1];
+      DC[i*4+0] = gauss.dcRaw[i*3+0]; DC[i*4+1] = gauss.dcRaw[i*3+1]; DC[i*4+2] = gauss.dcRaw[i*3+2];
     }
     this._uploadTex(this.geomA, texW, this.geomH, A);
     this._uploadTex(this.geomB, texW, this.geomH, B);
     this._uploadTex(this.geomC, texW, this.geomH, C);
     this._uploadTex(this.dcTex, texW, this.geomH, DC);
 
-    // Sites: 7 vec3 packed to 6 texels (24 floats, last has 3 pad slots).
-    const Sites = new Float32Array(texW * this.svH * 4);
-    const Cols  = new Float32Array(texW * this.svH * 4);
+    // SV: 7 texels per Gauss for sites (each = site.xyz + tau_raw), 7 for colours.
+    const S = new Float32Array(svTexels * 4);
+    const Cl = new Float32Array(svTexels * 4);
     for (let i = 0; i < N; ++i) {
-      const dstBase = i * 24;
-      const srcBase = i * 21;
-      for (let k = 0; k < 21; ++k) {
-        Sites[dstBase + k] = gauss.svSite[srcBase + k];
-        Cols [dstBase + k] = gauss.svCol [srcBase + k];
+      for (let k = 0; k < 7; ++k) {
+        const idx = (i * 7 + k) * 4;
+        S[idx + 0] = gauss.svSite[(i * 7 + k) * 3 + 0];
+        S[idx + 1] = gauss.svSite[(i * 7 + k) * 3 + 1];
+        S[idx + 2] = gauss.svSite[(i * 7 + k) * 3 + 2];
+        S[idx + 3] = gauss.svTauRaw[i * 7 + k];
+        Cl[idx + 0] = gauss.svCol[(i * 7 + k) * 3 + 0];
+        Cl[idx + 1] = gauss.svCol[(i * 7 + k) * 3 + 1];
+        Cl[idx + 2] = gauss.svCol[(i * 7 + k) * 3 + 2];
       }
-      // pad slots stay zero
     }
-    this._uploadTex(this.sitesTex,  texW, this.svH, Sites);
-    this._uploadTex(this.colorsTex, texW, this.svH, Cols);
-
-    // Taus: 7 floats packed to 2 texels (8 floats, last has 1 pad).
-    const Taus = new Float32Array(texW * this.tauH * 4);
-    for (let i = 0; i < N; ++i) {
-      const dstBase = i * 8;
-      const srcBase = i * 7;
-      for (let k = 0; k < 7; ++k) Taus[dstBase + k] = gauss.svTauRaw[srcBase + k];
-    }
-    this._uploadTex(this.tausTex, texW, this.tauH, Taus);
+    this._uploadTex(this.sitesTex, texW, this.svH, S);
+    this._uploadTex(this.colsTex,  texW, this.svH, Cl);
   }
 
   render({ viewMatrix, projMatrix, viewport, framebuffer, clear = true }) {
@@ -759,26 +771,42 @@ class SplatRenderer {
     const vpW = viewport.width, vpH = viewport.height;
     const t0 = performance.now();
 
-    // Per-frame CPU work: view-space depth per Gauss + frustum cull mark.
-    // Combine with NDC clip check (fx, fy from projMatrix) to skip splats fully
-    // outside the eye's frustum.
-    const P0 = projMatrix[0], P5 = projMatrix[5], P8 = projMatrix[8], P9 = projMatrix[9];
+    // -------- PREPROCESS PASS --------
+    // Render the fullscreen quad into the MRT FBO; fragment shader does the
+    // per-Gauss work exactly once per Gauss.
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.prepFBO);
+    gl.viewport(0, 0, this.texW, this.prepH);
+    gl.disable(gl.SCISSOR_TEST);
+    gl.disable(gl.BLEND);
+    gl.disable(gl.DEPTH_TEST);
+    gl.useProgram(this.prepProg);
+    gl.uniformMatrix4fv(this.uPrepView, false, viewMatrix);
+    gl.uniformMatrix4fv(this.uPrepProj, false, projMatrix);
+    gl.uniform2f(this.uPrepViewportPx, vpW, vpH);
+    gl.uniform1i(this.uPrepTexW,  this.texW);
+    gl.uniform1i(this.uPrepN,     N);
+    gl.uniform1i(this.uPrepHasSV, gauss.hasSV ? 1 : 0);
+
+    let u = 0;
+    gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, this.geomA);    gl.uniform1i(this.uPrepGeomA, u++);
+    gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, this.geomB);    gl.uniform1i(this.uPrepGeomB, u++);
+    gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, this.geomC);    gl.uniform1i(this.uPrepGeomC, u++);
+    gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, this.sitesTex); gl.uniform1i(this.uPrepSt,    u++);
+    gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, this.colsTex);  gl.uniform1i(this.uPrepCl,    u++);
+    gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, this.dcTex);    gl.uniform1i(this.uPrepDC,    u++);
+    gl.bindVertexArray(this.prepVAO);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.bindVertexArray(null);
+    const tPrep = performance.now();
+
+    // -------- DEPTH + SORT (CPU) --------
+    // Also cheap-cull behind-near-plane Gauss by setting depth = -Inf.
     let visible = 0;
-    // We use +∞ as the "skip" depth so culled Gauss sort to the end and get
-    // trivially rejected by their zero-extent branch in the vertex shader
-    // (extent for depth<=0.05 collapses to 0 anyway; we also pass the culled
-    // indices in the buffer for now — cheap enough).
     for (let i = 0; i < N; ++i) {
       const x = gauss.positions[i*3+0], y = gauss.positions[i*3+1], z = gauss.positions[i*3+2];
       const tz = viewMatrix[2]*x + viewMatrix[6]*y + viewMatrix[10]*z + viewMatrix[14];
       if (tz >= -0.05) { depths[i] = -Infinity; continue; }
-      const tx = viewMatrix[0]*x + viewMatrix[4]*y + viewMatrix[8]*z + viewMatrix[12];
-      const ty = viewMatrix[1]*x + viewMatrix[5]*y + viewMatrix[9]*z + viewMatrix[13];
-      const invTz = 1 / tz;
-      const ndcX = -P0*tx*invTz - P8;
-      const ndcY = -P5*ty*invTz - P9;
-      if (ndcX < -1.4 || ndcX > 1.4 || ndcY < -1.4 || ndcY > 1.4) { depths[i] = -Infinity; continue; }
-      depths[i] = -tz;   // larger = further
+      depths[i] = -tz;
       ++visible;
     }
     const tDepth = performance.now();
@@ -792,6 +820,7 @@ class SplatRenderer {
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, sortedIndex);
     const tPack = performance.now();
 
+    // -------- DRAW PASS --------
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer || null);
     gl.viewport(viewport.x|0, viewport.y|0, vpW|0, vpH|0);
     if (clear) {
@@ -805,31 +834,25 @@ class SplatRenderer {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-    gl.useProgram(this.prog);
-    gl.uniformMatrix4fv(this.uView, false, viewMatrix);
-    gl.uniformMatrix4fv(this.uProj, false, projMatrix);
-    gl.uniform2f(this.uViewportPx, vpW, vpH);
-    gl.uniform1i(this.uTexW, this.texW);
-    gl.uniform1i(this.uHasSV, gauss.hasSV ? 1 : 0);
-    let unit = 0;
-    gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, this.geomA);     gl.uniform1i(this.uGeomA,  unit++);
-    gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, this.geomB);     gl.uniform1i(this.uGeomB,  unit++);
-    gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, this.geomC);     gl.uniform1i(this.uGeomC,  unit++);
-    gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, this.sitesTex);  gl.uniform1i(this.uSites,  unit++);
-    gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, this.colorsTex); gl.uniform1i(this.uColors, unit++);
-    gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, this.tausTex);   gl.uniform1i(this.uTaus,   unit++);
-    gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, this.dcTex);     gl.uniform1i(this.uDC,     unit++);
-    gl.bindVertexArray(this.vao);
+    gl.useProgram(this.drawProg);
+    gl.uniform2f(this.uDrawViewportPx, vpW, vpH);
+    gl.uniform1i(this.uDrawTexW, this.texW);
+    u = 0;
+    gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, this.prep0); gl.uniform1i(this.uDrawPrep0, u++);
+    gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, this.prep1); gl.uniform1i(this.uDrawPrep1, u++);
+    gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, this.prep2); gl.uniform1i(this.uDrawPrep2, u++);
+    gl.bindVertexArray(this.drawVAO);
     gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, N);
     gl.bindVertexArray(null);
     const tDraw = performance.now();
 
     return {
-      msDepth: tDepth - t0,
-      msSort:  tSort - tDepth,
-      msPack:  tPack - tSort,
-      msDraw:  tDraw - tPack,
-      msTotal: tDraw - t0,
+      msPrep:  tPrep  - t0,
+      msDepth: tDepth - tPrep,
+      msSort:  tSort  - tDepth,
+      msPack:  tPack  - tSort,
+      msDraw:  tDraw  - tPack,
+      msTotal: tDraw  - t0,
       visible,
     };
   }
@@ -860,9 +883,11 @@ function makePill() {
 
     const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, xrCompatible: true, powerPreference: 'high-performance' });
     if (!gl) { showErr('WebGL2 not available.'); return; }
-    // Sample float textures — required so texelFetch(RGBA32F) works.
-    if (!gl.getExtension('EXT_color_buffer_float')) console.warn('EXT_color_buffer_float unavailable');
-    // OES_texture_float_linear not needed (we NEAREST-sample the data textures).
+    // Required to render into RGBA32F attachments (MRT preprocess pass).
+    if (!gl.getExtension('EXT_color_buffer_float')) {
+      showErr('EXT_color_buffer_float unavailable — MRT float FBO cannot be created.');
+      return;
+    }
 
     const gauss = await loadScene(bundleURL);
 
@@ -878,8 +903,7 @@ function makePill() {
     const renderer = new SplatRenderer(gl, gauss);
     const setPill  = makePill();
 
-    // XR world placement: scene AABB centre at (0, 1.4, -2.5) in ref space,
-    // uniformly scaled so the diagonal is ~2 m.
+    // XR world placement.
     const sceneScale = 2.0 / diag;
     const worldMatrix = mat4Identity();
     worldMatrix[0]  = sceneScale;
@@ -954,10 +978,7 @@ function makePill() {
     }
 
     (async () => {
-      if (!navigator.xr) {
-        setPill('#502020', '#ffb0b0', '❌ WebXR API missing');
-        return;
-      }
+      if (!navigator.xr) { setPill('#502020', '#ffb0b0', '❌ WebXR API missing'); return; }
       let supported = false;
       try { supported = await navigator.xr.isSessionSupported('immersive-vr'); } catch {}
       if (!supported) { setPill('#503820', '#ffdc80', '❌ immersive-vr not supported'); return; }
@@ -968,7 +989,7 @@ function makePill() {
     // Flat viewer loop.
     const FOV_Y = 60 * Math.PI / 180;
     let lastReport = performance.now();
-    let sumStats = { msDepth: 0, msSort: 0, msPack: 0, msDraw: 0, msTotal: 0, count: 0, visible: 0 };
+    let sumStats = { msPrep: 0, msDepth: 0, msSort: 0, msPack: 0, msDraw: 0, msTotal: 0, count: 0, visible: 0 };
     const loop = () => {
       if (xrSession) { requestAnimationFrame(loop); return; }
       const W = canvas.width, H = canvas.height;
@@ -980,6 +1001,7 @@ function makePill() {
         framebuffer: null,
         clear: true,
       });
+      sumStats.msPrep  += s.msPrep;
       sumStats.msDepth += s.msDepth; sumStats.msSort += s.msSort;
       sumStats.msPack  += s.msPack;  sumStats.msDraw += s.msDraw;
       sumStats.msTotal += s.msTotal; sumStats.count += 1; sumStats.visible = s.visible;
@@ -988,11 +1010,11 @@ function makePill() {
         const n = sumStats.count;
         setHud(
           `${gauss.count} Gauss · ${W}×${H} · ${(n * 1000 / (now - lastReport)).toFixed(0)} fps · vis ${sumStats.visible}\n` +
-          `depth ${(sumStats.msDepth/n).toFixed(1)} · sort ${(sumStats.msSort/n).toFixed(1)} · ` +
+          `prep ${(sumStats.msPrep/n).toFixed(1)} · depth ${(sumStats.msDepth/n).toFixed(1)} · sort ${(sumStats.msSort/n).toFixed(1)} · ` +
           `pack ${(sumStats.msPack/n).toFixed(1)} · draw ${(sumStats.msDraw/n).toFixed(1)} · ` +
           `total ${(sumStats.msTotal/n).toFixed(1)} ms`
         );
-        sumStats = { msDepth: 0, msSort: 0, msPack: 0, msDraw: 0, msTotal: 0, count: 0, visible: sumStats.visible };
+        sumStats = { msPrep: 0, msDepth: 0, msSort: 0, msPack: 0, msDraw: 0, msTotal: 0, count: 0, visible: sumStats.visible };
         lastReport = now;
       }
       requestAnimationFrame(loop);
