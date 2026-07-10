@@ -26,7 +26,7 @@
 <body>
 <main>
   <h1>🥽 Halloumi-Quest · native Vulkan + OpenXR</h1>
-  <p><span class="status dev">Phase 1.3 · v0.1.2-dev</span></p>
+  <p><span class="status dev">Phase 1.4 · v0.1.3-dev</span></p>
 
   <p>Native Android APK for Meta Quest 2 that renders 2DGS + SV Gaussian scenes
      in immersive VR — same asset format as the flat viewer (<code>.bitymi</code>
@@ -48,8 +48,21 @@
      and it opens the door to Quest-specific features (foveated rendering, controller
      tracking, spatial anchors).</p>
 
+  <div class="warn"><strong>🔎 Reference APK for diagnostic testing</strong> ·
+     Halloumi-Quest is still hanging on Meta's loading dots for at least one
+     tester. To isolate whether the problem is our code or the device/setup,
+     try the reference APK below (a known-working minimal Vulkan+OpenXR sample
+     from <a href="https://github.com/artyom-beilis/Quest-XR" target="_blank" rel="noopener">Quest-XR</a>).
+     If <em>this</em> reference APK also hangs on loading dots, the issue is
+     upstream of our code (dev mode setup, OS version, Meta runtime config).
+     If it works but Halloumi doesn't, the fault is in our code and we can
+     iterate.<br><br>
+     <a class="apk" href="quest-xr-reference.apk" style="opacity:1;pointer-events:auto;background:#603060;margin-top:0;">⬇ quest-xr-reference.apk <span style="opacity:0.7">(20 MB · Meta OpenXR loader + minimal Vulkan)</span></a>
+     <br><small style="color:#a0a0a0">Expected behaviour: a purple gradient in both eyes with a small triangle. If you see anything (even a solid colour), the reference works — that tells us the problem is Halloumi-specific.</small>
+  </div>
+
   <h2>Get the APK</h2>
-  <a class="apk" href="halloumi-quest-phase1-dev.apk" style="opacity:1;pointer-events:auto;">⬇ Download halloumi-quest-phase1-dev.apk <span style="opacity:0.7">(4.9 MB · v0.1.2-dev)</span></a>
+  <a class="apk" href="halloumi-quest-phase1-dev.apk" style="opacity:1;pointer-events:auto;">⬇ Download halloumi-quest-phase1-dev.apk <span style="opacity:0.7">(4.4 MB · v0.1.3-dev)</span></a>
   <p class="apk-note"><strong>Phase 1.3 build.</strong> Renders the tiny brain
      (15k Gauss, bundled as an APK asset) in immersive VR — full 2DGS pipeline
      with Spherical Voronoi colour, per-eye projection, CPU 16-bit radix sort,
