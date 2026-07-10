@@ -288,8 +288,16 @@
                href="xr-gl/">
                 <img class="thumb" src="static/thumbs/brain.jpg" alt="WebGL2 splat viewer · pure hardware raster, no compute shaders" loading="lazy" style="filter: hue-rotate(90deg) saturate(0.8);">
                 <div class="text">
-                    <div class="title">🧬 Brain (tiny) · WebGL2 + VR <span style="color:#a0f0a0;font-size:0.85em">· immersive</span></div>
-                    <div class="meta">WebGL2 viewer with WebXR (XRWebGLLayer, no XRGPUBinding needed) · tap the scene once loaded to enter immersive VR on Quest 2 · scene appears 2.5 m in front at eye height</div>
+                    <div class="title">🧬 Brain (tiny) · WebGL2 + VR <span style="color:#a0f0a0;font-size:0.85em">· SV + bitymi</span></div>
+                    <div class="meta">WebGL2 splat renderer + WebXR · loads .bitymi bundles (BPLY inside) or raw PLY · Spherical Voronoi colour + GPU-side vertex-shader compute · tap once loaded to enter VR</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true"
+               href="xr-gl/?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k.bitymi">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Full brain 2k bundle via WebGL2+SV+WebXR" loading="lazy" style="filter: hue-rotate(120deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">🧬 Brain 2k · WebGL2 + VR <span style="color:#a0f0a0;font-size:0.85em">· .bitymi/BPLY</span></div>
+                    <div class="meta">Full 2k-Gauss brain BPLY bundle via the WebGL2 renderer · streams from HuggingFace · same VR path as the tiny card</div>
                 </div>
             </a>
         </div>
