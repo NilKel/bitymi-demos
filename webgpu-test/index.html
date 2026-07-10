@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WebGPU minimal test</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #202020; color: #eee; font-family: system-ui, sans-serif; }
+  main { max-width: 780px; margin: 0 auto; padding: 4vh 4vw; }
+  h1 { font-size: 1.4rem; font-weight: 500; }
+  pre { background: #101010; padding: 0.8em; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.4; }
+  #canvas { width: 100%; aspect-ratio: 16/9; background: #303030; display: block; margin: 1em 0; }
+  .ok { color: #7fc07f; }
+  .fail { color: #ff8080; }
+  .warn { color: #ffcc80; }
+</style>
+</head>
+<body>
+<main>
+  <h1>WebGPU minimal test</h1>
+  <p>Renders a solid-colour full-screen quad using WebGPU. Nothing fancy — no
+     compute shaders, no textures, no buffers. If <strong>this</strong> shows
+     colour, WebGPU basically works. If it stays grey, WebGPU is stubbed even
+     though the adapter reports OK.</p>
+
+  <canvas id="canvas"></canvas>
+
+  <h2>Live log</h2>
+  <pre id="log">running...</pre>
+</main>
+
+<script type="module">
+const log = document.getElementById('log');
+log.textContent = '';
+function say(cls, msg) {
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = msg;
+  log.appendChild(line);
+}
+
+async function run() {
+  if (!navigator.gpu) { say('fail', 'navigator.gpu is undefined — WebGPU not exposed'); return; }
+  say('ok', 'navigator.gpu present');
+
+  const adapter = await navigator.gpu.requestAdapter();
+  if (!adapter) { say('fail', 'requestAdapter returned null'); return; }
+  say('ok', 'adapter obtained');
+  say(null, `  vendor=${adapter.info?.vendor ?? '(no info)'} architecture=${adapter.info?.architecture ?? '?'}`);
+  const feats = Array.from(adapter.features).sort().join(', ') || '(none)';
+  say(null, `  features: ${feats}`);
+  say(null, `  limits.maxTextureDimension2D = ${adapter.limits.maxTextureDimension2D}`);
+  say(null, `  limits.maxComputeWorkgroupSizeX = ${adapter.limits.maxComputeWorkgroupSizeX}`);
+  say(null, `  limits.maxStorageBufferBindingSize = ${adapter.limits.maxStorageBufferBindingSize}`);
+
+  const device = await adapter.requestDevice();
+  say('ok', 'device obtained');
+
+  device.addEventListener('uncapturederror', e => say('fail', 'device error: ' + e.error.message));
+
+  const canvas = document.getElementById('canvas');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.max(1, Math.floor(canvas.clientWidth * dpr));
+  canvas.height = Math.max(1, Math.floor(canvas.clientHeight * dpr));
+  const ctx = canvas.getContext('webgpu');
+  if (!ctx) { say('fail', 'canvas.getContext("webgpu") returned null'); return; }
+  const format = navigator.gpu.getPreferredCanvasFormat();
+  say('ok', `canvas ctx OK, format = ${format}`);
+  ctx.configure({ device, format, alphaMode: 'opaque' });
+
+  const shader = device.createShaderModule({ code: `
+    @vertex fn vs_main(@builtin(vertex_index) vi: u32) -> @builtin(position) vec4<f32> {
+      var pos = array<vec2<f32>, 3>(
+        vec2<f32>(-1.0, -1.0), vec2<f32>(3.0, -1.0), vec2<f32>(-1.0, 3.0)
+      );
+      return vec4<f32>(pos[vi], 0.0, 1.0);
+    }
+    @fragment fn fs_main(@builtin(position) fp: vec4<f32>) -> @location(0) vec4<f32> {
+      // Cyan/magenta gradient by pixel — proves the fragment shader ran.
+      let x = fp.x / 800.0;
+      let y = fp.y / 600.0;
+      return vec4<f32>(x, y, 0.6, 1.0);
+    }
+  `});
+
+  const pipeline = await device.createRenderPipelineAsync({
+    label: 'test-tri',
+    layout: 'auto',
+    vertex: { module: shader, entryPoint: 'vs_main' },
+    fragment: { module: shader, entryPoint: 'fs_main', targets: [{ format }] },
+    primitive: { topology: 'triangle-list' },
+  });
+  say('ok', 'render pipeline created');
+
+  function draw() {
+    const encoder = device.createCommandEncoder();
+    const pass = encoder.beginRenderPass({
+      colorAttachments: [{
+        view: ctx.getCurrentTexture().createView(),
+        loadOp: 'clear', storeOp: 'store',
+        clearValue: { r: 0.4, g: 0.05, b: 0.05, a: 1 },  // dark red — if you see red only, fragment shader didn't run
+      }],
+    });
+    pass.setPipeline(pipeline);
+    pass.draw(3);
+    pass.end();
+    device.queue.submit([encoder.finish()]);
+  }
+  draw();
+  say('ok', 'first frame submitted');
+  say(null, '');
+  say(null, 'Expected: cyan-magenta gradient in the canvas.');
+  say(null, 'Dark red = clear worked but pipeline failed.');
+  say(null, 'Grey = canvas context configure failed silently.');
+}
+
+run().catch(e => say('fail', 'exception: ' + (e.message || e)));
+</script>
+</body>
+</html>
