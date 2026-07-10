@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Halloumi-Quest · native Vulkan + OpenXR for Meta Quest 2</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #181820; color: #e6e6e6; font-family: system-ui, sans-serif; line-height: 1.55; }
+  main { max-width: 800px; margin: 0 auto; padding: 5vh 5vw 8vh; }
+  h1 { font-size: 1.7rem; font-weight: 500; letter-spacing: 0.01em; }
+  h2 { font-size: 1.15rem; font-weight: 500; margin-top: 2.2em; color: #b0c8f0; border-bottom: 1px solid #303040; padding-bottom: 0.25em; }
+  h3 { font-size: 0.95rem; font-weight: 500; color: #f0b060; margin-top: 1.4em; }
+  code { background: #0e0e14; padding: 0.15em 0.4em; border-radius: 3px; color: #d0d0ff; font-size: 0.9em; }
+  pre { background: #0e0e14; padding: 0.9em 1em; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; }
+  .status { display: inline-block; padding: 0.25em 0.7em; border-radius: 12px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .status.dev { background: #4a3020; color: #ffcc80; border: 1px solid #7a5030; }
+  .apk { display: inline-block; padding: 0.7em 1.3em; background: #305080; color: #ffffff; border-radius: 6px; text-decoration: none; margin-top: 0.5em; opacity: 0.4; pointer-events: none; }
+  .apk-note { color: #909090; font-size: 0.85rem; margin-top: 0.4em; }
+  ol { padding-left: 1.4em; }
+  ol li { margin: 0.55em 0; }
+  .warn { background: #2a1010; border-left: 3px solid #ff6060; padding: 0.6em 0.9em; margin: 1em 0; border-radius: 4px; font-size: 0.9rem; }
+  .aside { background: #0e1a2a; border-left: 3px solid #6090c0; padding: 0.6em 0.9em; margin: 1em 0; border-radius: 4px; font-size: 0.9rem; }
+  a { color: #90b0ff; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🥽 Halloumi-Quest · native Vulkan + OpenXR</h1>
+  <p><span class="status dev">Phase 0 · boot APK live</span></p>
+
+  <p>Native Android APK for Meta Quest 2 that renders 2DGS + SV Gaussian scenes
+     in immersive VR — same asset format as the flat viewer (<code>.bitymi</code>
+     bundles), rendered directly against Vulkan + OpenXR without the browser.</p>
+
+  <p>Distributed <strong>sideloaded from this site</strong>. No Meta Store, no App
+     Lab, no Meta review. Meta doesn't see the app, doesn't gate it, doesn't take a
+     cut.</p>
+
+  <h2>Why native (and not WebXR)?</h2>
+  <p>WebXR + WebGPU was the first attempt: same code as the flat viewer, plus a stereo
+     render loop. It compiled and submitted command buffers on Quest 2, but the Adreno 650
+     WebGPU driver crashes the GPU context during execution — for <em>any</em> combination of
+     compute passes, and even for a minimal cleared-only render pass. A minimal WebGPU
+     triangle works, but Halloumi's resource graph does not. That's the browser/driver
+     floor as it stands in 2026 on Quest 2 hardware. See the WebXR fork
+     (<a href="../xr/">Halloumi-XR</a>) for the diagnostic history.</p>
+  <p>Native Vulkan + OpenXR bypasses all of that: direct GPU access, mature drivers,
+     and it opens the door to Quest-specific features (foveated rendering, controller
+     tracking, spatial anchors).</p>
+
+  <h2>Get the APK</h2>
+  <a class="apk" href="halloumi-quest-phase0-dev.apk" style="opacity:1;pointer-events:auto;">⬇ Download halloumi-quest-phase0-dev.apk <span style="opacity:0.7">(1.1 MB)</span></a>
+  <p class="apk-note"><strong>Phase 0 build.</strong> Boots into an OpenXR session,
+     initialises Vulkan against the runtime, and clears each eye's swapchain to
+     dark blue every frame. Confirms the toolchain, distribution path, and
+     Vulkan + OpenXR binding all work end-to-end on Quest 2 hardware. No 2DGS
+     rendering yet — that's Phase 1 (see <a href="https://github.com/nilkel/Halloumi-Quest/blob/main/docs/PLAN.md" target="_blank" rel="noopener"><code>docs/PLAN.md</code></a>).</p>
+  <p class="apk-note">Expected behaviour on the headset: launcher shows "Halloumi-Quest"
+     under Unknown Sources, launching it → immersive view with both eyes
+     dark blue. Home-button exits cleanly.</p>
+
+  <h2>How to install (one-time setup)</h2>
+  <p>You only need to do this <em>once per headset</em>. After that, every future APK
+     from this site installs with a single tap.</p>
+
+  <h3>Step 1 · Enable Developer Mode on your Quest</h3>
+  <ol>
+    <li>Create a free Meta developer organisation at
+        <a href="https://developer.oculus.com/manage/organizations/create/" target="_blank" rel="noopener">developer.oculus.com</a>
+        — just pick any name, no company info or ID verification required.</li>
+    <li>Open the <strong>Meta Quest phone app</strong> on your phone.</li>
+    <li>Devices → <em>[your Quest 2]</em> → Developer Mode → toggle <strong>on</strong>.</li>
+    <li>Reboot the headset once.</li>
+  </ol>
+
+  <h3>Step 2 · Allow installs from the Quest browser (recommended)</h3>
+  <p>This makes future installs a single tap on this download link, right from the headset.</p>
+  <ol>
+    <li>On the headset, open <strong>Settings → Apps</strong>.</li>
+    <li>Find <em>Meta Quest Browser</em> → toggle <strong>"install unknown apps"</strong> on.</li>
+  </ol>
+
+  <h3>Step 3 · Install</h3>
+  <p><strong>Option A · From the Quest browser (once above is done)</strong>:
+     open this page inside the headset, tap the download link, tap "install" when Android prompts.
+     That's it.</p>
+  <p><strong>Option B · From a PC via SideQuest</strong>:
+     download <a href="https://sidequestvr.com/" target="_blank" rel="noopener">SideQuest</a>,
+     plug your Quest in via USB-C, drag the APK onto the headset icon.</p>
+  <p><strong>Option C · From a PC via ADB (advanced)</strong>:
+     <code>adb install halloumi-quest.apk</code>.</p>
+
+  <h2>What's under the hood</h2>
+  <p>Full pipeline reworked to Vulkan compute shaders + OpenXR. Same conceptual passes
+     as Halloumi-WS (cull → preprocess → radix sort → tile raster) but as GLSL/SPIR-V
+     compute shaders on Vulkan, with stereo rendering via OpenXR's projection layer + view
+     matrices. Asset format unchanged — the same <code>.bitymi</code> bundles served
+     to the flat viewer load directly. BC7 / ASTC atlas support handled by native texture
+     compression paths that Vulkan supports directly.</p>
+
+  <div class="aside">Reference implementation lives at
+  <code>/home/nilkel/Projects/Halloumi-Quest</code> — see <code>docs/PLAN.md</code> for
+  the full port plan and phase breakdown.</div>
+
+  <h2>Timeline</h2>
+  <p>~6-8 weeks of focused work for one dev with Vulkan + OpenXR experience. Milestones
+     will be published here as they land.</p>
+
+  <p style="margin-top:3em"><a href="../">← back to bitymi demos</a></p>
+</main>
+</body>
+</html>
