@@ -6,6 +6,13 @@
     <title>BITYMI demos</title>
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <!-- Force phones/desktop to always re-fetch this HTML. .bitymi/HF blobs
+         are already immutable-versioned and cache fine; the demos index is
+         edited constantly and we need the new card sizes / new links to
+         appear immediately on mobile. -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <style>
         html,
         body {
@@ -221,13 +228,13 @@
     <main>
         <h1>BITYMI demos</h1>
         <p>WebGPU Textured 2D surfel splatting with texture atlases baked from a neural representation.</p>
-        <p>WebGPU 2D-surfel splatting with texture atlases baked from a neural representation. mip-360 ships in two flavours — <code>Mixed</code> (textured 2D surfels + untextured 3D EWA ellipsoids, the new default) and <code>Original</code> (textured 2D surfels only). Both use <code>--feature SV</code> (K=7 Spherical-Voronoi sites/surfel) and a paired-RVQ residual atlas. On Wi-Fi the indoor scenes load in a couple seconds; the outdoor ones are larger so save them for a fast connection.</p>
+        <p>WebGPU 2D-surfel splatting with texture atlases baked from a neural representation. mip-360 ships in two flavours — <code>Mixed</code> (textured 2D surfels + untextured 3D EWA ellipsoids, the new default) and <code>Original</code> (textured 2D surfels only). Both use <code>--feature SV</code> (K=7 Spherical-Voronoi sites/surfel) and a typeD (BC7-codebook) residual atlas. On Wi-Fi the indoor scenes load in a couple seconds; the outdoor ones are larger so save them for a fast connection.</p>
 
-        <!-- mip_360 scenes ship as a single tier: paired-RVQ atlas
-             (atlas_format=5, in-shader 4-tap bilinear decode over a 1024×2048
-             rgba8 codebook texture). No more Lite/HD split, no BC7-vs-ASTC
-             toggle (RVQ doesn't need a hw-compressed texture), no SV-vs-SB
-             toggle (SV is the only supported color encoding on the RVQ path).
+        <!-- mip_360 scenes ship as a single tier: typeD BC7-codebook atlas
+             (atlas_format=7, K=65536 K-means centroids re-encoded as BC7 4×4,
+             loader gathers the full BC7 stream at load → single HW tex fetch
+             per fragment at render — bit-identical cost to raw BC7 with ~7×
+             smaller download). No more Lite/HD split, no SV-vs-SB toggle.
              Medical / personal scenes below still honor the Atlas toggle. -->
         <div class="quality-bar" role="group" aria-label="Atlas compression format">
             <span class="label">Atlas</span>
@@ -237,7 +244,7 @@
         <p class="quality-note" id="quality-note">
             Viewer = our fork of <a href="https://arxiv.org/abs/2602.03207" target="_blank" rel="noopener">WebSplatter</a> with the 2DGS rasterizer ported on top: wait-free hierarchical Blelloch sort instead of the spin-wait Fuchsia radix that crashes on Snapdragon-class phones.
             <br><br>
-            <strong>mip-360 scenes:</strong> paired-RVQ atlas (L=4 → L=2 collapsed K²=65536 codebooks, in-shader decode). Bit-equivalent quality to the BC7 baseline at ~3.5× less GPU memory; uses ~1.2× the fragment-shader cost.
+            <strong>mip-360 scenes:</strong> typeD atlas (BC7-codebook, atlas_format=7) — K=65536 K-means centroids re-encoded as one BC7 4×4 each; loader gathers into a normal <code>texture_2d_array&lt;bc7-rgba-unorm&gt;</code> at load, so the fragment shader does a single HW BC7 sample per pixel (bit-identical render cost to raw BC7, ~7× smaller download).
             <br><br>
             <strong>Atlas format (medical / personal):</strong> <code>BC7</code> ships everywhere desktop / iOS Safari / iPad Pro support <code>texture-compression-bc</code>. <code>ASTC</code> is the Adreno / Mali Android equivalent — pick this on a Snapdragon Android phone if BC7 falls back to color-only (no residual).
         </p>
@@ -302,16 +309,16 @@
             </a>
         </div>
 
-        <!-- 3D_SH_res paper checkpoint (garden). Paired-RVQ atlas (K²=65536
-             pair codebooks, in-shader 4-tap decode) baked from
+        <!-- 3D_SH_res paper checkpoint (garden). typeD BC7-codebook atlas
+             (K=65536, atlas_format=7) baked from
              outputs/mip_360/garden/3D_SH_res/RD_SV_30thr_005w25gLP_N2f_frz5k10/.
              Distinct architecture from the mixed_3d Garden below.  -->
-        <h2>🔬 Paper checkpoint <span style="color:#f0b060;font-size:0.75em">· 3D_SH_res · RVQ</span></h2>
+        <h2>🔬 Paper checkpoint <span style="color:#f0b060;font-size:0.75em">· 3D_SH_res</span></h2>
         <p style="opacity:0.75; margin:0 0 0.6em 0;">
-            The Garden 3D_SH_res bake used for the paper, compressed with the
-            same paired-RVQ atlas as the mip_360 folder (~2.8× smaller than
-            BC7). Distinct architecture from the Mixed / Original Garden cards
-            below.
+            The Garden 3D_SH_res bake used for the paper, packaged with the
+            same typeD (BC7-codebook) atlas + BPLY format as the rest of the
+            mip_360 folder. Distinct architecture from the Mixed / Original
+            Garden cards below.
         </p>
         <div class="grid">
             <a class="demo" data-invariant="true"
@@ -325,7 +332,7 @@
         </div>
 
         <details class="folder" open>
-        <summary><span class="chev">▸</span><span class="fname">mip_360</span><span class="fcount">9 scenes · paired-RVQ</span></summary>
+        <summary><span class="chev">▸</span><span class="fname">mip_360</span><span class="fcount">9 scenes · typeD BC7-codebook</span></summary>
 
         <h2>Indoor (light)</h2>
         <div class="grid">
