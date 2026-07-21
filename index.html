@@ -330,17 +330,19 @@
                 </div>
             </a>
             <!-- Same bundle, new viewer (viewer-v2/): sort top-16-bits only
-                 (2 radix passes vs 4), alpha_lp exp() short-circuited inside
-                 the disc, and a compile-time BETA_KERNEL pipeline constant
-                 that dead-strips the gaussian branch for beta_scaled bakes.
-                 Purpose: A/B against the card above on the SAME bundle to
-                 measure the sort/render speedup on real mobile HW. -->
+                 (2 radix passes vs 4). alpha_lp short-circuit + BETA_KERNEL
+                 pipeline split were tried and reverted — the alpha_lp
+                 short-circuit skips the low-pass filter inside the disc
+                 where alpha_lp can still reach 1.0, so it systematically
+                 undervalued near-center alpha and caused a frame-to-frame
+                 shimmer. Only the sort win survives here (verified on-device
+                 ~4 ms → ~1 ms, no visual regression). -->
             <a class="demo" data-invariant="true"
                href="viewer-v2/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_sh_res.bitymi">
-                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · 3D_SH_res via viewer-v2 (sort-16 + alpha_lp short-circuit + kernel split)" loading="lazy" style="filter: hue-rotate(45deg) saturate(1.1);">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · 3D_SH_res via viewer-v2 (sort top-16-bits only)" loading="lazy" style="filter: hue-rotate(45deg) saturate(1.1);">
                 <div class="text">
                     <div class="title">⚡ Garden · viewer-v2 <span style="color:#a0f0a0;font-size:0.75em">· A/B</span></div>
-                    <div class="meta"><span class="size">80 MB</span> · same bundle, new viewer · sort 16-bit + alpha_lp short-circuit + kernel split</div>
+                    <div class="meta"><span class="size">80 MB</span> · same bundle · sort top-16-bits only (2 radix passes vs 4)</div>
                 </div>
             </a>
         </div>
