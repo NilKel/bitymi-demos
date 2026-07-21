@@ -329,20 +329,25 @@
                     <div class="meta"><span class="size">80 MB</span> · typeD BC7-codebook + BPLY · 148,658 Gauss</div>
                 </div>
             </a>
-            <!-- Same bundle, new viewer (viewer-v2/): sort top-16-bits only
-                 (2 radix passes vs 4). alpha_lp short-circuit + BETA_KERNEL
-                 pipeline split were tried and reverted — the alpha_lp
-                 short-circuit skips the low-pass filter inside the disc
-                 where alpha_lp can still reach 1.0, so it systematically
-                 undervalued near-center alpha and caused a frame-to-frame
-                 shimmer. Only the sort win survives here (verified on-device
-                 ~4 ms → ~1 ms, no visual regression). -->
+            <!-- Same bundle, new viewer (viewer-v2/). Three renderer changes:
+                 (1) Sort top 24 bits (3 radix passes vs 4). 16-bit mantissa
+                     precision within each depth octave = ~1/65536 = enough
+                     that near-tied Gauss stay in a stable frame-to-frame
+                     order despite the cull pass's non-deterministic emit
+                     order. (Tried top 16 bits / 2 passes first — flickered
+                     because too many depths collapsed to the same bucket
+                     and the sort ties flipped every frame.)
+                 (2) alpha_lp is always computed unconditionally (previously
+                     tried a >0.5 short-circuit; safe to always compute).
+                 (3) Gaussian-vs-beta split via BETA_KERNEL pipeline constant
+                     — dead-strips the never-taken branch for the bake's
+                     kernel type. -->
             <a class="demo" data-invariant="true"
                href="viewer-v2/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_sh_res.bitymi">
-                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · 3D_SH_res via viewer-v2 (sort top-16-bits only)" loading="lazy" style="filter: hue-rotate(45deg) saturate(1.1);">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · 3D_SH_res via viewer-v2 (sort 24-bit + BETA_KERNEL split)" loading="lazy" style="filter: hue-rotate(45deg) saturate(1.1);">
                 <div class="text">
                     <div class="title">⚡ Garden · viewer-v2 <span style="color:#a0f0a0;font-size:0.75em">· A/B</span></div>
-                    <div class="meta"><span class="size">80 MB</span> · same bundle · sort top-16-bits only (2 radix passes vs 4)</div>
+                    <div class="meta"><span class="size">80 MB</span> · same bundle · sort 24-bit (3 passes) + BETA_KERNEL split</div>
                 </div>
             </a>
         </div>
