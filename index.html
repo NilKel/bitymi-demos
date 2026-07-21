@@ -329,6 +329,20 @@
                     <div class="meta"><span class="size">80 MB</span> · typeD BC7-codebook + BPLY · 148,658 Gauss</div>
                 </div>
             </a>
+            <!-- Same bundle, new viewer (viewer-v2/): sort top-16-bits only
+                 (2 radix passes vs 4), alpha_lp exp() short-circuited inside
+                 the disc, and a compile-time BETA_KERNEL pipeline constant
+                 that dead-strips the gaussian branch for beta_scaled bakes.
+                 Purpose: A/B against the card above on the SAME bundle to
+                 measure the sort/render speedup on real mobile HW. -->
+            <a class="demo" data-invariant="true"
+               href="viewer-v2/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_sh_res.bitymi">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · 3D_SH_res via viewer-v2 (sort-16 + alpha_lp short-circuit + kernel split)" loading="lazy" style="filter: hue-rotate(45deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">⚡ Garden · viewer-v2 <span style="color:#a0f0a0;font-size:0.75em">· A/B</span></div>
+                    <div class="meta"><span class="size">80 MB</span> · same bundle, new viewer · sort 16-bit + alpha_lp short-circuit + kernel split</div>
+                </div>
+            </a>
         </div>
 
         <details class="folder" open>
