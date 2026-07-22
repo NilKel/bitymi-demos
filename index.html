@@ -283,6 +283,21 @@
                     <div class="meta">Meta Quest 2 · WebXR + WebGPU · full residual atlas · tap the scene to enter VR</div>
                 </div>
             </a>
+            <!-- Halloumi-XR c-series: CONIC-corrected fragment rasterizer +
+                 BETA_KERNEL pipeline-constant kernel split + stable sort tie-break
+                 (packs source-index LSB into the low 8 bits of the sort key so
+                 the atomicAdd cull compact stops flipping frame-to-frame at
+                 close range). Was Jul 10 pre-CONIC; c-series brings it up to
+                 the current Halloumi-WS. Ships alongside xr/ (b-series) so
+                 users can A/B against the old one. -->
+            <a class="demo" data-invariant="true"
+               href="xr-c/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k.bitymi">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Halloumi-XR c-series · CONIC + sort tie-break for close-range flicker" loading="lazy" style="filter: hue-rotate(-30deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">🥽 Brain 2k · XR c-series <span style="color:#f0b060;font-size:0.85em">· CONIC + flicker fix</span></div>
+                    <div class="meta">Meta Quest 2 · WebXR + WebGPU · CONIC fragment (~1.5-2× shader) + BETA_KERNEL template split + stable sort tie-break (close-range flicker fix from project_sort_depth_precision) · A/B against the b-series above</div>
+                </div>
+            </a>
             <a class="demo" data-invariant="true"
                href="xr/index.html?bundle=https://nilkel.github.io/bitymi-demos/test-data/brain_tiny.ply">
                 <img class="thumb" src="static/thumbs/brain.jpg" alt="Tiny untextured brain PLY · SH-only, no atlas" loading="lazy" style="filter: grayscale(0.6);">
