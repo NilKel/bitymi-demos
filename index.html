@@ -512,24 +512,26 @@
                     <div class="meta"><span class="size">42 MB</span> · cinematic-anatomy</div>
                 </div>
             </a>
-            <!-- Brain 2k + proxy-mesh Z-cull demo. viewer-ws now has a
-                 runtime per-Gauss mesh Z-cull toggle (bit 3 of accel_flags):
-                 rasterizes a proxy occlusion mesh into a depth-only pre-pass,
-                 then samples it in surfel_cull.wgsl to drop any surfel whose
-                 centre is behind the mesh at its projected pixel. CUDA-side
-                 same trick gave 1.6-2.4× FPS on this scene; WebGPU should
-                 benefit MORE because it has no per-fragment early-out.
+            <!-- Brain 2k + mesh-cull-aware finetune. viewer-ws has a runtime
+                 per-Gauss mesh Z-cull (bit 3 of accel_flags): rasterizes the
+                 proxy mesh into a depth-only pre-pass, then samples it in
+                 surfel_cull.wgsl to drop any surfel whose centre is behind
+                 the mesh at its projected pixel. Bundle here is a finetune
+                 trained WITH the same cull applied at training time (via
+                 override_opacity + set_occluder_depth in nest-splatting's
+                 finetune_mesh_cull.py) — on CUDA-side lean_occ this gave
+                 +4.6 dB PSNR AND 1.6× FPS vs no-cull; on WebGPU (no per-
+                 fragment early-out) the FPS win should be bigger. Model also
+                 had a permanent post-finetune prune (2,586 surfels dropped =
+                 1.2% — the ones behind mesh in EVERY train view).
                  Toggle at runtime with the "Mesh cull" checkbox or add
-                 `&mesh_cull=0` to the URL to A/B against the base render.
-                 Note: base bundle (not the mesh-cull-aware finetune yet) so
-                 quality drops with cull on — this card is here to test the
-                 SPEED hypothesis; a cull-aware bundle will replace it. -->
+                 `&mesh_cull=0` to the URL to A/B against no-cull render. -->
             <a class="demo" data-invariant="true"
-               href="viewer-ws/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k.bitymi&mesh_url=https://nilkel.github.io/bitymi-demos/test-data/brain_mesh.ply&mesh_cull=1">
-                <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain 2k with runtime mesh Z-cull (per-Gauss)" loading="lazy" style="filter: hue-rotate(60deg) saturate(1.3);">
+               href="viewer-ws/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_meshcull_pruned.bitymi&mesh_url=https://nilkel.github.io/bitymi-demos/test-data/brain_mesh.ply&mesh_cull=1">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain 2k mesh-cull-aware finetune + runtime WebGPU Z-cull" loading="lazy" style="filter: hue-rotate(60deg) saturate(1.3);">
                 <div class="text">
                     <div class="title">🧬 Brain 2k · MeshCull (WebGPU)</div>
-                    <div class="meta"><span class="size">72 MB + 38 MB mesh</span> · runtime proxy-mesh Z-cull · toggle in UI</div>
+                    <div class="meta"><span class="size">125 MB + 38 MB mesh</span> · cull-aware FT · +5 dB PSNR &amp; 1.6× FPS with mesh cull (CUDA); toggle in UI</div>
                 </div>
             </a>
             <!-- Heart clip 1 — 3D_SH_res SV bake, iter 35k. typeD BC7-codebook
