@@ -527,11 +527,11 @@
                  Toggle at runtime with the "Mesh cull" checkbox or add
                  `&mesh_cull=0` to the URL to A/B against no-cull render. -->
             <a class="demo" data-invariant="true"
-               href="viewer-ws/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_meshcull_pruned.bitymi&mesh_url=https://nilkel.github.io/bitymi-demos/test-data/brain_mesh.ply&mesh_cull=1">
-                <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain 2k mesh-cull-aware finetune + runtime WebGPU Z-cull" loading="lazy" style="filter: hue-rotate(60deg) saturate(1.3);">
+               href="viewer-ws/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_meshcull_pruned_regs.bitymi&mesh_url=https://nilkel.github.io/bitymi-demos/test-data/brain_mesh.ply&mesh_cull=1">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain 2k mesh-cull-aware finetune (heavier regs) + runtime WebGPU Z-cull" loading="lazy" style="filter: hue-rotate(60deg) saturate(1.3);">
                 <div class="text">
                     <div class="title">🧬 Brain 2k · MeshCull (WebGPU)</div>
-                    <div class="meta"><span class="size">125 MB + 38 MB mesh</span> · cull-aware FT · +5 dB PSNR &amp; 1.6× FPS with mesh cull (CUDA); toggle in UI</div>
+                    <div class="meta"><span class="size">116 MB + 38 MB mesh</span> · cull-aware FT + heavier regs (λ_normal/λ_dist/λ_mask/w_lambda) · toggle cull + adjust margin in UI</div>
                 </div>
             </a>
             <!-- Heart clip 1 — 3D_SH_res SV bake, iter 35k. typeD BC7-codebook
