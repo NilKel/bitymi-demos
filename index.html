@@ -531,7 +531,7 @@
                 <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain 2k mesh-cull-aware finetune (heavier regs) + runtime WebGPU Z-cull" loading="lazy" style="filter: hue-rotate(60deg) saturate(1.3);">
                 <div class="text">
                     <div class="title">🧬 Brain 2k · MeshCull (WebGPU)</div>
-                    <div class="meta"><span class="size">116 MB + 38 MB mesh</span> · cull-aware FT + heavier regs (λ_normal/λ_dist/λ_mask/w_lambda) · UI toggles: mesh cull · mesh margin · mesh debug (proxy-mesh green overlay) · MeshCull pixel formula (diagnostic 0..7 — 4 sign-flips + 4 axis-swap variants, <code>?mesh_sample_mode=</code>) · silhouette cull diagnostic (<code>?mesh_silhouette=1</code>)</div>
+                    <div class="meta"><span class="size">116 MB + 38 MB mesh</span> · cull-aware FT + heavier regs (λ_normal/λ_dist/λ_mask/w_lambda) · UI toggles: mesh cull · mesh margin · mesh debug (proxy-mesh green overlay) · pixel formula default = mode 1 (y-flip, empirically verified via silhouette-cull diagnostic; other modes 0/2..7 still selectable via <code>?mesh_sample_mode=</code>) · silhouette cull diagnostic (<code>?mesh_silhouette=1</code>)</div>
                 </div>
             </a>
             <!-- Heart clip 1 — 3D_SH_res SV bake, iter 35k. typeD BC7-codebook
