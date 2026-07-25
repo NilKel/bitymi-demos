@@ -527,11 +527,11 @@
                  Toggle at runtime with the "Mesh cull" checkbox or add
                  `&mesh_cull=0` to the URL to A/B against no-cull render. -->
             <a class="demo" data-invariant="true"
-               href="viewer-ws/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_meshcull_pruned_regs.bitymi&mesh_url=https://nilkel.github.io/bitymi-demos/test-data/brain_mesh.ply&mesh_cull=1&mesh_normal_margin=-0.03">
-                <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain 2k mesh-cull-aware finetune (heavier regs) + runtime WebGPU normal-offset cull" loading="lazy" style="filter: hue-rotate(60deg) saturate(1.3);">
+               href="viewer-ws/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_meshcull_pruned_regsnomargmnorm.bitymi&mesh_url=https://nilkel.github.io/bitymi-demos/test-data/brain_mesh.ply&mesh_cull=1&mesh_normal_margin=-0.03">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain 2k mesh-cull-aware finetune (regsnomargmnorm) + runtime WebGPU normal-offset cull" loading="lazy" style="filter: hue-rotate(60deg) saturate(1.3);">
                 <div class="text">
                     <div class="title">🧬 Brain 2k · MeshCull (WebGPU)</div>
-                    <div class="meta"><span class="size">116 MB + 38 MB mesh</span> · cull-aware FT + heavier regs (λ_normal/λ_dist/λ_mask/w_lambda) · mesh offset is now WORLD-space vertex push along outward normals (matches CUDA <code>--mesh_normal_margin</code>) instead of the old view-Z shift — bundle ships with <code>?mesh_normal_margin=-0.03</code> to match the training cull; adjust in the panel · toggles: mesh cull · mesh normal margin · mesh debug overlay · diagnostics: <code>?mesh_sample_mode=0..7</code>, <code>?mesh_silhouette=1</code>, <code>?mesh_invert_depth=1</code></div>
+                    <div class="meta"><span class="size">84 MB + 38 MB mesh</span> · cull-aware FT trained under <code>--mesh_margin 0 --mesh_normal_margin -0.03</code> (normal-inflation cull, no per-pixel z-push) · bundle ships with matching <code>?mesh_normal_margin=-0.03</code> so WebGPU inference cull sees the same deflated silhouette · lighter than prior _regs (84 MB vs 116 MB — tighter cull removed more back-of-mesh surfels at prune time) · UI: mesh cull · mesh normal margin (m) · mesh debug (green overlay of pushed silhouette) · diagnostics: <code>?mesh_sample_mode=0..7</code>, <code>?mesh_silhouette=1</code>, <code>?mesh_invert_depth=1</code></div>
                 </div>
             </a>
             <!-- Heart clip 1 — 3D_SH_res SV bake, iter 35k. typeD BC7-codebook
