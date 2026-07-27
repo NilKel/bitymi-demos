@@ -1070,9 +1070,39 @@ fn surfel_cull(
                 // out-of-range → skip the cull (keep the surfel).
                 if px_f >= 0.0 && py_f >= 0.0 && px_f < W_c && py_f < H_c {
                     let tex_dims = vec2<i32>(textureDimensions(mesh_depth_tex));
-                    let tx = clamp(i32(px_f), 0, tex_dims.x - 1);
-                    let ty = clamp(i32(py_f), 0, tex_dims.y - 1);
-                    let mesh_z = textureLoad(mesh_depth_tex, vec2<i32>(tx, ty), 0);
+                    // FOOTPRINT-AWARE sampling (anti-popping). A single
+                    // center-texel point sample is discontinuous two ways:
+                    // at the mesh's own silhouette adjacent texels flip
+                    // between finite depth and far-plane (1.0 = no hit), and
+                    // a wide surfel's center samples one texel while its
+                    // visible splat spans dozens. Both make the cull decision
+                    // flicker with sub-pixel camera motion — no depth-band
+                    // fade can bridge a discontinuity in the SAMPLED value.
+                    // Fix: 5 taps (center + ±r on each axis, r = projected
+                    // surfel radius in pixels) combined MOST-PERMISSIVELY:
+                    // any no-hit tap ⇒ keep outright; otherwise fade against
+                    // the DEEPEST tap. A surfel only fades when its whole
+                    // footprint is confidently inside and behind the mesh.
+                    let sxy_r = unpack2x16float(s.scale_rot[0]);
+                    let zv_r = max(camspace.z, 1e-4);
+                    let r_px = clamp(max(sxy_r.x, sxy_r.y) / zv_r * camera.focal.y,
+                                     1.0, 64.0);
+                    var mesh_z : f32 = 0.0;   // running MAX over taps
+                    var any_miss : bool = false;
+                    for (var ti = 0u; ti < 5u; ti++) {
+                        var ox = 0.0; var oy = 0.0;
+                        if ti == 1u { ox =  r_px; }
+                        else if ti == 2u { ox = -r_px; }
+                        else if ti == 3u { oy =  r_px; }
+                        else if ti == 4u { oy = -r_px; }
+                        let tx = clamp(i32(px_f + ox), 0, tex_dims.x - 1);
+                        let ty = clamp(i32(py_f + oy), 0, tex_dims.y - 1);
+                        let mz = textureLoad(mesh_depth_tex, vec2<i32>(tx, ty), 0);
+                        if mz >= 0.9999 {   // far-plane clear ⇒ no mesh at this tap
+                            any_miss = true;
+                        }
+                        mesh_z = max(mesh_z, mz);
+                    }
                     // Debug: silhouette-only cull (bit 7). Fires whenever the
                     // sampled pixel has a mesh hit at all, regardless of the
                     // z comparison. If the resulting hole matches the green
