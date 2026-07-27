@@ -537,9 +537,19 @@
             <!-- Heart clip 1 — 3D_SH_res SV bake, iter 35k. typeD BC7-codebook
                  atlas + BPLY; CONIC lean bench on 5090 = 2152 FPS at
                  30.58 dB PSNR (bit-identical to prod). -->
+            <!-- Heart clip 1 — Atlas toggle wired 2026-07-27 via the
+                 invariant-card override listener (see the bottom of the
+                 <script> block).  Card stays data-invariant="true" to
+                 opt out of the mip360 SUFFIX rewrite (which would try
+                 the nonexistent _lite variant); the ASTC toggle then
+                 swaps `heart_clip1.bitymi` ↔ `heart_clip1_astc.bitymi`
+                 based on data-bc7-hf / data-astc-hf. -->
             <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_heart/heart_clip1.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_heart/heart_clip1_astc.bitymi"
+               data-bc7-mb="61" data-astc-mb="60"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_heart/heart_clip1.bitymi">
-                <img class="thumb" src="static/thumbs/heart_clip1.jpg" alt="Heart clip 1 · 3D_SH_res SV, typeD atlas" loading="lazy">
+                <img class="thumb" src="static/thumbs/heart_clip1.jpg" alt="Heart clip 1 · 3D_SH_res SV, typeD atlas (BC7/ASTC)" loading="lazy">
                 <div class="text">
                     <div class="title">Heart clip 1</div>
                     <div class="meta"><span class="size">61 MB</span> · cinematic-anatomy · 101k Gauss · 30.58 dB · 2152 FPS (CONIC 5090)</div>
@@ -785,7 +795,29 @@
                 currentA = a;
                 atlasButtons.forEach(b => b.setAttribute('aria-pressed', b.dataset.atlas === a ? 'true' : 'false'));
                 refreshCards();
+                refreshInvariantAtlasCards(a);
                 try { localStorage.setItem(STORAGE_KEY_A, a); } catch (e) {}
+            }
+
+            /* Invariant-card atlas swap. `refreshCards()` skips cards marked
+             * data-invariant="true" — but a few of those (heart_clip1, …)
+             * still want the BC7 ↔ ASTC toggle. They carry both URLs in
+             * data-bc7-hf / data-astc-hf and matching data-bc7-mb / data-astc-mb.
+             * This callback swaps the href + the visible size label without
+             * going through the mip360 SUFFIX machinery. */
+            function refreshInvariantAtlasCards(a) {
+                document.querySelectorAll('a.demo[data-invariant="true"][data-bc7-hf][data-astc-hf]')
+                    .forEach(card => {
+                        const url = a === 'astc' ? card.dataset.astcHf : card.dataset.bc7Hf;
+                        const mb  = a === 'astc' ? card.dataset.astcMb : card.dataset.bc7Mb;
+                        const cur = new URL(card.href, window.location.href);
+                        cur.searchParams.set('bundle', url);
+                        card.href = cur.toString();
+                        if (mb) {
+                            const sizeEl = card.querySelector('.size');
+                            if (sizeEl) sizeEl.textContent = mb + ' MB';
+                        }
+                    });
             }
 
             function applyColor(c) {
