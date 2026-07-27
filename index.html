@@ -227,15 +227,8 @@
 <body>
     <main>
         <h1>BITYMI demos</h1>
-        <p>WebGPU Textured 2D surfel splatting with texture atlases baked from a neural representation.</p>
-        <p>WebGPU 2D-surfel splatting with texture atlases baked from a neural representation. mip-360 ships in two flavours — <code>Mixed</code> (textured 2D surfels + untextured 3D EWA ellipsoids, the new default) and <code>Original</code> (textured 2D surfels only). Both use <code>--feature SV</code> (K=7 Spherical-Voronoi sites/surfel) and a typeD (BC7-codebook) residual atlas. On Wi-Fi the indoor scenes load in a couple seconds; the outdoor ones are larger so save them for a fast connection.</p>
+        <p>WebGPU 2D-surfel splatting with texture atlases baked from a neural representation. All scenes use <code>--feature SV</code> (K=7 Spherical-Voronoi sites/surfel) and a typeD (BC7-codebook) residual atlas.</p>
 
-        <!-- mip_360 scenes ship as a single tier: typeD BC7-codebook atlas
-             (atlas_format=7, K=65536 K-means centroids re-encoded as BC7 4×4,
-             loader gathers the full BC7 stream at load → single HW tex fetch
-             per fragment at render — bit-identical cost to raw BC7 with ~7×
-             smaller download). No more Lite/HD split, no SV-vs-SB toggle.
-             Medical / personal scenes below still honor the Atlas toggle. -->
         <div class="quality-bar" role="group" aria-label="Atlas compression format">
             <span class="label">Atlas</span>
             <button type="button" data-atlas="bc7"  aria-pressed="true">BC7 (desktop / iOS)</button>
@@ -244,9 +237,7 @@
         <p class="quality-note" id="quality-note">
             Viewer = our fork of <a href="https://arxiv.org/abs/2602.03207" target="_blank" rel="noopener">WebSplatter</a> with the 2DGS rasterizer ported on top: wait-free hierarchical Blelloch sort instead of the spin-wait Fuchsia radix that crashes on Snapdragon-class phones.
             <br><br>
-            <strong>mip-360 scenes:</strong> typeD atlas (BC7-codebook, atlas_format=7) — K=65536 K-means centroids re-encoded as one BC7 4×4 each; loader gathers into a normal <code>texture_2d_array&lt;bc7-rgba-unorm&gt;</code> at load, so the fragment shader does a single HW BC7 sample per pixel (bit-identical render cost to raw BC7, ~7× smaller download).
-            <br><br>
-            <strong>Atlas format (medical / personal):</strong> <code>BC7</code> ships everywhere desktop / iOS Safari / iPad Pro support <code>texture-compression-bc</code>. <code>ASTC</code> is the Adreno / Mali Android equivalent — pick this on a Snapdragon Android phone if BC7 falls back to color-only (no residual).
+            <strong>Atlas format:</strong> <code>BC7</code> ships everywhere desktop / iOS Safari / iPad Pro support <code>texture-compression-bc</code>. <code>ASTC</code> is the Adreno / Mali Android equivalent — pick this on a Snapdragon Android phone if BC7 falls back to color-only (no residual). typeD = K=65536 K-means centroids re-encoded as one BC7 (or ASTC) 4×4 codeword each; loader gathers into a normal <code>texture_2d_array</code> at load so the fragment shader does one HW sample per pixel (bit-identical render cost to raw BC7/ASTC, ~7× smaller download).
         </p>
 
         <!--
@@ -255,12 +246,6 @@
             cross-origin browser fetch). HF returns Access-Control-Allow-Origin
             for our Pages domain so the viewer's fetch() works directly.
         -->
-
-        <div class="quality-bar variant-bar" role="group" aria-label="Model variant">
-            <span class="label">Model</span>
-            <button type="button" data-variant="mixed"    aria-pressed="true">Mixed (res_3d_paired)</button>
-            <button type="button" data-variant="original" aria-pressed="false">Original (3D_SH_res)</button>
-        </div>
 
         <!-- Immersive-VR viewer (WebXR fork of the flat viewer). Meta Quest 2
              browser only; the flat viewer will still load if you open this on
@@ -326,14 +311,11 @@
 
         <!-- 3D_SH_res paper checkpoint (garden). typeD BC7-codebook atlas
              (K=65536, atlas_format=7) baked from
-             outputs/mip_360/garden/3D_SH_res/RD_SV_30thr_005w25gLP_N2f_frz5k10/.
-             Distinct architecture from the mixed_3d Garden below.  -->
+             outputs/mip_360/garden/3D_SH_res/RD_SV_30thr_005w25gLP_N2f_frz5k10/. -->
         <h2>🔬 Paper checkpoint <span style="color:#f0b060;font-size:0.75em">· 3D_SH_res</span></h2>
         <p style="opacity:0.75; margin:0 0 0.6em 0;">
-            The Garden 3D_SH_res bake used for the paper, packaged with the
-            same typeD (BC7-codebook) atlas + BPLY format as the rest of the
-            mip_360 folder. Distinct architecture from the Mixed / Original
-            Garden cards below.
+            The Garden 3D_SH_res bake used for the paper, packaged with typeD
+            (BC7-codebook) atlas + BPLY.
         </p>
         <div class="grid">
             <a class="demo" data-invariant="true"
@@ -364,117 +346,6 @@
         </div>
 
         <details class="folder" open>
-        <summary><span class="chev">▸</span><span class="fname">mip_360</span><span class="fcount">9 scenes · typeD BC7-codebook</span></summary>
-
-        <h2>Indoor (light)</h2>
-        <div class="grid">
-            <a class="demo" data-invariant="true" data-variant-set="mip360"
-               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_rvqply.bitymi" data-original-size="38"
-               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_mixed.bitymi" data-mixed-size="37"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_mixed.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_mixed.bitymi">
-                <img class="thumb" src="static/thumbs/counter.jpg" alt="Counter (RVQ-paired) preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Counter</div>
-                    <div class="meta"><span class="size">37 MB</span></div>
-                </div>
-            </a>
-            <a class="demo" data-invariant="true" data-variant-set="mip360"
-               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_rvqply.bitymi" data-original-size="47"
-               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_mixed.bitymi" data-mixed-size="39"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_mixed.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_mixed.bitymi">
-                <img class="thumb" src="static/thumbs/room.jpg" alt="Room preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Room</div>
-                    <div class="meta"><span class="size">39 MB</span></div>
-                </div>
-            </a>
-            <a class="demo" data-invariant="true" data-variant-set="mip360"
-               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_rvqply.bitymi" data-original-size="53"
-               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_mixed.bitymi" data-mixed-size="56"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_mixed.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_mixed.bitymi">
-                <img class="thumb" src="static/thumbs/kitchen.jpg" alt="Kitchen (RVQ-paired) preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Kitchen</div>
-                    <div class="meta"><span class="size">56 MB</span></div>
-                </div>
-            </a>
-            <a class="demo" data-invariant="true" data-variant-set="mip360"
-               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_rvqply.bitymi" data-original-size="53"
-               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_mixed.bitymi" data-mixed-size="59"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_mixed.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_mixed.bitymi">
-                <img class="thumb" src="static/thumbs/bonsai.jpg" alt="Bonsai (RVQ-paired) preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Bonsai</div>
-                    <div class="meta"><span class="size">59 MB</span></div>
-                </div>
-            </a>
-        </div>
-
-        <h2>Outdoor (heavier)</h2>
-        <div class="grid">
-            <a class="demo" data-invariant="true" data-variant-set="mip360"
-               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_rvqply.bitymi" data-original-size="71"
-               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_mixed.bitymi" data-mixed-size="58"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_mixed.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_mixed.bitymi">
-                <img class="thumb" src="static/thumbs/stump.jpg" alt="Stump (RVQ-paired) preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Stump</div>
-                    <div class="meta"><span class="size">58 MB</span></div>
-                </div>
-            </a>
-            <a class="demo" data-invariant="true" data-variant-set="mip360"
-               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_rvqply.bitymi" data-original-size="123"
-               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_mixed.bitymi" data-mixed-size="88"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_mixed.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_mixed.bitymi">
-                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden (RVQ-paired) preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Garden</div>
-                    <div class="meta"><span class="size">88 MB</span></div>
-                </div>
-            </a>
-            <a class="demo" data-invariant="true" data-variant-set="mip360"
-               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_rvqply.bitymi" data-original-size="136"
-               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_mixed.bitymi" data-mixed-size="94"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_mixed.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_mixed.bitymi">
-                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle (RVQ-paired) preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Bicycle</div>
-                    <div class="meta"><span class="size">94 MB</span></div>
-                </div>
-            </a>
-            <a class="demo" data-invariant="true" data-variant-set="mip360"
-               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_rvqply.bitymi" data-original-size="165"
-               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_mixed.bitymi" data-mixed-size="122"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_mixed.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_mixed.bitymi">
-                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers (RVQ-paired) preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Flowers</div>
-                    <div class="meta"><span class="size">122 MB</span></div>
-                </div>
-            </a>
-            <a class="demo" data-invariant="true" data-variant-set="mip360"
-               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_rvqply.bitymi" data-original-size="146"
-               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_mixed.bitymi" data-mixed-size="121"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_mixed.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_mixed.bitymi">
-                <img class="thumb" src="static/thumbs/treehill.jpg" alt="Treehill (RVQ-paired) preview" loading="lazy">
-                <div class="text">
-                    <div class="title">Treehill</div>
-                    <div class="meta"><span class="size">121 MB</span></div>
-                </div>
-            </a>
-        </div>
-        </details>
-
-        <details class="folder" open>
         <summary><span class="chev">▸</span><span class="fname">medical</span><span class="fcount">8 scenes</span></summary>
 
         <h2>Cinematic Anatomy (micro-CT)</h2>
@@ -501,16 +372,15 @@
                     <div class="meta"><span class="size">155 MB</span> · cinematic-anatomy</div>
                 </div>
             </a>
-            <a class="demo" data-invariant="true" data-variant-set="mip360"
-               data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k.bitymi" data-original-size="72"
-               data-original-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_astc.bitymi" data-original-astc-size="72"
-               data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_mixed.bitymi" data-mixed-size="42"
-               data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_mixed.bitymi"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_mixed.bitymi">
-                <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain micro-CT (2k iters, himn2) preview" loading="lazy">
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_astc.bitymi"
+               data-bc7-mb="72" data-astc-mb="72"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k.bitymi">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain micro-CT (2k iters, himn2) · 3D_SH_res N-variant, typeD atlas (BC7/ASTC)" loading="lazy">
                 <div class="text">
                     <div class="title">Brain 2k</div>
-                    <div class="meta"><span class="size">42 MB</span> · cinematic-anatomy</div>
+                    <div class="meta"><span class="size">72 MB</span> · cinematic-anatomy · 131k Gauss · 25.97 dB · 573 FPS (CONIC 5090)</div>
                 </div>
             </a>
             <!-- Brain 2k + mesh-cull-aware finetune. viewer-ws has a runtime
@@ -620,7 +490,7 @@
         </details>
 
         <details class="folder" open>
-        <summary><span class="chev">▸</span><span class="fname">personal</span><span class="fcount">4 scenes · paired-RVQ</span></summary>
+        <summary><span class="chev">▸</span><span class="fname">personal</span><span class="fcount">3 scenes</span></summary>
         <div class="grid">
             <a class="demo" data-invariant="true"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/jhabbu.bitymi">
@@ -628,14 +498,6 @@
                 <div class="text">
                     <div class="title">jhabbu</div>
                     <div class="meta"><span class="size">38 MB</span></div>
-                </div>
-            </a>
-            <a class="demo" data-invariant="true"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/jhabbu_mixed.bitymi">
-                <img class="thumb" src="static/thumbs/jhabbu.jpg" alt="jhabbu (res_3d_paired, mixed) preview" loading="lazy">
-                <div class="text">
-                    <div class="title">jhabbu (mixed)</div>
-                    <div class="meta"><span class="size">39 MB</span></div>
                 </div>
             </a>
             <a class="demo" data-invariant="true"
@@ -673,48 +535,7 @@
             const qualityButtons = document.querySelectorAll('.quality-bar button[data-quality]');
             const atlasButtons   = document.querySelectorAll('.quality-bar button[data-atlas]');
             const colorButtons   = document.querySelectorAll('.quality-bar button[data-color]');
-            const variantButtons = document.querySelectorAll('.variant-bar button[data-variant]');
             const cards = document.querySelectorAll('a.demo[data-scene]');
-            const variantCards = document.querySelectorAll('a.demo[data-variant-set="mip360"]');
-
-            // mip_360 model variant toggle: each card carries both
-            //   data-original-hf / data-original-size  (3D_SH_res baseline)
-            //   data-mixed-hf    / data-mixed-size     (res_3d_paired G2 — default)
-            // The button swaps href + size text + data-hf in-place.
-            const STORAGE_KEY_V = 'bitymi.variant';
-            const VALID_V = new Set(['mixed', 'original']);
-            let currentV = 'mixed';
-            function applyVariant(v) {
-                if (!VALID_V.has(v)) v = 'mixed';
-                currentV = v;
-                variantButtons.forEach(b => b.setAttribute('aria-pressed', b.dataset.variant === v ? 'true' : 'false'));
-                variantCards.forEach(card => {
-                    // Prefer data-{v}-astc-hf when the Atlas toggle is on ASTC
-                    // AND that variant actually has an ASTC bundle uploaded.
-                    // Otherwise fall back to the BC7 data-{v}-hf. Same for
-                    // the visible size label.
-                    let hf = card.dataset[v + 'Hf'];
-                    let size = card.dataset[v + 'Size'];
-                    if (currentA === 'astc' && card.dataset[v + 'AstcHf']) {
-                        hf   = card.dataset[v + 'AstcHf'];
-                        size = card.dataset[v + 'AstcSize'] || size;
-                    }
-                    if (hf) {
-                        card.href = 'viewer/index.html?bundle=' + hf;
-                        card.dataset.hf = hf;
-                    }
-                    const sizeEl = card.querySelector('.size');
-                    if (sizeEl && size) sizeEl.textContent = size + ' MB';
-                });
-                try { localStorage.setItem(STORAGE_KEY_V, v); } catch (e) {}
-            }
-            variantButtons.forEach(b => b.addEventListener('click', () => applyVariant(b.dataset.variant)));
-            let initialV = 'mixed';
-            try {
-                const sV = localStorage.getItem(STORAGE_KEY_V);
-                if (VALID_V.has(sV)) initialV = sV;
-            } catch (e) {}
-            applyVariant(initialV);
 
             const SUFFIX = {
                 'lite-ws':    { viewer: 'viewer-ws', suffix: '_lite',    extra: '' },
@@ -825,10 +646,6 @@
                 atlasButtons.forEach(b => b.setAttribute('aria-pressed', b.dataset.atlas === a ? 'true' : 'false'));
                 refreshCards();
                 refreshInvariantAtlasCards(a);
-                // Variant-toggled cards (Brain 2k) can carry per-variant ASTC
-                // overrides — re-run applyVariant so it re-resolves the URL
-                // against currentA.
-                applyVariant(currentV);
                 try { localStorage.setItem(STORAGE_KEY_A, a); } catch (e) {}
             }
 
