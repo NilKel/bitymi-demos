@@ -272,11 +272,12 @@ fn preprocess(@builtin(global_invocation_id) gid: vec3<u32>) {
     // Untextured mixed_3d Gauss and no-atlas bundles: cull writes gauss_id with
     // its high bit set OR the bundle has atlas_width=0. Either way we skip the
     // rect fetch and write sentinel zeros — fragment gates on tex_params.atlas_enabled.
+    // NB: don't reuse \`gid\` here — that's the workgroup-builtin param name.
     let gid_raw   = splats_2d[store_idx].gauss_id;
     let is_texd   = (gid_raw & 0x80000000u) == 0u;
-    let gid       = gid_raw & 0x7FFFFFFFu;
+    let src_gauss = gid_raw & 0x7FFFFFFFu;
     if is_texd && atlas_params.atlas_width > 0u {
-        let base_off = gid * 5u;
+        let base_off = src_gauss * 5u;
         let u0     = atlas_rects[base_off + 0u];
         let v0     = atlas_rects[base_off + 1u];
         let w_span = atlas_rects[base_off + 2u];
