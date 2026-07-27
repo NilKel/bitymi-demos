@@ -503,6 +503,7 @@
             </a>
             <a class="demo" data-invariant="true" data-variant-set="mip360"
                data-original-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k.bitymi" data-original-size="72"
+               data-original-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_astc.bitymi" data-original-astc-size="72"
                data-mixed-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_mixed.bitymi" data-mixed-size="42"
                data-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_mixed.bitymi"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_2k_mixed.bitymi">
@@ -668,8 +669,16 @@
                 currentV = v;
                 variantButtons.forEach(b => b.setAttribute('aria-pressed', b.dataset.variant === v ? 'true' : 'false'));
                 variantCards.forEach(card => {
-                    const hf = card.dataset[v + 'Hf'];
-                    const size = card.dataset[v + 'Size'];
+                    // Prefer data-{v}-astc-hf when the Atlas toggle is on ASTC
+                    // AND that variant actually has an ASTC bundle uploaded.
+                    // Otherwise fall back to the BC7 data-{v}-hf. Same for
+                    // the visible size label.
+                    let hf = card.dataset[v + 'Hf'];
+                    let size = card.dataset[v + 'Size'];
+                    if (currentA === 'astc' && card.dataset[v + 'AstcHf']) {
+                        hf   = card.dataset[v + 'AstcHf'];
+                        size = card.dataset[v + 'AstcSize'] || size;
+                    }
                     if (hf) {
                         card.href = 'viewer/index.html?bundle=' + hf;
                         card.dataset.hf = hf;
@@ -796,6 +805,10 @@
                 atlasButtons.forEach(b => b.setAttribute('aria-pressed', b.dataset.atlas === a ? 'true' : 'false'));
                 refreshCards();
                 refreshInvariantAtlasCards(a);
+                // Variant-toggled cards (Brain 2k) can carry per-variant ASTC
+                // overrides — re-run applyVariant so it re-resolves the URL
+                // against currentA.
+                applyVariant(currentV);
                 try { localStorage.setItem(STORAGE_KEY_A, a); } catch (e) {}
             }
 
