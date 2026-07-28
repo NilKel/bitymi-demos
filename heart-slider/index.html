@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Heart clip1 vs clip2 · split-slider</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        html, body {
+            width: 100%; height: 100%;
+            margin: 0; padding: 0;
+            background: #0a0a0a;
+            color: #eee;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+            overscroll-behavior: contain;
+        }
+        .pane {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            border: 0; display: block;
+            background: #000;
+        }
+        /* Right iframe: only the pixels to the RIGHT of the split are visible.
+           `inset(0 0 0 X)` clips out the LEFT X — leaving the right side. */
+        #right { clip-path: inset(0 0 0 var(--split, 50%)); }
+
+        /* The full-height draggable divider sits on top of both iframes so
+           pointer events land on it, not on the underlying canvases. Its
+           40px pointer-catcher is invisible except for the thin line + the
+           small circular handle. */
+        #divider {
+            position: absolute; top: 0; bottom: 0;
+            left: var(--split, 50%);
+            transform: translateX(-50%);
+            width: 44px;
+            z-index: 10;
+            cursor: ew-resize;
+            touch-action: none;
+            user-select: none;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #divider .line {
+            position: absolute;
+            top: 0; bottom: 0;
+            left: 50%; transform: translateX(-50%);
+            width: 2px;
+            background: rgba(255,255,255,0.85);
+            box-shadow: 0 0 6px rgba(0,0,0,0.6);
+        }
+        #divider .handle {
+            position: relative;
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: rgba(30,32,40,0.9);
+            border: 2px solid rgba(255,255,255,0.95);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.05em;
+        }
+
+        .label {
+            position: absolute;
+            top: 14px;
+            padding: 6px 12px;
+            background: rgba(20,22,32,0.85);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            z-index: 5;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        #label-left  { left: 14px; }
+        #label-right { right: 14px; }
+
+        .home {
+            position: absolute;
+            bottom: 14px; left: 14px;
+            padding: 8px 14px;
+            background: rgba(20,22,32,0.85);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 999px;
+            font-size: 0.85rem;
+            color: #eee;
+            text-decoration: none;
+            z-index: 5;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        .home:hover { background: rgba(40,45,60,0.9); }
+
+        /* First-load hint that fades out after the initial drag. */
+        #hint {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, calc(-50% - 44px));
+            padding: 8px 14px;
+            background: rgba(20,22,32,0.85);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            font-size: 0.82rem;
+            color: #ddd;
+            z-index: 6;
+            pointer-events: none;
+            transition: opacity 400ms ease;
+        }
+    </style>
+</head>
+<body>
+    <iframe id="left"  class="pane" src="about:blank" allow="fullscreen"></iframe>
+    <iframe id="right" class="pane" src="about:blank" allow="fullscreen"></iframe>
+
+    <div id="label-left"  class="label">Clip 1</div>
+    <div id="label-right" class="label">Clip 2</div>
+
+    <div id="divider">
+        <div class="line"></div>
+        <div class="handle">⇔</div>
+    </div>
+
+    <div id="hint">drag the slider · orbit either side to look around</div>
+
+    <a class="home" href="../index.html">← back to demos</a>
+
+    <script>
+    (function () {
+        const HF = 'https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main';
+        const params = new URLSearchParams(location.search);
+        const clip1 = params.get('left')  || params.get('clip1')
+                   || HF + '/himalaya_heart/heart_clip1.bitymi';
+        const clip2 = params.get('right') || params.get('clip2')
+                   || HF + '/himalaya_heart/heart_clip2.bitymi';
+
+        // Any extra `?viewer_*=` params are passed through to both viewer
+        // iframes (so a caller can force e.g. `?viewer_mesh_cull=1`).
+        const passthrough = new URLSearchParams();
+        for (const [k, v] of params) {
+            if (k.startsWith('viewer_')) passthrough.set(k.slice(7), v);
+        }
+        const passStr = passthrough.toString();
+        const suffix = passStr ? ('&' + passStr) : '';
+
+        const left  = document.getElementById('left');
+        const right = document.getElementById('right');
+        left.src  = '../viewer/index.html?bundle=' + encodeURIComponent(clip1) + suffix;
+        right.src = '../viewer/index.html?bundle=' + encodeURIComponent(clip2) + suffix;
+
+        // -------- Split-slider drag --------
+        const root = document.documentElement;
+        const divider = document.getElementById('divider');
+        const hint = document.getElementById('hint');
+        let hintHidden = false;
+        const setSplit = (pct) => {
+            const clamped = Math.max(0, Math.min(100, pct));
+            root.style.setProperty('--split', clamped + '%');
+        };
+
+        let dragging = false;
+        divider.addEventListener('pointerdown', (e) => {
+            dragging = true;
+            divider.setPointerCapture(e.pointerId);
+            e.preventDefault();
+        });
+        divider.addEventListener('pointermove', (e) => {
+            if (!dragging) return;
+            setSplit((e.clientX / window.innerWidth) * 100);
+            if (!hintHidden) {
+                hintHidden = true;
+                hint.style.opacity = '0';
+                setTimeout(() => hint.remove(), 500);
+            }
+        });
+        const endDrag = (e) => {
+            if (!dragging) return;
+            dragging = false;
+            try { divider.releasePointerCapture(e.pointerId); } catch {}
+        };
+        divider.addEventListener('pointerup',     endDrag);
+        divider.addEventListener('pointercancel', endDrag);
+
+        // -------- Camera-pose relay --------
+        // Viewer iframes emit `halloumi_camera_state` whenever the local
+        // pose changes; we forward it to the OTHER iframe as
+        // `halloumi_sync_pose`. The dedup on the receiving side prevents
+        // echo (the receiver applies the pose, notes it as `_syncLast`, and
+        // its next broadcastCameraIfChanged() sees no change → no echo).
+        window.addEventListener('message', (e) => {
+            const d = e.data;
+            if (!d) return;
+            let peer = null;
+            if      (e.source === left.contentWindow)  peer = right;
+            else if (e.source === right.contentWindow) peer = left;
+            else return;
+
+            if (d.type === 'halloumi_camera_state' && peer && peer.contentWindow) {
+                peer.contentWindow.postMessage({
+                    type: 'halloumi_sync_pose',
+                    position: d.position,
+                    rotation: d.rotation,
+                }, '*');
+            }
+            // We could also handle `halloumi_sync_ready` here (both iframes
+            // signal it), but the relay is fire-and-forget so nothing to do.
+        });
+    })();
+    </script>
+</body>
+</html>
