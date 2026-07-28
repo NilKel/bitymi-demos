@@ -425,6 +425,23 @@
                     <div class="meta"><span class="size">68 MB + 5 MB mesh</span> · trained with noise pressure + per-view backface cull (<code>--backface_cull</code>, centroid-oriented, cos 0.2) → coherent opaque manifold; 58.8% of surfels permanently pruned (behind mesh in every view) · viewer boots with matching centroid-BFC (<code>?bfc=1&amp;bfc_cos=0.2</code> — required, back shell is unsupervised) + normal-offset mesh cull (<code>?mesh_normal_margin=-0.012</code>) · anti-popping: smooth opacity fades + footprint-aware 5-tap mesh sampling (most-permissive combine — any no-mesh tap keeps the surfel; fade vs deepest tap) (BFC ±0.08 cos band; mesh cull fades over 12 mm with GES-style per-surfel scale slack — big discs get extra room before the wall bites) · <b>NEW: hybrid transparency</b> (HTGS-style, exact frontmost per pixel via a real z-buffer on the ray-disc intersection depth → kills center-depth-sort popping by construction) — <code>&amp;ht=2</code> <b>sorted tail</b> (recommended: tail keeps radix-sorted crisp over-blending behind the exact core; residual tail flips attenuated ×(1−α_F)) or <code>&amp;ht=1</code> OIT tail (no sort at all; depth-weighted order-independent tail, tune <code>&amp;ht_k=</code> 0–2000, default 150 — 0 is milky/washed, higher = crisper near-surface) · panel: "HybridT" selector + "tail k" slider · CUDA ref: 2.13× faster AND +0.69 dB vs no-cull · ⚠ quarter-res (-r 4) training — preview quality</div>
                 </div>
             </a>
+            <!-- Brain BFC+MeshCull r2 — same brutebf recipe retrained at -r 2
+                 (half res, production quality): --random_mesh @5k +
+                 --backface_cull cos 0.2 @5k, beta_scaled, fastgs, 35k iters.
+                 361,118 surfels; coarse last-frag TSDF mesh (voxel 0.012)
+                 789 clusters / 247,838 tris / 6.3 MB; behind-mesh prune
+                 (normal offset -0.012, all views) dropped 141,100 (39.1%)
+                 → 220,018 survivors. Baked BC7 (max_res 32): 27.33 dB /
+                 0.8603 SSIM / 0.1553 LPIPS @ 707 FPS (5090). Smaller r2
+                 surfels → much less cull-boundary flicker than the r4 card. -->
+            <a class="demo" data-invariant="true"
+               href="viewer-ws/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_brutebf_r2_bfc_meshcull.bitymi&mesh_url=https://nilkel.github.io/bitymi-demos/test-data/brain_mesh_bfc_r2.ply&mesh_cull=1&mesh_normal_margin=-0.012&bfc=1&bfc_cos=0.2">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Brain BFC + MeshCull r2 — half-res brutebf retrain, smaller surfels" loading="lazy" style="filter: hue-rotate(180deg) saturate(1.3);">
+                <div class="text">
+                    <div class="title">🧬 Brain · BFC+MeshCull r2 (WebGPU)</div>
+                    <div class="meta"><span class="size">124 MB + 6.3 MB mesh</span> · the brutebf recipe (<code>--random_mesh</code> + <code>--backface_cull</code> cos 0.2, both @5k) retrained at <b>half res (-r 2)</b> — smaller surfels, finer detail, noticeably less cull-boundary flicker than the r4 card · 39.1% of surfels permanently pruned behind the mesh (361K → 220K) · baked BC7: 27.33 dB / 0.860 SSIM / 0.155 LPIPS @ 707 FPS on a 5090 (metrics at r2 GT — not comparable to the r4 card's numbers) · boots with matching centroid-BFC (<code>?bfc=1&amp;bfc_cos=0.2</code> — required, back shell is unsupervised) + normal-offset mesh cull (<code>?mesh_normal_margin=-0.012</code>) · same anti-popping stack: smooth fades + footprint 5-tap sampling + <b>hybrid transparency</b> (<code>&amp;ht=2</code> sorted tail / <code>&amp;ht=1</code> OIT tail with <code>&amp;ht_k=</code>; panel "HybridT" selector)</div>
+                </div>
+            </a>
             <!-- Heart clip 1 — 3D_SH_res SV bake, iter 35k. typeD BC7-codebook
                  atlas + BPLY; CONIC lean bench on 5090 = 2152 FPS at
                  30.58 dB PSNR (bit-identical to prod). -->
