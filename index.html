@@ -520,7 +520,7 @@
         </details>
 
         <details class="folder" open>
-        <summary><span class="chev">▸</span><span class="fname">personal</span><span class="fcount">3 scenes</span></summary>
+        <summary><span class="chev">▸</span><span class="fname">personal</span><span class="fcount">4 scenes</span></summary>
         <div class="grid">
             <a class="demo" data-invariant="true"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/jhabbu.bitymi">
@@ -528,6 +528,23 @@
                 <div class="text">
                     <div class="title">jhabbu</div>
                     <div class="meta"><span class="size">38 MB</span></div>
+                </div>
+            </a>
+            <!-- Felix — 3D_SH_res SV bake, 35k iters. beta_scaled kernel,
+                 hybrid_levels=2, ppisp, --lowpass. 122k Gauss, typeD BC7-codebook
+                 atlas + BPLY (K=65536, atlas-PSNR 38.81 dB, 63.4 MB bundle).
+                 Bench (5090): baked 25.94 dB / 0.921 SSIM / 353 FPS vs neural
+                 26.50 dB / 100 FPS — 3.5× speedup, -0.56 dB delta. Atlas toggle
+                 (top of page) swaps BC7 ↔ typeD ASTC. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/felix.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/felix_astc.bitymi"
+               data-bc7-mb="63" data-astc-mb="63"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/felix.bitymi">
+                <img class="thumb" src="static/thumbs/felix.jpg" alt="Felix · 3D_SH_res SV, typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Felix</div>
+                    <div class="meta"><span class="size">63 MB</span> · 122k Gauss · 25.94 dB · 353 FPS baked (5090)</div>
                 </div>
             </a>
             <a class="demo" data-invariant="true"
