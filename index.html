@@ -343,6 +343,23 @@
                     <div class="meta"><span class="size">80 MB</span> · same bundle · BETA_KERNEL pipeline-constant split</div>
                 </div>
             </a>
+            <!-- room_p32_oct — proberes. Replaces the baked pipeline's per-surfel
+                 atlas rects with ONE shared 8192x8192 texture plus a per-surfel
+                 general 2x2 affine ("probe"): tx = A00*s.x + A01*s.y + t0.
+                 Same single texture fetch per fragment; the mapping just gains
+                 rotation/shear, so the atlas is a far more compact
+                 parameterisation. 72.3 MB vs room_astc.bitymi's 172.9 MB = 2.4x
+                 smaller. NAT2 atlas_format=9, single layer (8192 <=
+                 maxTextureDimension2D so no striping needed).
+                 See docs/PROBERES_WEBGPU_RENDERER.md. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_p32_oct.bitymi">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · proberes shared probe texture + per-surfel affine" loading="lazy" style="filter: hue-rotate(-25deg) saturate(1.15);">
+                <div class="text">
+                    <div class="title">🎯 Room · proberes <span style="color:#f0b060;font-size:0.75em">· probe atlas</span></div>
+                    <div class="meta"><span class="size">72 MB</span> · shared 8192² BC7 texture + 63k per-surfel affines · 2.4× smaller than the ASTC baked bundle · one HW fetch/fragment</div>
+                </div>
+            </a>
         </div>
 
         <details class="folder" open>
