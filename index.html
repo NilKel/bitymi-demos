@@ -383,6 +383,23 @@
                     <div class="meta"><span class="size">32 MB</span> · 4096×48576 shelf-packed atlas, 6 layers, typeD codebook · 30.73 dB @ 1105 FPS · same checkpoint as <em>Room · proberes</em></div>
                 </div>
             </a>
+            <!-- bicycle_p32_oct — proberes on an outdoor scene. Same recipe as
+                 room_p32_oct (shared 8192² texture, --probe_tex_res 8192,
+                 seeded from 3D_SH_res/RD_SV_30thr_005w25gLP_N2f_frz5k10 via
+                 --init_ply) but 2.5× the surfels: 160,835 probes vs room's
+                 63,164. The shared texture is also far denser here — 94.7%
+                 of texels occupied vs room's 69.9% — and the residual range
+                 is wider ([-3.72, +6.76] vs [-2.75, +4.66]), so u8 quantisation
+                 is coarser: rmse 0.01238 vs room's 0.00854.
+                 Baked reference for the same checkpoint: 23.91 dB @ 758 FPS. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_p32_oct.bitymi">
+                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle · proberes shared probe texture + per-surfel affine" loading="lazy" style="filter: hue-rotate(-25deg) saturate(1.15);">
+                <div class="text">
+                    <div class="title">🎯 Bicycle · proberes <span style="color:#f0b060;font-size:0.75em">· probe atlas</span></div>
+                    <div class="meta"><span class="size">85 MB</span> · shared 8192² BC7 texture + 161k per-surfel affines · 94.7% atlas occupancy · outdoor stress-test for the probe path</div>
+                </div>
+            </a>
         </div>
 
         <details class="folder" open>
