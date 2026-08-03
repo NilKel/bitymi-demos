@@ -774,10 +774,19 @@ fn fs_main(@builtin(position) frag_coord: vec4<f32>) -> @location(0) vec4<f32> {
     let acc  = textureLoad(accum_tex, p, 0);
     let T    = textureLoad(trans_tex, p, 0).r;
 
-    let tail_a = clamp(1.0 - T, 0.0, 1.0);
+    var tail_a = clamp(1.0 - T, 0.0, 1.0);
     var tail_rgb = vec3<f32>(0.0);
     if acc.a > 1e-4 {
         tail_rgb = acc.rgb / acc.a;
+    } else {
+        // No usable weighted colour: every tail fragment's w = exp(-k*rel)
+        // underflowed (happens as ht_k rises). tail_a comes from the
+        // UNWEIGHTED transmittance product, so it is still large -- leaving
+        // tail_rgb at 0 composites an OPAQUE BLACK layer over the core, which
+        // is the black seam-at-high-ht_k artifact (visible against any
+        // background because it is painted, not background showing through).
+        // Unknown colour must contribute nothing, not black.
+        tail_a = 0.0;
     }
 
     let rgb = core.rgb + (1.0 - core.a) * tail_rgb * tail_a;
