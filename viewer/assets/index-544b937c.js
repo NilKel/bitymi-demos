@@ -281,15 +281,20 @@ fn preprocess(@builtin(global_invocation_id) gid: vec3<u32>) {
     let is_texd   = (gid_raw & 0x80000000u) == 0u;
     let src_gauss = gid_raw & 0x7FFFFFFFu;
     if is_texd && atlas_params.atlas_width > 0u && atlas_params.probe_mode != 0u {
-        // Proberes: the fragment reads the per-surfel affine straight from the
-        // atlas_probes storage buffer (indexed by gauss_id), so there is
-        // nothing to precompute here. Zero the baked-path fields.
-        splats_2d[store_idx].uv_base_x  = 0.0;
-        splats_2d[store_idx].uv_base_y  = 0.0;
-        splats_2d[store_idx].uv_scale_x = 0.0;
-        splats_2d[store_idx].uv_scale_y = 0.0;
-        splats_2d[store_idx].layer      = 0u;
-        splats_2d[store_idx]._pad       = 0u;
+        // Proberes: stage the per-surfel affine into Splat2DGS so the fragment
+        // needs ZERO storage-buffer reads (the baked path's whole reason for
+        // the UV precompute). The 6 probe floats fit the 6 free slots exactly:
+        // 4 f32 + the layer/_pad u32 pair, reinterpreted via bitcast. Safe
+        // because this atlas is single-layer, so \`layer\` is identically 0 and
+        // the fragment hardcodes layer = 0 under probe_mode.
+        // Values are already divided by tex_res by the exporter.
+        let po = src_gauss * 6u;
+        splats_2d[store_idx].uv_base_x  = atlas_rects[po + 4u];                 // t0
+        splats_2d[store_idx].uv_base_y  = atlas_rects[po + 5u];                 // t1
+        splats_2d[store_idx].uv_scale_x = atlas_rects[po + 0u];                 // A00
+        splats_2d[store_idx].uv_scale_y = atlas_rects[po + 3u];                 // A11
+        splats_2d[store_idx].layer      = bitcast<u32>(atlas_rects[po + 1u]);   // A01
+        splats_2d[store_idx]._pad       = bitcast<u32>(atlas_rects[po + 2u]);   // A10
     } else if is_texd && atlas_params.atlas_width > 0u {
         let base_off = src_gauss * 5u;
         let u0     = atlas_rects[base_off + 0u];
@@ -394,6 +399,8 @@ struct VertexOutput {
   @location(8)  @interpolate(flat) uv_base     : vec2<f32>,
   @location(9)  @interpolate(flat) uv_scale    : vec2<f32>,
   @location(10) @interpolate(flat) layer       : u32,
+  // Proberes off-diagonal terms (A01, A10) / tex_res. Unused when probe_mode==0.
+  @location(11) @interpolate(flat) uv_skew     : vec2<f32>,
 };
 
 // 32-byte RenderSettings — same layout as preprocess_2dgs.wgsl. We only read
@@ -485,6 +492,9 @@ fn vs_main(
     out.uv_base     = vec2<f32>(splat.uv_base_x,  splat.uv_base_y);
     out.uv_scale    = vec2<f32>(splat.uv_scale_x, splat.uv_scale_y);
     out.layer       = splat.layer;
+    // Under probe_mode the layer/_pad slots carry A01/A10 (see preprocess).
+    // Harmless otherwise — probe_mode==0 never reads uv_skew.
+    out.uv_skew     = vec2<f32>(bitcast<f32>(splat.layer), bitcast<f32>(splat._pad));
     return out;
 }
 
@@ -600,15 +610,12 @@ fn shade(in: VertexOutput) -> ShadeOut {
             // screen-space kernel wins, the sample point is the probe CENTRE,
             // not the ray-splat point. Dropping it corrupts distant geometry.
             let uv_eff = select(vec2<f32>(0.0), s, rho3d <= rho2d);
-            let po  = (in.gauss_id & 0x7FFFFFFFu) * 6u;
-            let a00 = atlas_probes[po + 0u];
-            let a01 = atlas_probes[po + 1u];
-            let a10 = atlas_probes[po + 2u];
-            let a11 = atlas_probes[po + 3u];
-            let t0  = atlas_probes[po + 4u];
-            let t1  = atlas_probes[po + 5u];
-            uv = vec2<f32>(a00 * uv_eff.x + a01 * uv_eff.y + t0,
-                           a10 * uv_eff.x + a11 * uv_eff.y + t1);
+            // Zero storage reads — all six coefficients arrive as flat varyings.
+            // uv_scale = (A00, A11) diagonal, uv_skew = (A01, A10) off-diagonal.
+            uv = vec2<f32>(
+                in.uv_scale.x * uv_eff.x + in.uv_skew.x  * uv_eff.y + in.uv_base.x,
+                in.uv_skew.y  * uv_eff.x + in.uv_scale.y * uv_eff.y + in.uv_base.y,
+            );
             layer = 0;
         } else {
             uv = in.uv_base + s * in.uv_scale;
