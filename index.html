@@ -357,7 +357,30 @@
                 <img class="thumb" src="static/thumbs/room.jpg" alt="Room · proberes shared probe texture + per-surfel affine" loading="lazy" style="filter: hue-rotate(-25deg) saturate(1.15);">
                 <div class="text">
                     <div class="title">🎯 Room · proberes <span style="color:#f0b060;font-size:0.75em">· probe atlas</span></div>
-                    <div class="meta"><span class="size">72 MB</span> · shared 8192² BC7 texture + 63k per-surfel affines · 2.4× smaller than the ASTC baked bundle · one HW fetch/fragment</div>
+                    <div class="meta"><span class="size">72 MB</span> · shared 8192² BC7 texture + 63k per-surfel affines · one HW fetch/fragment · A/B against <em>Room · packed</em></div>
+                </div>
+            </a>
+            <!-- room_packed — the shelf-packed baked atlas A/B partner for
+                 room_p32_oct. SAME source checkpoint
+                 (3D_SH_res/RD_SV_30thr_005w25gLP_N2f_frz5k10) — the proberes run
+                 was seeded from it via --init_ply — so geometry and SV are
+                 identical and the only variable is the residual
+                 parameterisation: per-surfel rects shelf-packed into a
+                 4096×48576 6-layer atlas vs one shared 8192² texture with a
+                 per-surfel affine.
+                 typeD codebook (K=65536, atlas-PSNR 39.07 dB), 62,947 rects.
+                 Baked reference: 30.73 dB / 0.9049 / 0.2341 @ 1105 FPS (5090)
+                 vs neural 30.62 dB @ 134 FPS.
+                 Atlas toggle at page top swaps BC7 ↔ typeD-ASTC. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_packed.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_packed_astc.bitymi"
+               data-bc7-mb="32" data-astc-mb="32"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_packed.bitymi">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · shelf-packed baked atlas (typeD BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">📦 Room · packed <span style="color:#a0f0a0;font-size:0.75em">· shelf-packed bake</span></div>
+                    <div class="meta"><span class="size">32 MB</span> · 4096×48576 shelf-packed atlas, 6 layers, typeD codebook · 30.73 dB @ 1105 FPS · same checkpoint as <em>Room · proberes</em></div>
                 </div>
             </a>
         </div>
