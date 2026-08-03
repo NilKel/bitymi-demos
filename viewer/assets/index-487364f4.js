@@ -729,7 +729,14 @@ fn fs_tail(in: VertexOutput) -> TailOut {
     let p = vec2<i32>(floor(in.position.xy));
     let zc = ht_inv_depth(textureLoad(ht_core_depth, p, 0));
     let rel = max(0.0, (sh.zv - zc) / max(zc, 1e-3));
-    let w = exp(-min(20.0, ht_params.tail_k * rel));
+    // Exponent clamp at 10, NOT 20: the accum target is rgba16float, whose
+    // smallest subnormal is 5.96e-8. exp(-20) = 2.06e-9 flushes to ZERO on the
+    // ROP write, so at high ht_k every tail fragment more than ~10/k relative
+    // depth behind the core vanished from the weighted sum while the
+    // (unweighted) transmittance product still reported real opacity — the
+    // black-seam-at-surfel-boundaries artifact. exp(-10) = 4.54e-5 is safely
+    // fp16-normal; relative weighting beyond 10 e-folds is visually nil.
+    let w = exp(-min(10.0, ht_params.tail_k * rel));
     var out : TailOut;
     out.accum = vec4<f32>(sh.rgb * sh.a * w, sh.a * w);
     out.trans = vec4<f32>(sh.a, 0.0, 0.0, sh.a);
