@@ -403,16 +403,19 @@
                 </div>
             </a>
             <!-- room_wsrg — GATED WSR finetune (--wsr_gate_tau 0.05, wsr_mode 1
-                 + 2-pass transmittance-saturation gate). Pass 1 bins per-pixel
-                 optical depth -log(1-α) into 16 log-depth bins (4×rgba16f
-                 additive MRT); pass 2 discards any fragment whose strictly-
-                 nearer-bin transmittance < 0.05, then WSR-accumulates
-                 (w = α·occ). The gate is a DEPTH relation — order-independent,
-                 frame-coherent, per-frame exact — so deep background surfels
-                 can't bleed through saturated foreground no matter what the
-                 baked occ says. Trained WITH the gate in the loss (CUDA
-                 wsrGatePrepassCUDA, identical bin constants zmin 0.2 zmax 120).
-                 30.50 dB vs 31.14 sorted; novel-view stress (dolly 1.2 m):
+                 + 2-pass transmittance-saturation gate, SOFT/CONTINUOUS v2).
+                 Pass 1 bins per-pixel optical depth -log(1-α) into 16
+                 log-depth bins (4×rgba16f additive MRT); pass 2 evaluates the
+                 linearly-interpolated cumulative od ONE BIN NEARER than the
+                 fragment (guard band — no self-gating of one-bin surface
+                 stacks, C0-continuous across bin crossings) and fades the
+                 occ weight by smoothstep of T over [0.5τ, 1.5τ] — no hard
+                 discard anywhere, so nothing pops as the camera-attached bin
+                 planes sweep the scene (v1's hard prefix gate produced
+                 rippling iso-depth lines that tracked camera zoom/rotation).
+                 Trained WITH the identical gate in the loss (CUDA
+                 wsrGatePrepassCUDA, bin constants zmin 0.2 zmax 120).
+                 30.55 dB vs 31.14 sorted; novel-view stress (dolly 1.2 m):
                  tabletop solid where ungated WSR leaks. Still no sort, no
                  z-buffer core. ?wsr=2 arms the gate; the 'WSR sat-gate' UI
                  checkbox A/Bs gated vs ungated live. docs/WSR_DISTILL.md §3d. -->
@@ -421,7 +424,7 @@
                 <img class="thumb" src="static/thumbs/room.jpg" alt="Room · gated WSR — transmittance-saturation gate, sort-free" loading="lazy" style="filter: hue-rotate(180deg) saturate(1.15);">
                 <div class="text">
                     <div class="title">🚪 Room · WSR+gate <span style="color:#80e0ff;font-size:0.75em">· saturation-gated, sort-free</span></div>
-                    <div class="meta"><span class="size">73 MB</span> · 2-pass: depth-binned opacity histogram → gate fragments behind saturation · 30.50 dB · kills ungated WSR's off-hull see-through (dolly 1.2 m verified) · no sort, no z-buffer</div>
+                    <div class="meta"><span class="size">73 MB</span> · 2-pass: depth-binned opacity → smooth saturation fade (v2: continuous — no ripple lines) · 30.55 dB · kills ungated WSR's off-hull see-through · no sort, no z-buffer</div>
                 </div>
             </a>
             <!-- room_packed — the shelf-packed baked atlas A/B partner for
