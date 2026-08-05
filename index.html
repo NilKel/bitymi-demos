@@ -360,6 +360,27 @@
                     <div class="meta"><span class="size">72 MB</span> · shared 8192² BC7 texture + 63k per-surfel affines · one HW fetch/fragment · A/B against <em>Room · packed</em></div>
                 </div>
             </a>
+            <!-- room_wsr — WSR sort-free finetune of room8k_p32 (proberes).
+                 5k-iter finetune under the order-independent weighted-sum
+                 composite out = (1-P)·Σ(α·occ·c)/Σ(α·occ), P = Π(1-α), with a
+                 LEARNED per-surfel occlusion (distill-initialized from the
+                 sorted renderer's mean transmittance Σ(αT)/Σα, then trained
+                 jointly with opacity/SV/probes/texture; geometry frozen).
+                 Test PSNR 30.47 dB vs 31.14 sorted. Stride-7 probe records
+                 (7th float = occ), NAT2 flags bit 0, probe_mode 2.
+                 ?wsr=1 opens sort-free (no radix sort, no depth pass, popping
+                 structurally impossible); the "WSR (sort-free)" UI checkbox
+                 A/Bs against classic sorted on the SAME bundle. Known limit:
+                 scalar occ is view-INdependent → some see-through on opaque
+                 occluders (stage 2 = directional occ). docs/WSR_DISTILL.md. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?wsr=1&bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_wsr.bitymi">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · WSR sort-free weighted-sum with learned occlusion" loading="lazy" style="filter: hue-rotate(140deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">🌀 Room · WSR <span style="color:#80c8f0;font-size:0.75em">· sort-free, learned occlusion</span></div>
+                    <div class="meta"><span class="size">73 MB</span> · no sort, no depth pass — zero popping by construction · 30.47 dB (sorted ceiling 31.14) · UI checkbox A/Bs vs sorted on the same bundle</div>
+                </div>
+            </a>
             <!-- room_packed — the shelf-packed baked atlas A/B partner for
                  room_p32_oct. SAME source checkpoint
                  (3D_SH_res/RD_SV_30thr_005w25gLP_N2f_frz5k10) — the proberes run
