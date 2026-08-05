@@ -381,6 +381,27 @@
                     <div class="meta"><span class="size">73 MB</span> · no sort, no depth pass — zero popping by construction · 30.47 dB (sorted ceiling 31.14) · UI checkbox A/Bs vs sorted on the same bundle</div>
                 </div>
             </a>
+            <!-- room_htc — ht=1 core + learned-occ tail composite finetune
+                 (--wsr_composite, wsr_mode 2). Operator: exact per-pixel
+                 frontmost fragment via z-buffer (NOT a sort — per-pixel
+                 ray-splat intersection depth) + occ-weighted mean of the rest:
+                 C = αF·cF + (1-αF)·(1-P_t)·Σ(α·occ·c)/Σ(α·occ).
+                 30.53 dB vs 31.14 sorted; unlike room_wsr (pure WSR,
+                 30.47 dB) the opaque-occluder bleed-through is gone BY
+                 CONSTRUCTION (behind an opaque front fragment the tail is
+                 scaled by 1-αF ≈ 0, per-frame exact, camera-position
+                 correct). Costs a depth pre-pass; still no sort → still
+                 pop-free. ?ht=3 opens this operator; the HybridT dropdown
+                 ('occ tail (learned)') A/Bs vs sorted / ht=1 / pure WSR on
+                 the same bundle. docs/WSR_DISTILL.md §3b. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?ht=3&bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_htc.bitymi">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · hybrid core + learned occlusion tail, sort-free" loading="lazy" style="filter: hue-rotate(100deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">🛡️ Room · HT+occ <span style="color:#80f0c8;font-size:0.75em">· exact front, learned tail</span></div>
+                    <div class="meta"><span class="size">73 MB</span> · z-buffer frontmost + occ-weighted tail, no sort · 30.53 dB · opaque bleed-through gone by construction · A/B vs <em>Room · WSR</em></div>
+                </div>
+            </a>
             <!-- room_packed — the shelf-packed baked atlas A/B partner for
                  room_p32_oct. SAME source checkpoint
                  (3D_SH_res/RD_SV_30thr_005w25gLP_N2f_frz5k10) — the proberes run
