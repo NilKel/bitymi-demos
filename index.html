@@ -427,6 +427,31 @@
                     <div class="meta"><span class="size">73 MB</span> · 2-pass: depth-binned opacity → smooth saturation fade (v2: continuous — no ripple lines) · 30.55 dB · kills ungated WSR's off-hull see-through · no sort, no z-buffer</div>
                 </div>
             </a>
+            <!-- room_wsrd — mean-depth-gated WSR (--wsr_dgate_margin 0.15,
+                 ?wsr=3, "D-gate"). The insight: the SATURATION DEPTH is an
+                 opacity INTEGRAL — robust to the local order swaps that make
+                 sorted color compositing pop — so keep the radix sort but use
+                 it ONLY for the per-pixel visibility anchor: a sorted
+                 premultiplied over-blend of (zv·α, α) yields (Σ αT·zv, Σ αT)
+                 in the blend unit = the alpha-weighted mean depth D̄ +
+                 saturation A. Color then blends fully order-independently
+                 (w = α·occ·s) with s fading over the RELATIVE window
+                 [D̄·1.075, D̄·1.225], scaled by smoothstep(0.6,0.9,A) so
+                 unsaturated pixels never gate their background. No bins ⇒
+                 nothing camera-attached ⇒ no ripple; margin ~15% depth vs the
+                 binned gate's 33-77% quantum ⇒ tighter occluder separation.
+                 Pays the sort (unlike ?wsr=2) but only for a cheap depth-only
+                 pass. Trained with the identical gate in CUDA
+                 (wsrDGatePrepassCUDA). 30.62 dB vs 31.14 sorted — best of the
+                 WSR family. docs/WSR_DISTILL.md §3e. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?wsr=3&bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_wsrd.bitymi">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · mean-depth-gated WSR — sorted depth anchor, order-independent color" loading="lazy" style="filter: hue-rotate(220deg) saturate(1.15);">
+                <div class="text">
+                    <div class="title">⚓ Room · WSR+D-gate <span style="color:#b0c8ff;font-size:0.75em">· sorted depth anchor, OI color</span></div>
+                    <div class="meta"><span class="size">73 MB</span> · sort anchors visibility only (mean-depth pass); color blends order-independently behind a ~15% depth fade · 30.62 dB — family best · pop-free by construction, tighter leak floor than ?wsr=2</div>
+                </div>
+            </a>
             <!-- room_packed — the shelf-packed baked atlas A/B partner for
                  room_p32_oct. SAME source checkpoint
                  (3D_SH_res/RD_SV_30thr_005w25gLP_N2f_frz5k10) — the proberes run
