@@ -452,6 +452,29 @@
                     <div class="meta"><span class="size">73 MB</span> · sort anchors visibility only (mean-depth pass); color blends order-independently behind a ~15% depth fade · 30.62 dB — family best · pop-free by construction, tighter leak floor than ?wsr=2</div>
                 </div>
             </a>
+            <!-- ============ mip-360 · WSR+D-gate (?wsr=3) all-scenes set ============
+                 Same recipe as room_wsrd for every mip-360 scene: 5k D-gate WSR
+                 finetune (--wsr --wsr_dgate_margin 0.15) from each scene's
+                 proberes checkpoint (oct8k_p32_free bases; bike8k_p32 for
+                 bicycle), stride-7 BC7 bundle, HF subfolder mip_360_wsrd/.
+                 Sorted-baseline PSNRs of the bases: bicycle 23.97, bonsai 32.00.
+                 Cards added per scene as the batch completes. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?wsr=3&bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360_wsrd/bicycle_wsrd.bitymi">
+                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle · mean-depth-gated WSR" loading="lazy" style="filter: hue-rotate(220deg) saturate(1.15);">
+                <div class="text">
+                    <div class="title">⚓ Bicycle · WSR+D-gate <span style="color:#b0c8ff;font-size:0.75em">· sort-anchored, OI color</span></div>
+                    <div class="meta"><span class="size">86 MB</span> · D-gate WSR finetune of bike8k_p32 · 23.44 dB (sorted base 23.97) · pop-free</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?wsr=3&bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360_wsrd/bonsai_wsrd.bitymi">
+                <img class="thumb" src="static/thumbs/bonsai.jpg" alt="Bonsai · mean-depth-gated WSR" loading="lazy" style="filter: hue-rotate(220deg) saturate(1.15);">
+                <div class="text">
+                    <div class="title">⚓ Bonsai · WSR+D-gate <span style="color:#b0c8ff;font-size:0.75em">· sort-anchored, OI color</span></div>
+                    <div class="meta"><span class="size">77 MB</span> · D-gate WSR finetune of oct8k_p32_free · 30.19 dB (sorted base 32.00) · pop-free</div>
+                </div>
+            </a>
             <!-- room_packed — the shelf-packed baked atlas A/B partner for
                  room_p32_oct. SAME source checkpoint
                  (3D_SH_res/RD_SV_30thr_005w25gLP_N2f_frz5k10) — the proberes run
