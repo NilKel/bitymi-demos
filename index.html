@@ -343,6 +343,231 @@
                     <div class="meta"><span class="size">80 MB</span> · same bundle · BETA_KERNEL pipeline-constant split</div>
                 </div>
             </a>
+            <!-- bicycle_octc — proberes with the CONTRACTED-metric probe sizing +
+                 a mip chain. Two changes vs bicycle_p32_oct:
+                 (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
+                     scale ((2-1/r)/r for r>1) instead of world scale. The teacher's
+                     hash is queried in contracted coords, so its far-field residual
+                     is already band-limited there; world-scale sizing handed the
+                     background ~79x the texel area per surfel for detail that does
+                     not exist. Bicycle: demand 2090M -> 550M texels, writes/texel
+                     48 -> 12. Mean over all 9 scenes 26.79 -> 26.86 dB PSNR and
+                     0.2248 -> 0.2179 LPIPS; 9/9 scenes improved LPIPS.
+                 (2) 12-level mip chain (2x2 box filter on the FLOAT atlas, one
+                     shared dequant pair). +33% payload, trilinear minification.
+                     Compute passes have no implicit derivatives, so LOD is computed
+                     per-Gauss in the vertex stage from the probe affine and the
+                     screen extent. Toggle live with the "Mips" control or ?mip=0.
+                 p32 footprints, 8192x8192 BC7, NAT2 atlas_format=9.
+                 Test PSNR 24.02 / LPIPS 0.2365. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_octc.bitymi">
+                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle · proberes contracted-metric probes + mips" loading="lazy" style="filter: hue-rotate(-45deg) saturate(1.2);">
+                <div class="text">
+                    <div class="title">🎯 Bicycle · proberes+mips <span style="color:#7fd1b9;font-size:0.75em">· contracted</span></div>
+                    <div class="meta"><span class="size">106 MB</span> · contracted-metric probes + 12-level mips · PSNR 24.02 · LPIPS 0.2365 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
+                </div>
+            </a>
+            <!-- bonsai_octc — proberes with the CONTRACTED-metric probe sizing +
+                 a mip chain. Two changes vs bonsai_p32_oct:
+                 (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
+                     scale ((2-1/r)/r for r>1) instead of world scale. The teacher's
+                     hash is queried in contracted coords, so its far-field residual
+                     is already band-limited there; world-scale sizing handed the
+                     background ~79x the texel area per surfel for detail that does
+                     not exist. Bicycle: demand 2090M -> 550M texels, writes/texel
+                     48 -> 12. Mean over all 9 scenes 26.79 -> 26.86 dB PSNR and
+                     0.2248 -> 0.2179 LPIPS; 9/9 scenes improved LPIPS.
+                 (2) 12-level mip chain (2x2 box filter on the FLOAT atlas, one
+                     shared dequant pair). +33% payload, trilinear minification.
+                     Compute passes have no implicit derivatives, so LOD is computed
+                     per-Gauss in the vertex stage from the probe affine and the
+                     screen extent. Toggle live with the "Mips" control or ?mip=0.
+                 p32 footprints, 8192x8192 BC7, NAT2 atlas_format=9.
+                 Test PSNR 32.10 / LPIPS 0.1727. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_octc.bitymi">
+                <img class="thumb" src="static/thumbs/bonsai.jpg" alt="Bonsai · proberes contracted-metric probes + mips" loading="lazy" style="filter: hue-rotate(-45deg) saturate(1.2);">
+                <div class="text">
+                    <div class="title">🎯 Bonsai · proberes+mips <span style="color:#7fd1b9;font-size:0.75em">· contracted</span></div>
+                    <div class="meta"><span class="size">97 MB</span> · contracted-metric probes + 12-level mips · PSNR 32.10 · LPIPS 0.1727 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
+                </div>
+            </a>
+            <!-- counter_octc — proberes with the CONTRACTED-metric probe sizing +
+                 a mip chain. Two changes vs counter_p32_oct:
+                 (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
+                     scale ((2-1/r)/r for r>1) instead of world scale. The teacher's
+                     hash is queried in contracted coords, so its far-field residual
+                     is already band-limited there; world-scale sizing handed the
+                     background ~79x the texel area per surfel for detail that does
+                     not exist. Bicycle: demand 2090M -> 550M texels, writes/texel
+                     48 -> 12. Mean over all 9 scenes 26.79 -> 26.86 dB PSNR and
+                     0.2248 -> 0.2179 LPIPS; 9/9 scenes improved LPIPS.
+                 (2) 12-level mip chain (2x2 box filter on the FLOAT atlas, one
+                     shared dequant pair). +33% payload, trilinear minification.
+                     Compute passes have no implicit derivatives, so LOD is computed
+                     per-Gauss in the vertex stage from the probe affine and the
+                     screen extent. Toggle live with the "Mips" control or ?mip=0.
+                 p32 footprints, 8192x8192 BC7, NAT2 atlas_format=9.
+                 Test PSNR 28.96 / LPIPS 0.1984. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_octc.bitymi">
+                <img class="thumb" src="static/thumbs/counter.jpg" alt="Counter · proberes contracted-metric probes + mips" loading="lazy" style="filter: hue-rotate(-45deg) saturate(1.2);">
+                <div class="text">
+                    <div class="title">🎯 Counter · proberes+mips <span style="color:#7fd1b9;font-size:0.75em">· contracted</span></div>
+                    <div class="meta"><span class="size">94 MB</span> · contracted-metric probes + 12-level mips · PSNR 28.96 · LPIPS 0.1984 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
+                </div>
+            </a>
+            <!-- flowers_octc — proberes with the CONTRACTED-metric probe sizing +
+                 a mip chain. Two changes vs flowers_p32_oct:
+                 (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
+                     scale ((2-1/r)/r for r>1) instead of world scale. The teacher's
+                     hash is queried in contracted coords, so its far-field residual
+                     is already band-limited there; world-scale sizing handed the
+                     background ~79x the texel area per surfel for detail that does
+                     not exist. Bicycle: demand 2090M -> 550M texels, writes/texel
+                     48 -> 12. Mean over all 9 scenes 26.79 -> 26.86 dB PSNR and
+                     0.2248 -> 0.2179 LPIPS; 9/9 scenes improved LPIPS.
+                 (2) 12-level mip chain (2x2 box filter on the FLOAT atlas, one
+                     shared dequant pair). +33% payload, trilinear minification.
+                     Compute passes have no implicit derivatives, so LOD is computed
+                     per-Gauss in the vertex stage from the probe affine and the
+                     screen extent. Toggle live with the "Mips" control or ?mip=0.
+                 p32 footprints, 8192x8192 BC7, NAT2 atlas_format=9.
+                 Test PSNR 20.48 / LPIPS 0.3265. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_octc.bitymi">
+                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers · proberes contracted-metric probes + mips" loading="lazy" style="filter: hue-rotate(-45deg) saturate(1.2);">
+                <div class="text">
+                    <div class="title">🎯 Flowers · proberes+mips <span style="color:#7fd1b9;font-size:0.75em">· contracted</span></div>
+                    <div class="meta"><span class="size">109 MB</span> · contracted-metric probes + 12-level mips · PSNR 20.48 · LPIPS 0.3265 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
+                </div>
+            </a>
+            <!-- garden_octc — proberes with the CONTRACTED-metric probe sizing +
+                 a mip chain. Two changes vs garden_p32_oct:
+                 (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
+                     scale ((2-1/r)/r for r>1) instead of world scale. The teacher's
+                     hash is queried in contracted coords, so its far-field residual
+                     is already band-limited there; world-scale sizing handed the
+                     background ~79x the texel area per surfel for detail that does
+                     not exist. Bicycle: demand 2090M -> 550M texels, writes/texel
+                     48 -> 12. Mean over all 9 scenes 26.79 -> 26.86 dB PSNR and
+                     0.2248 -> 0.2179 LPIPS; 9/9 scenes improved LPIPS.
+                 (2) 12-level mip chain (2x2 box filter on the FLOAT atlas, one
+                     shared dequant pair). +33% payload, trilinear minification.
+                     Compute passes have no implicit derivatives, so LOD is computed
+                     per-Gauss in the vertex stage from the probe affine and the
+                     screen extent. Toggle live with the "Mips" control or ?mip=0.
+                 p32 footprints, 8192x8192 BC7, NAT2 atlas_format=9.
+                 Test PSNR 26.46 / LPIPS 0.1375. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_octc.bitymi">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · proberes contracted-metric probes + mips" loading="lazy" style="filter: hue-rotate(-45deg) saturate(1.2);">
+                <div class="text">
+                    <div class="title">🎯 Garden · proberes+mips <span style="color:#7fd1b9;font-size:0.75em">· contracted</span></div>
+                    <div class="meta"><span class="size">105 MB</span> · contracted-metric probes + 12-level mips · PSNR 26.46 · LPIPS 0.1375 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
+                </div>
+            </a>
+            <!-- kitchen_octc — proberes with the CONTRACTED-metric probe sizing +
+                 a mip chain. Two changes vs kitchen_p32_oct:
+                 (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
+                     scale ((2-1/r)/r for r>1) instead of world scale. The teacher's
+                     hash is queried in contracted coords, so its far-field residual
+                     is already band-limited there; world-scale sizing handed the
+                     background ~79x the texel area per surfel for detail that does
+                     not exist. Bicycle: demand 2090M -> 550M texels, writes/texel
+                     48 -> 12. Mean over all 9 scenes 26.79 -> 26.86 dB PSNR and
+                     0.2248 -> 0.2179 LPIPS; 9/9 scenes improved LPIPS.
+                 (2) 12-level mip chain (2x2 box filter on the FLOAT atlas, one
+                     shared dequant pair). +33% payload, trilinear minification.
+                     Compute passes have no implicit derivatives, so LOD is computed
+                     per-Gauss in the vertex stage from the probe affine and the
+                     screen extent. Toggle live with the "Mips" control or ?mip=0.
+                 p16 footprints, 8192x8192 BC7, NAT2 atlas_format=9.
+                 Test PSNR 30.62 / LPIPS 0.1465. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_octc.bitymi">
+                <img class="thumb" src="static/thumbs/kitchen.jpg" alt="Kitchen · proberes contracted-metric probes + mips" loading="lazy" style="filter: hue-rotate(-45deg) saturate(1.2);">
+                <div class="text">
+                    <div class="title">🎯 Kitchen · proberes+mips <span style="color:#7fd1b9;font-size:0.75em">· contracted</span></div>
+                    <div class="meta"><span class="size">101 MB</span> · contracted-metric probes + 12-level mips · PSNR 30.62 · LPIPS 0.1465 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
+                </div>
+            </a>
+            <!-- room_octc — proberes with the CONTRACTED-metric probe sizing +
+                 a mip chain. Two changes vs room_p32_oct:
+                 (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
+                     scale ((2-1/r)/r for r>1) instead of world scale. The teacher's
+                     hash is queried in contracted coords, so its far-field residual
+                     is already band-limited there; world-scale sizing handed the
+                     background ~79x the texel area per surfel for detail that does
+                     not exist. Bicycle: demand 2090M -> 550M texels, writes/texel
+                     48 -> 12. Mean over all 9 scenes 26.79 -> 26.86 dB PSNR and
+                     0.2248 -> 0.2179 LPIPS; 9/9 scenes improved LPIPS.
+                 (2) 12-level mip chain (2x2 box filter on the FLOAT atlas, one
+                     shared dequant pair). +33% payload, trilinear minification.
+                     Compute passes have no implicit derivatives, so LOD is computed
+                     per-Gauss in the vertex stage from the probe affine and the
+                     screen extent. Toggle live with the "Mips" control or ?mip=0.
+                 p32 footprints, 8192x8192 BC7, NAT2 atlas_format=9.
+                 Test PSNR 31.24 / LPIPS 0.1918. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_octc.bitymi">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · proberes contracted-metric probes + mips" loading="lazy" style="filter: hue-rotate(-45deg) saturate(1.2);">
+                <div class="text">
+                    <div class="title">🎯 Room · proberes+mips <span style="color:#7fd1b9;font-size:0.75em">· contracted</span></div>
+                    <div class="meta"><span class="size">94 MB</span> · contracted-metric probes + 12-level mips · PSNR 31.24 · LPIPS 0.1918 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
+                </div>
+            </a>
+            <!-- stump_octc — proberes with the CONTRACTED-metric probe sizing +
+                 a mip chain. Two changes vs stump_p32_oct:
+                 (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
+                     scale ((2-1/r)/r for r>1) instead of world scale. The teacher's
+                     hash is queried in contracted coords, so its far-field residual
+                     is already band-limited there; world-scale sizing handed the
+                     background ~79x the texel area per surfel for detail that does
+                     not exist. Bicycle: demand 2090M -> 550M texels, writes/texel
+                     48 -> 12. Mean over all 9 scenes 26.79 -> 26.86 dB PSNR and
+                     0.2248 -> 0.2179 LPIPS; 9/9 scenes improved LPIPS.
+                 (2) 12-level mip chain (2x2 box filter on the FLOAT atlas, one
+                     shared dequant pair). +33% payload, trilinear minification.
+                     Compute passes have no implicit derivatives, so LOD is computed
+                     per-Gauss in the vertex stage from the probe affine and the
+                     screen extent. Toggle live with the "Mips" control or ?mip=0.
+                 p32 footprints, 8192x8192 BC7, NAT2 atlas_format=9.
+                 Test PSNR 25.59 / LPIPS 0.2580. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_octc.bitymi">
+                <img class="thumb" src="static/thumbs/stump.jpg" alt="Stump · proberes contracted-metric probes + mips" loading="lazy" style="filter: hue-rotate(-45deg) saturate(1.2);">
+                <div class="text">
+                    <div class="title">🎯 Stump · proberes+mips <span style="color:#7fd1b9;font-size:0.75em">· contracted</span></div>
+                    <div class="meta"><span class="size">98 MB</span> · contracted-metric probes + 12-level mips · PSNR 25.59 · LPIPS 0.2580 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
+                </div>
+            </a>
+            <!-- treehill_octc — proberes with the CONTRACTED-metric probe sizing +
+                 a mip chain. Two changes vs treehill_p32_oct:
+                 (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
+                     scale ((2-1/r)/r for r>1) instead of world scale. The teacher's
+                     hash is queried in contracted coords, so its far-field residual
+                     is already band-limited there; world-scale sizing handed the
+                     background ~79x the texel area per surfel for detail that does
+                     not exist. Bicycle: demand 2090M -> 550M texels, writes/texel
+                     48 -> 12. Mean over all 9 scenes 26.79 -> 26.86 dB PSNR and
+                     0.2248 -> 0.2179 LPIPS; 9/9 scenes improved LPIPS.
+                 (2) 12-level mip chain (2x2 box filter on the FLOAT atlas, one
+                     shared dequant pair). +33% payload, trilinear minification.
+                     Compute passes have no implicit derivatives, so LOD is computed
+                     per-Gauss in the vertex stage from the probe affine and the
+                     screen extent. Toggle live with the "Mips" control or ?mip=0.
+                 p32 footprints, 8192x8192 BC7, NAT2 atlas_format=9.
+                 Test PSNR 22.30 / LPIPS 0.2935. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_octc.bitymi">
+                <img class="thumb" src="static/thumbs/treehill.jpg" alt="Treehill · proberes contracted-metric probes + mips" loading="lazy" style="filter: hue-rotate(-45deg) saturate(1.2);">
+                <div class="text">
+                    <div class="title">🎯 Treehill · proberes+mips <span style="color:#7fd1b9;font-size:0.75em">· contracted</span></div>
+                    <div class="meta"><span class="size">108 MB</span> · contracted-metric probes + 12-level mips · PSNR 22.30 · LPIPS 0.2935 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
+                </div>
+            </a>
             <!-- room_p32_oct — proberes. Replaces the baked pipeline's per-surfel
                  atlas rects with ONE shared 8192x8192 texture plus a per-surfel
                  general 2x2 affine ("probe"): tx = A00*s.x + A01*s.y + t0.
