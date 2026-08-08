@@ -921,6 +921,19 @@
                     <div class="meta"><span class="size">66 MB</span> · cinematic-anatomy · 115k Gauss · 28.55 dB · 1930 FPS (CONIC 5090)</div>
                 </div>
             </a>
+            <!-- Heart clip3 FL vs LAD — split-slider. Both are 3D_SH_res SV
+                 finetunes of the same clip3 capture at iter 10k, baked with
+                 typeD BC7. Camera-synced via the postMessage bridge, so
+                 orbiting one side moves the other.
+                   FL   35,029 Gauss · 23.13 dB / 0.868 / 0.127 @ 3145 FPS
+                   LAD  47,763 Gauss · 17.35 dB / 0.754 / 0.204 @ 2771 FPS -->
+            <a class="demo" data-invariant="true" href="heart-slider/index.html?left=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_heart/heart_clip3_fl.bitymi&amp;right=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_heart/heart_clip3_lad.bitymi&amp;left_label=FL&amp;right_label=LAD&amp;title=Heart%20clip3%20%C2%B7%20FL%20vs%20LAD">
+                <img class="thumb" src="static/thumbs/heart.jpg" alt="Heart clip3 FL vs LAD split-slider comparison" loading="lazy" style="filter: hue-rotate(20deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">🔀 Heart clip3 · FL ↔ LAD · split-slider</div>
+                    <div class="meta"><span class="size">23 + 29 MB</span> · camera-synced A/B · drag the divider · FL 35k Gauss / 23.13 dB &middot; LAD 48k Gauss / 17.35 dB</div>
+                </div>
+            </a>
             <!-- Split-slider: two synced viewer iframes side-by-side with a
                  draggable divider. Uses the halloumi_sync_pose / _camera_state
                  postMessage bridge added to the viewer 2026-07-28. Both heart

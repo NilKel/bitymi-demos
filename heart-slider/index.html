@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Heart clip1 vs clip2 · split-slider</title>
+    <title>Split-slider comparison</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -119,8 +119,8 @@
     <iframe id="left"  class="pane" src="about:blank" allow="fullscreen"></iframe>
     <iframe id="right" class="pane" src="about:blank" allow="fullscreen"></iframe>
 
-    <div id="label-left"  class="label">Clip 1</div>
-    <div id="label-right" class="label">Clip 2</div>
+    <div id="label-left"  class="label"></div>
+    <div id="label-right" class="label"></div>
 
     <div id="divider">
         <div class="line"></div>
@@ -148,6 +148,13 @@
         }
         const passStr = passthrough.toString();
         const suffix = passStr ? ('&' + passStr) : '';
+
+        // Labels are configurable so this page can compare any two bundles,
+        // not just clip1 vs clip2. Defaults preserve the original behaviour.
+        document.getElementById('label-left').textContent  = params.get('left_label')  || 'Clip 1';
+        document.getElementById('label-right').textContent = params.get('right_label') || 'Clip 2';
+        const t = params.get('title');
+        if (t) document.title = t;
 
         const left  = document.getElementById('left');
         const right = document.getElementById('right');
