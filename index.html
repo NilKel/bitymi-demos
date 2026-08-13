@@ -933,6 +933,30 @@
                     <div class="meta"><span class="size">23 MB</span> · cinematic-anatomy · 35k Gauss · 23.13 dB · 3145 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Prostate (HiP-CT) — 3D_SH_res SV, iter 35k, 37,982 Gauss.
+                 Synthetic 200-view orbit rendered in the Siemens Cinematic
+                 path tracer (2704x1632, black bg), poses triangulated in
+                 COLMAP at 0.63 px reprojection error.
+                 HD ships the PLAIN shelf bake: 31.69 dB / 0.9532 / 0.0475 @
+                 3927 FPS on a 5090. The 3k atlas finetune was run and REJECTED
+                 for HD (+0.01 dB PSNR but -0.0039 SSIM / +0.0023 LPIPS, at both
+                 P99.9 and P99.99 requant clamps) — 64x64 rects are already at
+                 teacher Nyquist so there is no headroom, and the finetune's
+                 wider value range only costs quantization precision.
+                 The _lite bundle DOES ship the finetune (31.60 -> 31.74 dB,
+                 LPIPS 0.0495 -> 0.0468) because 32x32 rects are sub-Nyquist.
+                 typeD BC7-codebook atlas (149 MB BC7 -> 19.4 MB nat2) + BPLY. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/prostate_2k.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/prostate_2k_astc.bitymi"
+               data-bc7-mb="24" data-astc-mb="147"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/prostate_2k.bitymi">
+                <img class="thumb" src="static/thumbs/prostate.jpg" alt="Prostate HiP-CT · 3D_SH_res SV, typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate (HiP-CT)</div>
+                    <div class="meta"><span class="size">24 MB</span> · cinematic-anatomy · 38k Gauss · 31.69 dB · 3927 FPS (5090)</div>
+                </div>
+            </a>
             <!-- Split-slider: two synced viewer iframes side-by-side with a
                  draggable divider. Uses the halloumi_sync_pose / _camera_state
                  postMessage bridge added to the viewer 2026-07-28. Both heart
