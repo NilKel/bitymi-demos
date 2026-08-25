@@ -326,21 +326,32 @@
                     <div class="meta"><span class="size">80 MB</span> · typeD BC7-codebook + BPLY · 148,658 Gauss</div>
                 </div>
             </a>
-            <!-- Same bundle, new viewer (viewer-v2/). Renderer change vs
-                 viewer/: Gaussian-vs-beta split hoisted to a compile-time
-                 BETA_KERNEL pipeline constant so the fragment shader dead-
-                 strips the never-taken branch for the bake's kernel type.
-                 Sort down-precision was tried at both 16 and 24 bits and
-                 shimmered both times — the cull pass emits into the sort
-                 buffer via atomicAdd (non-deterministic workgroup race),
-                 so any coarser sort key produces ties that flip every
-                 frame. Kept the 4-pass 32-bit sort. -->
+            <!-- Same bundle as the card above, opened with ?legacy=1 so it BOOTS
+                 the pre-2026-08-25 renderer; the "Legacy renderer" checkbox in the
+                 panel flips to the current one live, on one canvas, same camera.
+                 What differs (verified offline against the actually-shipped July
+                 shaders, ≤4/255 on <0.05% of pixels — see
+                 Halloumi-WS/tools/offline_harness):
+                   legacy: 13 flat varyings, plain axis-aligned quad with no edge
+                     margin, f16 splat centres (1 px grid beyond x=1024 → every
+                     splat right/bottom of centre shifted up to 0.5 px),
+                     unguarded compute_aabb fallback.
+                   current: fetch-by-id (one flat u32 + a storage re-read),
+                     exact ¼-px centres quantised BEFORE the CONIC is derived,
+                     0.25 px + 0.1 % bound margin, garbage-rect guard.
+                 Sub-pixel differences: watch splat edges FAR from the canvas
+                 centre. Also ?byid=0 / ?oct=1 / ?acc16=1 for the finer knobs.
+                 The frozen 2026-07-21 build still lives at viewer-v2/ (it was the
+                 BETA_KERNEL-pipeline-constant A/B; that change is in viewer/ now).
+                 Sort down-precision was tried at 16 and 24 bits and shimmered both
+                 times — cull emits into the sort buffer via atomicAdd, so a coarser
+                 key produces ties that flip every frame. Kept the 4-pass 32-bit sort. -->
             <a class="demo" data-invariant="true"
-               href="viewer-v2/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_sh_res.bitymi">
-                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · 3D_SH_res via viewer-v2 (BETA_KERNEL split)" loading="lazy" style="filter: hue-rotate(45deg) saturate(1.1);">
+               href="viewer/index.html?legacy=1&bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_sh_res.bitymi">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · 3D_SH_res · live old-vs-new renderer A/B toggle" loading="lazy" style="filter: hue-rotate(45deg) saturate(1.1);">
                 <div class="text">
-                    <div class="title">⚡ Garden · viewer-v2 <span style="color:#a0f0a0;font-size:0.75em">· A/B</span></div>
-                    <div class="meta"><span class="size">80 MB</span> · same bundle · BETA_KERNEL pipeline-constant split</div>
+                    <div class="title">⚡ Garden · renderer A/B <span style="color:#a0f0a0;font-size:0.75em">· old ↔ new</span></div>
+                    <div class="meta"><span class="size">80 MB</span> · same bundle · boots the pre-08-25 renderer (<code>?legacy=1</code>) · tick <b>Legacy renderer</b> to flip live</div>
                 </div>
             </a>
             <!-- bicycle_octc — proberes with the CONTRACTED-metric probe sizing +
