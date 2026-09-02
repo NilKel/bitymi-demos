@@ -470,6 +470,24 @@
                     <div class="meta"><span class="size">105 MB</span> · 3D_SH_res + 2DGS distortion loss · 191,022 Gauss · typeD BC7-codebook + BPLY · no finetune · orbit below the ground to compare with the base bake</div>
                 </div>
             </a>
+            <!-- flowers_uncon — second under-floor diagnostic: the same 3D_SH_res
+                 FastGS recipe trained with --contraction false (unbounded hash clone
+                 diff_surfel_3D_sh_res_nobound: no voxel-AABB cull, signed cell coords,
+                 always-hash; 360_indoor.yaml so min_logres 8). Under-floor share of
+                 opacity-weighted surfel area 5.5% (243 surfels below -2, 12 below -5)
+                 vs 68% / 14.7k / 11.6k for the contracted base run, at the same mean
+                 test PSNR 20.43 (SSIM 0.531 vs 0.533, LPIPS 0.355 vs 0.343). Baked with
+                 the PyTorch replica of the clone's hash query (hash_encoder/nobound_query.py)
+                 since the stock encoder zeroes texels outside the range; baked PSNR 20.55.
+                 8192-wide atlas (BAKE_NO_AUTOGROW=1) so the NAT2 ships as one column. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_uncon.bitymi">
+                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers · 3D_SH_res without scene contraction (under-floor surfel diagnostic)" loading="lazy" style="filter: hue-rotate(-120deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">🧪 Flowers · no contraction <span style="color:#f0b060;font-size:0.75em">· under-floor diagnostic</span></div>
+                    <div class="meta"><span class="size">100 MB</span> · 3D_SH_res, <code>--contraction false</code> (unbounded hash) · 174,840 Gauss · typeD BC7-codebook + BPLY · no finetune · 5.5% under-floor area vs 68% contracted</div>
+                </div>
+            </a>
             <!-- garden_octc — proberes with the CONTRACTED-metric probe sizing +
                  a mip chain. Two changes vs garden_p32_oct:
                  (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
