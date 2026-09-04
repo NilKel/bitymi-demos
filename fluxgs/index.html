@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <title>Flux-GS WebGL · FPS benchmark</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="stylesheet" href="viewer.css" />
+    <style>
+        #bench-ui { position: fixed; top: 8px; left: 8px; z-index: 2000; font: 13px/1.35 system-ui, sans-serif; color: #eee; max-width: 92vw; }
+        #bench-ui .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 6px; }
+        #bench-ui select, #bench-ui button { font: inherit; padding: 8px 12px; border-radius: 8px; border: 1px solid #555; background: #1c1c1ccc; color: #eee; backdrop-filter: blur(4px); }
+        #bench-ui button.go { border-color: #f0b060; color: #f0b060; font-weight: 600; }
+        #bench-ui button:disabled { opacity: .5; }
+        #bench-out { white-space: pre-wrap; background: #000a; border: 1px solid #333; border-radius: 8px; padding: 8px 10px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; display: none; }
+        #bench-note { opacity: .7; font-size: 11px; max-width: 420px; }
+    </style>
+</head>
+<body>
+    <div id="bench-ui">
+        <div class="row">
+            <select id="scene-sel"></select>
+            <button id="bench-go" class="go">📊 Benchmark</button>
+            <button id="bench-copy" style="display:none">Copy JSON</button>
+        </div>
+        <div id="bench-out"></div>
+        <div id="bench-note">Flux-GS authors' WebGL renderer (first-order SH, CPU worker sort), their released weights. Benchmark = nest-splatting protocol: every timed frame teleports to the next camera of the scene's camera set, waits for the sort, draws once at the paper's eval resolution, and syncs GPU completion (no vsync). 10 warmup + 200 frames.</div>
+    </div>
+    <script>
+        (function () {
+            const SCENES = ["bicycle", "flowers", "garden", "stump", "treehill", "room", "counter", "kitchen", "bonsai", "train", "truck", "drjohnson", "playroom"];
+            const p = new URLSearchParams(location.search);
+            const scene = SCENES.includes(p.get("scene")) ? p.get("scene") : "garden";
+            window.FLUX_GS_CONFIG = {
+                scene,
+                defaultModel: scene + ".json",   // authors' released weights, HF mobile-gs2/mobile-gs2
+                camerasUrl: "cameras/" + scene + ".json",
+            };
+            const sel = document.getElementById("scene-sel");
+            for (const s of SCENES) { const o = document.createElement("option"); o.value = s; o.textContent = s; if (s === scene) o.selected = true; sel.appendChild(o); }
+            sel.addEventListener("change", () => { location.search = "?scene=" + sel.value; });
+            const go = document.getElementById("bench-go"), out = document.getElementById("bench-out"), cp = document.getElementById("bench-copy");
+            let last = null;
+            go.addEventListener("click", async () => {
+                if (!window.__fluxBench) { out.style.display = "block"; out.textContent = "viewer not ready"; return; }
+                go.disabled = true; out.style.display = "block"; cp.style.display = "none";
+                const r = await window.__fluxBench({ onProgress: (m) => { out.textContent = m; } });
+                go.disabled = false;
+                if (!r) { out.textContent = "model still loading — try again"; return; }
+                last = r;
+                out.textContent =
+                    `${r.scene} · ${r.gaussians.toLocaleString()} Gaussians · ${r.res} · ${r.frames} frames over ${r.cameras} cams\n` +
+                    `new-view FPS (sort + draw, = our protocol): ${r.fps_new_view.toFixed(1)}   (${r.frame_ms.toFixed(2)} ms/frame)\n` +
+                    `  sort (CPU worker): ${r.sort_ms.toFixed(2)} ms mean / ${r.sort_ms_median.toFixed(2)} median\n` +
+                    `  draw (GPU):        ${r.draw_ms.toFixed(2)} ms mean / ${r.draw_ms_median.toFixed(2)} median → ${r.fps_draw_only.toFixed(1)} FPS draw-only\n` +
+                    `${r.gpu}`;
+                cp.style.display = "";
+            });
+            cp.addEventListener("click", async () => { try { await navigator.clipboard.writeText(JSON.stringify(last)); cp.textContent = "Copied"; } catch { cp.textContent = "copy failed"; } });
+        })();
+    </script>
+    <script src="main.js"></script>
+</body>
+</html>
