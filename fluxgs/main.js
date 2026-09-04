@@ -1517,7 +1517,7 @@ async function main() {
 
 
         // Locate this in your main() function:
-    const tmc3Path = new URL("../tools/tmc3.js", window.location.href).href;
+    const tmc3Path = new URL("tools/tmc3.js", window.location.href).href;
 
     const worker = new Worker(
         URL.createObjectURL(
