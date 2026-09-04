@@ -309,51 +309,137 @@
             </a>
         </div>
 
-        <!-- 3D_SH_res paper checkpoint (garden). typeD BC7-codebook atlas
-             (K=65536, atlas_format=7) baked from
-             outputs/mip_360/garden/3D_SH_res/RD_SV_30thr_005w25gLP_N2f_frz5k10/. -->
-        <h2>🔬 Paper checkpoint <span style="color:#f0b060;font-size:0.75em">· 3D_SH_res</span></h2>
+        <!-- E3RD:BEGIN -->
+        <h2>🔬 Paper checkpoints <span style="color:#f0b060;font-size:0.75em">· BITYMI · extent-3 + RD atlas, finetuned</span></h2>
         <p style="opacity:0.75; margin:0 0 0.6em 0;">
-            The Garden 3D_SH_res bake used for the paper, packaged with typeD
-            (BC7-codebook) atlas + BPLY.
+            All 13 benchmark scenes in the configuration reported in the paper: baked over the beta kernel's
+            3σ support, texel budget set per surfel by the rate&ndash;distortion probe (~60 % of the atlas kept),
+            texture-finetuned against ground truth, packaged as typeD (BC7-codebook) atlas + BPLY.
         </p>
         <div class="grid">
-            <a class="demo" data-invariant="true"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_aftp.bitymi">
-                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · 3D_SH_res paper checkpoint, atlas-finetuned bake (typeD BC7-codebook)" loading="lazy">
+            <a class="demo" data-folder="mip_360" data-scene="garden_e3rd" data-hd-mb="55" data-true-mb="55" data-bc7-single="garden_e3rd.bitymi"
+               data-astc-hd="garden_e3rd_astc.bitymi" data-astc-lite="garden_e3rd_astc.bitymi" data-astc-classic="garden_e3rd_astc.bitymi" data-astc-mb="304"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · BITYMI e3rd" loading="lazy">
                 <div class="text">
-                    <div class="title">🔬 Garden · 3D_SH_res</div>
-                    <div class="meta"><span class="size">80 MB</span> · typeD BC7-codebook + BPLY · 148,658 Gauss · atlas-finetuned bake (PSNR 27.03 raw-BC7 ref)</div>
+                    <div class="title">Garden</div>
+                    <div class="meta"><span class="size">55 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
                 </div>
             </a>
-            <!-- Same bundle as the card above, opened with ?legacy=1 so it BOOTS
-                 the pre-2026-08-25 renderer; the "Legacy renderer" checkbox in the
-                 panel flips to the current one live, on one canvas, same camera.
-                 What differs (verified offline against the actually-shipped July
-                 shaders, ≤4/255 on <0.05% of pixels — see
-                 Halloumi-WS/tools/offline_harness):
-                   legacy: 13 flat varyings, plain axis-aligned quad with no edge
-                     margin, f16 splat centres (1 px grid beyond x=1024 → every
-                     splat right/bottom of centre shifted up to 0.5 px),
-                     unguarded compute_aabb fallback.
-                   current: fetch-by-id (one flat u32 + a storage re-read),
-                     exact ¼-px centres quantised BEFORE the CONIC is derived,
-                     0.25 px + 0.1 % bound margin, garbage-rect guard.
-                 Sub-pixel differences: watch splat edges FAR from the canvas
-                 centre. Also ?byid=0 / ?oct=1 / ?acc16=1 for the finer knobs.
-                 The frozen 2026-07-21 build still lives at viewer-v2/ (it was the
-                 BETA_KERNEL-pipeline-constant A/B; that change is in viewer/ now).
-                 Sort down-precision was tried at 16 and 24 bits and shimmered both
-                 times — cull emits into the sort buffer via atomicAdd, so a coarser
-                 key produces ties that flip every frame. Kept the 4-pass 32-bit sort. -->
-            <a class="demo" data-invariant="true"
-               href="viewer/index.html?legacy=1&bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_aftp.bitymi">
-                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · 3D_SH_res · live old-vs-new renderer A/B toggle" loading="lazy" style="filter: hue-rotate(45deg) saturate(1.1);">
+            <a class="demo" data-folder="mip_360" data-scene="bicycle_e3rd" data-hd-mb="63" data-true-mb="63" data-bc7-single="bicycle_e3rd.bitymi"
+               data-astc-hd="bicycle_e3rd_astc.bitymi" data-astc-lite="bicycle_e3rd_astc.bitymi" data-astc-classic="bicycle_e3rd_astc.bitymi" data-astc-mb="357"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle · BITYMI e3rd" loading="lazy">
                 <div class="text">
-                    <div class="title">⚡ Garden · renderer A/B <span style="color:#a0f0a0;font-size:0.75em">· old ↔ new</span></div>
-                    <div class="meta"><span class="size">80 MB</span> · same bundle as above · boots the pre-08-25 renderer (<code>?legacy=1</code>) · tick <b>Legacy renderer</b> to flip live</div>
+                    <div class="title">Bicycle</div>
+                    <div class="meta"><span class="size">63 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
                 </div>
             </a>
+            <a class="demo" data-folder="mip_360" data-scene="flowers_e3rd" data-hd-mb="67" data-true-mb="67" data-bc7-single="flowers_e3rd.bitymi"
+               data-astc-hd="flowers_e3rd_astc.bitymi" data-astc-lite="flowers_e3rd_astc.bitymi" data-astc-classic="flowers_e3rd_astc.bitymi" data-astc-mb="368"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers · BITYMI e3rd" loading="lazy">
+                <div class="text">
+                    <div class="title">Flowers</div>
+                    <div class="meta"><span class="size">67 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                </div>
+            </a>
+            <a class="demo" data-folder="mip_360" data-scene="stump_e3rd" data-hd-mb="37" data-true-mb="37" data-bc7-single="stump_e3rd.bitymi"
+               data-astc-hd="stump_e3rd_astc.bitymi" data-astc-lite="stump_e3rd_astc.bitymi" data-astc-classic="stump_e3rd_astc.bitymi" data-astc-mb="199"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/stump.jpg" alt="Stump · BITYMI e3rd" loading="lazy">
+                <div class="text">
+                    <div class="title">Stump</div>
+                    <div class="meta"><span class="size">37 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                </div>
+            </a>
+            <a class="demo" data-folder="mip_360" data-scene="treehill_e3rd" data-hd-mb="70" data-true-mb="70" data-bc7-single="treehill_e3rd.bitymi"
+               data-astc-hd="treehill_e3rd_astc.bitymi" data-astc-lite="treehill_e3rd_astc.bitymi" data-astc-classic="treehill_e3rd_astc.bitymi" data-astc-mb="403"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/treehill.jpg" alt="Treehill · BITYMI e3rd" loading="lazy">
+                <div class="text">
+                    <div class="title">Treehill</div>
+                    <div class="meta"><span class="size">70 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                </div>
+            </a>
+            <a class="demo" data-folder="mip_360" data-scene="room_e3rd" data-hd-mb="22" data-true-mb="22" data-bc7-single="room_e3rd.bitymi"
+               data-astc-hd="room_e3rd_astc.bitymi" data-astc-lite="room_e3rd_astc.bitymi" data-astc-classic="room_e3rd_astc.bitymi" data-astc-mb="108"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · BITYMI e3rd" loading="lazy">
+                <div class="text">
+                    <div class="title">Room</div>
+                    <div class="meta"><span class="size">22 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                </div>
+            </a>
+            <a class="demo" data-folder="mip_360" data-scene="counter_e3rd" data-hd-mb="21" data-true-mb="21" data-bc7-single="counter_e3rd.bitymi"
+               data-astc-hd="counter_e3rd_astc.bitymi" data-astc-lite="counter_e3rd_astc.bitymi" data-astc-classic="counter_e3rd_astc.bitymi" data-astc-mb="95"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/counter.jpg" alt="Counter · BITYMI e3rd" loading="lazy">
+                <div class="text">
+                    <div class="title">Counter</div>
+                    <div class="meta"><span class="size">21 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                </div>
+            </a>
+            <a class="demo" data-folder="mip_360" data-scene="kitchen_e3rd" data-hd-mb="27" data-true-mb="27" data-bc7-single="kitchen_e3rd.bitymi"
+               data-astc-hd="kitchen_e3rd_astc.bitymi" data-astc-lite="kitchen_e3rd_astc.bitymi" data-astc-classic="kitchen_e3rd_astc.bitymi" data-astc-mb="102"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/kitchen.jpg" alt="Kitchen · BITYMI e3rd" loading="lazy">
+                <div class="text">
+                    <div class="title">Kitchen</div>
+                    <div class="meta"><span class="size">27 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                </div>
+            </a>
+            <a class="demo" data-folder="mip_360" data-scene="bonsai_e3rd" data-hd-mb="26" data-true-mb="26" data-bc7-single="bonsai_e3rd.bitymi"
+               data-astc-hd="bonsai_e3rd_astc.bitymi" data-astc-lite="bonsai_e3rd_astc.bitymi" data-astc-classic="bonsai_e3rd_astc.bitymi" data-astc-mb="117"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/bonsai.jpg" alt="Bonsai · BITYMI e3rd" loading="lazy">
+                <div class="text">
+                    <div class="title">Bonsai</div>
+                    <div class="meta"><span class="size">26 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                </div>
+            </a>
+            <a class="demo" data-folder="tnt" data-scene="train_e3rd" data-hd-mb="31" data-true-mb="31" data-bc7-single="train_e3rd.bitymi"
+               data-astc-hd="train_e3rd_astc.bitymi" data-astc-lite="train_e3rd_astc.bitymi" data-astc-classic="train_e3rd_astc.bitymi" data-astc-mb="161"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/tnt/train_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/train.jpg" alt="Train · BITYMI e3rd" loading="lazy">
+                <div class="text">
+                    <div class="title">Train</div>
+                    <div class="meta"><span class="size">31 MB</span> · Tanks &amp; Temples · typeD BC7-codebook atlas + BPLY</div>
+                </div>
+            </a>
+            <a class="demo" data-folder="tnt" data-scene="truck_e3rd" data-hd-mb="31" data-true-mb="31" data-bc7-single="truck_e3rd.bitymi"
+               data-astc-hd="truck_e3rd_astc.bitymi" data-astc-lite="truck_e3rd_astc.bitymi" data-astc-classic="truck_e3rd_astc.bitymi" data-astc-mb="163"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/tnt/truck_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/truck.jpg" alt="Truck · BITYMI e3rd" loading="lazy">
+                <div class="text">
+                    <div class="title">Truck</div>
+                    <div class="meta"><span class="size">31 MB</span> · Tanks &amp; Temples · typeD BC7-codebook atlas + BPLY</div>
+                </div>
+            </a>
+            <a class="demo" data-folder="db" data-scene="drjohnson_e3rd" data-hd-mb="24" data-true-mb="24" data-bc7-single="drjohnson_e3rd.bitymi"
+               data-astc-hd="drjohnson_e3rd_astc.bitymi" data-astc-lite="drjohnson_e3rd_astc.bitymi" data-astc-classic="drjohnson_e3rd_astc.bitymi" data-astc-mb="126"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/db/drjohnson_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/drjohnson.jpg" alt="Dr Johnson · BITYMI e3rd" loading="lazy">
+                <div class="text">
+                    <div class="title">Dr Johnson</div>
+                    <div class="meta"><span class="size">24 MB</span> · Deep Blending · typeD BC7-codebook atlas + BPLY</div>
+                </div>
+            </a>
+            <a class="demo" data-folder="db" data-scene="playroom_e3rd" data-hd-mb="23" data-true-mb="23" data-bc7-single="playroom_e3rd.bitymi"
+               data-astc-hd="playroom_e3rd_astc.bitymi" data-astc-lite="playroom_e3rd_astc.bitymi" data-astc-classic="playroom_e3rd_astc.bitymi" data-astc-mb="116"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/db/playroom_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/playroom.jpg" alt="Playroom · BITYMI e3rd" loading="lazy">
+                <div class="text">
+                    <div class="title">Playroom</div>
+                    <div class="meta"><span class="size">23 MB</span> · Deep Blending · typeD BC7-codebook atlas + BPLY</div>
+                </div>
+            </a>
+        </div>
+        <details class="folder">
+        <summary><span class="chev">▸</span><span class="fname">experimental · proberes</span><span class="fcount">11 scenes</span></summary>
+        <p style="opacity:0.7; margin:0.4em 1em 0.6em 1em;">Learned-probe texturing (shared probe texture + per-surfel affine), kept for reference. Not the paper configuration.</p>
+        <div class="grid">
+
             <!-- bicycle_octc — proberes with the CONTRACTED-metric probe sizing +
                  a mip chain. Two changes vs bicycle_p32_oct:
                  (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
@@ -379,6 +465,7 @@
                     <div class="meta"><span class="size">106 MB</span> · contracted-metric probes + 12-level mips · PSNR 24.02 · LPIPS 0.2365 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
                 </div>
             </a>
+
             <!-- bonsai_octc — proberes with the CONTRACTED-metric probe sizing +
                  a mip chain. Two changes vs bonsai_p32_oct:
                  (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
@@ -404,6 +491,7 @@
                     <div class="meta"><span class="size">97 MB</span> · contracted-metric probes + 12-level mips · PSNR 32.10 · LPIPS 0.1727 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
                 </div>
             </a>
+
             <!-- counter_octc — proberes with the CONTRACTED-metric probe sizing +
                  a mip chain. Two changes vs counter_p32_oct:
                  (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
@@ -429,6 +517,7 @@
                     <div class="meta"><span class="size">94 MB</span> · contracted-metric probes + 12-level mips · PSNR 28.96 · LPIPS 0.1984 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
                 </div>
             </a>
+
             <!-- flowers_octc — proberes with the CONTRACTED-metric probe sizing +
                  a mip chain. Two changes vs flowers_p32_oct:
                  (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
@@ -454,57 +543,7 @@
                     <div class="meta"><span class="size">109 MB</span> · contracted-metric probes + 12-level mips · PSNR 20.48 · LPIPS 0.3265 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
                 </div>
             </a>
-            <!-- flowers_dist100 — diagnostic bake for the "giant surfels below the
-                 floor" artifact. Same 3D_SH_res FastGS recipe as the paper flowers
-                 run plus --random_background --lambda_dist 100 (2DGS depth-distortion
-                 loss from iter 3k). Without it 68% of opacity-weighted surfel area
-                 sits below the ground plane (11.6k surfels >5 units under the floor,
-                 none in the COLMAP init); with it 7% / 173. Mean test PSNR 20.41 vs
-                 20.43 for the base run, LPIPS 0.358 vs 0.343. Plain HD BC7 bake
-                 (max_res 64, typeD codebook), no atlas finetune. Baked PSNR 20.55. -->
-            <a class="demo" data-invariant="true"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_dist100.bitymi">
-                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers · 3D_SH_res + depth-distortion loss (under-floor surfel diagnostic)" loading="lazy" style="filter: hue-rotate(120deg) saturate(1.1);">
-                <div class="text">
-                    <div class="title">🧪 Flowers · λ_dist=100 <span style="color:#f0b060;font-size:0.75em">· under-floor diagnostic</span></div>
-                    <div class="meta"><span class="size">105 MB</span> · 3D_SH_res + 2DGS distortion loss · 191,022 Gauss · typeD BC7-codebook + BPLY · no finetune · orbit below the ground to compare with the base bake</div>
-                </div>
-            </a>
-            <!-- flowers_uncon — second under-floor diagnostic: the same 3D_SH_res
-                 FastGS recipe trained with --contraction false (unbounded hash clone
-                 diff_surfel_3D_sh_res_nobound: no voxel-AABB cull, signed cell coords,
-                 always-hash; 360_indoor.yaml so min_logres 8). Under-floor share of
-                 opacity-weighted surfel area 5.5% (243 surfels below -2, 12 below -5)
-                 vs 68% / 14.7k / 11.6k for the contracted base run, at the same mean
-                 test PSNR 20.43 (SSIM 0.531 vs 0.533, LPIPS 0.355 vs 0.343). Baked with
-                 the PyTorch replica of the clone's hash query (hash_encoder/nobound_query.py)
-                 since the stock encoder zeroes texels outside the range; baked PSNR 20.55.
-                 8192-wide atlas (BAKE_NO_AUTOGROW=1) so the NAT2 ships as one column. -->
-            <a class="demo" data-invariant="true"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_uncon.bitymi">
-                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers · 3D_SH_res without scene contraction (under-floor surfel diagnostic)" loading="lazy" style="filter: hue-rotate(-120deg) saturate(1.1);">
-                <div class="text">
-                    <div class="title">🧪 Flowers · no contraction <span style="color:#f0b060;font-size:0.75em">· under-floor diagnostic</span></div>
-                    <div class="meta"><span class="size">100 MB</span> · 3D_SH_res, <code>--contraction false</code> (unbounded hash) · 174,840 Gauss · typeD BC7-codebook + BPLY · no finetune · 5.5% under-floor area vs 68% contracted</div>
-                </div>
-            </a>
-            <!-- flowers_det — third under-floor diagnostic: contracted (360_indoor.yaml)
-                 3D_SH_res FastGS recipe + --detach_hash_grad (hash contributes NO positional
-                 gradient: dL_dxyz zeroed at all 6 sites of the 3D_SH_res backward). Result:
-                 densification collapses (79,768 Gauss vs 175k-185k; the hash term is ~99% of
-                 the densify proxy), PSNR 19.94 (-0.5 dB), and the under-floor mass is NOT
-                 fixed: only 803 surfels below -2 / 542 below -5, but they are giant
-                 (s99.9 = 9.5) and still carry 67% of opacity-weighted area. So it is the
-                 contraction (uncon: 5.5%), not the hash's pull on positions. Bake at 8192
-                 width, validated by the Vulkan renderer at 20.11 dB / 2713 FPS. -->
-            <a class="demo" data-invariant="true"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_det.bitymi">
-                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers · 3D_SH_res contracted with detached hash positional gradients (under-floor surfel diagnostic)" loading="lazy" style="filter: hue-rotate(60deg) saturate(1.1);">
-                <div class="text">
-                    <div class="title">🧪 Flowers · detached hash grads <span style="color:#f0b060;font-size:0.75em">· under-floor diagnostic</span></div>
-                    <div class="meta"><span class="size">46 MB</span> · 3D_SH_res contracted + <code>--detach_hash_grad</code> · 79,624 Gauss · PSNR 19.94 · typeD BC7-codebook + BPLY · no finetune · fewer but giant under-floor billboards (67% of area)</div>
-                </div>
-            </a>
+
             <!-- garden_octc — proberes with the CONTRACTED-metric probe sizing +
                  a mip chain. Two changes vs garden_p32_oct:
                  (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
@@ -530,6 +569,7 @@
                     <div class="meta"><span class="size">105 MB</span> · contracted-metric probes + 12-level mips · PSNR 26.46 · LPIPS 0.1375 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
                 </div>
             </a>
+
             <!-- kitchen_octc — proberes with the CONTRACTED-metric probe sizing +
                  a mip chain. Two changes vs kitchen_p32_oct:
                  (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
@@ -555,6 +595,7 @@
                     <div class="meta"><span class="size">101 MB</span> · contracted-metric probes + 12-level mips · PSNR 30.62 · LPIPS 0.1465 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
                 </div>
             </a>
+
             <!-- room_octc — proberes with the CONTRACTED-metric probe sizing +
                  a mip chain. Two changes vs room_p32_oct:
                  (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
@@ -580,6 +621,7 @@
                     <div class="meta"><span class="size">94 MB</span> · contracted-metric probes + 12-level mips · PSNR 31.24 · LPIPS 0.1918 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
                 </div>
             </a>
+
             <!-- stump_octc — proberes with the CONTRACTED-metric probe sizing +
                  a mip chain. Two changes vs stump_p32_oct:
                  (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
@@ -605,6 +647,7 @@
                     <div class="meta"><span class="size">98 MB</span> · contracted-metric probes + 12-level mips · PSNR 25.59 · LPIPS 0.2580 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
                 </div>
             </a>
+
             <!-- treehill_octc — proberes with the CONTRACTED-metric probe sizing +
                  a mip chain. Two changes vs treehill_p32_oct:
                  (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
@@ -630,6 +673,7 @@
                     <div class="meta"><span class="size">108 MB</span> · contracted-metric probes + 12-level mips · PSNR 22.30 · LPIPS 0.2935 · trilinear toggle (<code>?mip=0</code> to A/B)</div>
                 </div>
             </a>
+
             <!-- room_p32_oct — proberes. Replaces the baked pipeline's per-surfel
                  atlas rects with ONE shared 8192x8192 texture plus a per-surfel
                  general 2x2 affine ("probe"): tx = A00*s.x + A01*s.y + t0.
@@ -647,29 +691,7 @@
                     <div class="meta"><span class="size">72 MB</span> · shared 8192² BC7 texture + 63k per-surfel affines · one HW fetch/fragment · A/B against <em>Room · packed</em></div>
                 </div>
             </a>
-            <!-- room_packed — the shelf-packed baked atlas A/B partner for
-                 room_p32_oct. SAME source checkpoint
-                 (3D_SH_res/RD_SV_30thr_005w25gLP_N2f_frz5k10) — the proberes run
-                 was seeded from it via --init_ply — so geometry and SV are
-                 identical and the only variable is the residual
-                 parameterisation: per-surfel rects shelf-packed into a
-                 4096×48576 6-layer atlas vs one shared 8192² texture with a
-                 per-surfel affine.
-                 typeD codebook (K=65536, atlas-PSNR 39.07 dB), 62,947 rects.
-                 Baked reference: 30.73 dB / 0.9049 / 0.2341 @ 1105 FPS (5090)
-                 vs neural 30.62 dB @ 134 FPS.
-                 Atlas toggle at page top swaps BC7 ↔ typeD-ASTC. -->
-            <a class="demo" data-invariant="true"
-               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_packed.bitymi"
-               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_packed_astc.bitymi"
-               data-bc7-mb="32" data-astc-mb="32"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_packed.bitymi">
-                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · shelf-packed baked atlas (typeD BC7/ASTC)" loading="lazy">
-                <div class="text">
-                    <div class="title">📦 Room · packed <span style="color:#a0f0a0;font-size:0.75em">· shelf-packed bake</span></div>
-                    <div class="meta"><span class="size">32 MB</span> · 4096×48576 shelf-packed atlas, 6 layers, typeD codebook · 30.73 dB @ 1105 FPS · same checkpoint as <em>Room · proberes</em></div>
-                </div>
-            </a>
+
             <!-- bicycle_p32_oct — proberes on an outdoor scene. Same recipe as
                  room_p32_oct (shared 8192² texture, --probe_tex_res 8192,
                  seeded from 3D_SH_res/RD_SV_30thr_005w25gLP_N2f_frz5k10 via
@@ -688,7 +710,126 @@
                 </div>
             </a>
         </div>
+        </details>
+        <!-- E3RD:HIDDEN cards (diagnostics, legacy A/B, older bakes) — kept for the record, not rendered:
 
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_aftp.bitymi">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · 3D_SH_res paper checkpoint, atlas-finetuned bake (typeD BC7-codebook)" loading="lazy">
+                <div class="text">
+                    <div class="title">🔬 Garden · 3D_SH_res</div>
+                    <div class="meta"><span class="size">80 MB</span> · typeD BC7-codebook + BPLY · 148,658 Gauss · atlas-finetuned bake (PSNR 27.03 raw-BC7 ref)</div>
+                </div>
+            </a>
+
+            <!~~ Same bundle as the card above, opened with ?legacy=1 so it BOOTS
+                 the pre-2026-08-25 renderer; the "Legacy renderer" checkbox in the
+                 panel flips to the current one live, on one canvas, same camera.
+                 What differs (verified offline against the actually-shipped July
+                 shaders, ≤4/255 on <0.05% of pixels — see
+                 Halloumi-WS/tools/offline_harness):
+                   legacy: 13 flat varyings, plain axis-aligned quad with no edge
+                     margin, f16 splat centres (1 px grid beyond x=1024 → every
+                     splat right/bottom of centre shifted up to 0.5 px),
+                     unguarded compute_aabb fallback.
+                   current: fetch-by-id (one flat u32 + a storage re-read),
+                     exact ¼-px centres quantised BEFORE the CONIC is derived,
+                     0.25 px + 0.1 % bound margin, garbage-rect guard.
+                 Sub-pixel differences: watch splat edges FAR from the canvas
+                 centre. Also ?byid=0 / ?oct=1 / ?acc16=1 for the finer knobs.
+                 The frozen 2026-07-21 build still lives at viewer-v2/ (it was the
+                 BETA_KERNEL-pipeline-constant A/B; that change is in viewer/ now).
+                 Sort down-precision was tried at 16 and 24 bits and shimmered both
+                 times — cull emits into the sort buffer via atomicAdd, so a coarser
+                 key produces ties that flip every frame. Kept the 4-pass 32-bit sort. ~~>
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?legacy=1&bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_aftp.bitymi">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · 3D_SH_res · live old-vs-new renderer A/B toggle" loading="lazy" style="filter: hue-rotate(45deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">⚡ Garden · renderer A/B <span style="color:#a0f0a0;font-size:0.75em">· old ↔ new</span></div>
+                    <div class="meta"><span class="size">80 MB</span> · same bundle as above · boots the pre-08-25 renderer (<code>?legacy=1</code>) · tick <b>Legacy renderer</b> to flip live</div>
+                </div>
+            </a>
+
+            <!~~ flowers_dist100 — diagnostic bake for the "giant surfels below the
+                 floor" artifact. Same 3D_SH_res FastGS recipe as the paper flowers
+                 run plus --random_background --lambda_dist 100 (2DGS depth-distortion
+                 loss from iter 3k). Without it 68% of opacity-weighted surfel area
+                 sits below the ground plane (11.6k surfels >5 units under the floor,
+                 none in the COLMAP init); with it 7% / 173. Mean test PSNR 20.41 vs
+                 20.43 for the base run, LPIPS 0.358 vs 0.343. Plain HD BC7 bake
+                 (max_res 64, typeD codebook), no atlas finetune. Baked PSNR 20.55. ~~>
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_dist100.bitymi">
+                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers · 3D_SH_res + depth-distortion loss (under-floor surfel diagnostic)" loading="lazy" style="filter: hue-rotate(120deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">🧪 Flowers · λ_dist=100 <span style="color:#f0b060;font-size:0.75em">· under-floor diagnostic</span></div>
+                    <div class="meta"><span class="size">105 MB</span> · 3D_SH_res + 2DGS distortion loss · 191,022 Gauss · typeD BC7-codebook + BPLY · no finetune · orbit below the ground to compare with the base bake</div>
+                </div>
+            </a>
+
+            <!~~ flowers_uncon — second under-floor diagnostic: the same 3D_SH_res
+                 FastGS recipe trained with --contraction false (unbounded hash clone
+                 diff_surfel_3D_sh_res_nobound: no voxel-AABB cull, signed cell coords,
+                 always-hash; 360_indoor.yaml so min_logres 8). Under-floor share of
+                 opacity-weighted surfel area 5.5% (243 surfels below -2, 12 below -5)
+                 vs 68% / 14.7k / 11.6k for the contracted base run, at the same mean
+                 test PSNR 20.43 (SSIM 0.531 vs 0.533, LPIPS 0.355 vs 0.343). Baked with
+                 the PyTorch replica of the clone's hash query (hash_encoder/nobound_query.py)
+                 since the stock encoder zeroes texels outside the range; baked PSNR 20.55.
+                 8192-wide atlas (BAKE_NO_AUTOGROW=1) so the NAT2 ships as one column. ~~>
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_uncon.bitymi">
+                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers · 3D_SH_res without scene contraction (under-floor surfel diagnostic)" loading="lazy" style="filter: hue-rotate(-120deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">🧪 Flowers · no contraction <span style="color:#f0b060;font-size:0.75em">· under-floor diagnostic</span></div>
+                    <div class="meta"><span class="size">100 MB</span> · 3D_SH_res, <code>--contraction false</code> (unbounded hash) · 174,840 Gauss · typeD BC7-codebook + BPLY · no finetune · 5.5% under-floor area vs 68% contracted</div>
+                </div>
+            </a>
+
+            <!~~ flowers_det — third under-floor diagnostic: contracted (360_indoor.yaml)
+                 3D_SH_res FastGS recipe + --detach_hash_grad (hash contributes NO positional
+                 gradient: dL_dxyz zeroed at all 6 sites of the 3D_SH_res backward). Result:
+                 densification collapses (79,768 Gauss vs 175k-185k; the hash term is ~99% of
+                 the densify proxy), PSNR 19.94 (-0.5 dB), and the under-floor mass is NOT
+                 fixed: only 803 surfels below -2 / 542 below -5, but they are giant
+                 (s99.9 = 9.5) and still carry 67% of opacity-weighted area. So it is the
+                 contraction (uncon: 5.5%), not the hash's pull on positions. Bake at 8192
+                 width, validated by the Vulkan renderer at 20.11 dB / 2713 FPS. ~~>
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_det.bitymi">
+                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers · 3D_SH_res contracted with detached hash positional gradients (under-floor surfel diagnostic)" loading="lazy" style="filter: hue-rotate(60deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">🧪 Flowers · detached hash grads <span style="color:#f0b060;font-size:0.75em">· under-floor diagnostic</span></div>
+                    <div class="meta"><span class="size">46 MB</span> · 3D_SH_res contracted + <code>--detach_hash_grad</code> · 79,624 Gauss · PSNR 19.94 · typeD BC7-codebook + BPLY · no finetune · fewer but giant under-floor billboards (67% of area)</div>
+                </div>
+            </a>
+
+            <!~~ room_packed — the shelf-packed baked atlas A/B partner for
+                 room_p32_oct. SAME source checkpoint
+                 (3D_SH_res/RD_SV_30thr_005w25gLP_N2f_frz5k10) — the proberes run
+                 was seeded from it via --init_ply — so geometry and SV are
+                 identical and the only variable is the residual
+                 parameterisation: per-surfel rects shelf-packed into a
+                 4096×48576 6-layer atlas vs one shared 8192² texture with a
+                 per-surfel affine.
+                 typeD codebook (K=65536, atlas-PSNR 39.07 dB), 62,947 rects.
+                 Baked reference: 30.73 dB / 0.9049 / 0.2341 @ 1105 FPS (5090)
+                 vs neural 30.62 dB @ 134 FPS.
+                 Atlas toggle at page top swaps BC7 ↔ typeD-ASTC. ~~>
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_packed.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_packed_astc.bitymi"
+               data-bc7-mb="32" data-astc-mb="32"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_packed.bitymi">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · shelf-packed baked atlas (typeD BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">📦 Room · packed <span style="color:#a0f0a0;font-size:0.75em">· shelf-packed bake</span></div>
+                    <div class="meta"><span class="size">32 MB</span> · 4096×48576 shelf-packed atlas, 6 layers, typeD codebook · 30.73 dB @ 1105 FPS · same checkpoint as <em>Room · proberes</em></div>
+                </div>
+            </a>
+        E3RD:HIDDEN-END -->
+        <!-- E3RD:END -->
         <details class="folder" open>
         <summary><span class="chev">▸</span><span class="fname">medical</span><span class="fcount">11 scenes</span></summary>
 
@@ -937,6 +1078,7 @@
                     if (quality === 'classic-ws') return card.dataset.astcClassic;
                     return quality === 'lite-ws' ? card.dataset.astcLite : card.dataset.astcHd;
                 }
+                if (card.dataset.bc7Single) return card.dataset.bc7Single; // single-tier bundles (e3rd)
                 return null; // SV+BC7 uses the default <scene>{_lite|_classic|}.bitymi convention.
             }
 
