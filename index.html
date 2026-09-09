@@ -712,7 +712,7 @@
         </div>
         </details>
         <details class="folder">
-        <summary><span class="chev">▸</span><span class="fname">experimental · regs</span><span class="fcount">2 scenes</span></summary>
+        <summary><span class="chev">▸</span><span class="fname">experimental · regs</span><span class="fcount">3 scenes</span></summary>
         <p style="opacity:0.7; margin:0.4em 1em 0.6em 1em;">Geometry-regularizer experiments on top of the paper configuration. Not the paper configuration.</p>
         <div class="grid">
             <!-- room_normal0p01 — production recipe + static 2DGS normal-consistency loss λ=0.01
@@ -721,6 +721,23 @@
                  3x lower than production (0.145 vs 0.418) at equal quality (31.59 dB / LPIPS 0.1892 vs
                  31.56 / 0.1891, 62.7k surfels, 3210 HW FPS). λ≥0.05 collapses the scene (16–20 dB),
                  and neither GT- nor SV-gradient gating rescues it. -->
+            <!-- bicycle_normalbal0p05g2500 — production recipe + ERROR-BALANCED normal consistency
+                 (--w_normal 0.05 --w_normal_gamma 2500: loss = lambda * mean(w*err), w = exp(-gamma*MSE_pix)),
+                 RD_SV_bicycle_wn0p05g2500 -> shelf bake max_res 64 -> 3k texture finetune; atlas repacked to
+                 8192 wide for NAT2. Bicycle normal sweep 2026-09-09: 24.48 dB / 0.7225 / LPIPS 0.2346 @ 1341 SW
+                 / 2782 HW, 163.1k surfels — best SSIM and LPIPS of the sweep, vs static 0.01 (24.51 / 0.7204 /
+                 0.2356 @ 2851 HW) and production with no normal loss (24.44 / 0.7137 / 0.2383 @ 2956 HW).
+                 The gate's mean weight on bicycle is 0.281, so this is an effective strength of 0.0141 — 1.4x
+                 the static 0.01 card; matched-strength control (static 0.014) is queued. -->
+            <a class="demo" data-folder="regs" data-scene="bicycle_normalbal0p05g2500" data-hd-mb="88" data-true-mb="88" data-bc7-single="bicycle_normalbal0p05g2500.bitymi"
+               data-astc-hd="bicycle_normalbal0p05g2500_astc.bitymi" data-astc-lite="bicycle_normalbal0p05g2500_astc.bitymi" data-astc-classic="bicycle_normalbal0p05g2500_astc.bitymi" data-astc-mb="556"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/regs/bicycle_normalbal0p05g2500.bitymi">
+                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle · error-balanced normal consistency" loading="lazy">
+                <div class="text">
+                    <div class="title">Bicycle · normal consistency, error-balanced 0.05 / γ2500</div>
+                    <div class="meta"><span class="size">88 MB</span> · Mip-NeRF 360 · production recipe + error-weighted normal loss · 24.48 dB / SSIM 0.7225 / LPIPS 0.2346 · shelf bake, finetuned · typeD BC7-codebook atlas + BPLY</div>
+                </div>
+            </a>
             <!-- bicycle_normal0p01 — production recipe + static 2DGS normal-consistency loss λ=0.01
                  (RD_SV_bicycle_ln0p01 → shelf bake max_res 64 → 3k texture finetune = RD_SV_bicycle_ln0p01_aftp;
                  atlas repacked to 8192 wide for NAT2). Outdoor robustness check of the room result, 2026-09-09:
