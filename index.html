@@ -712,7 +712,7 @@
         </div>
         </details>
         <details class="folder">
-        <summary><span class="chev">▸</span><span class="fname">experimental · regs</span><span class="fcount">1 scene</span></summary>
+        <summary><span class="chev">▸</span><span class="fname">experimental · regs</span><span class="fcount">2 scenes</span></summary>
         <p style="opacity:0.7; margin:0.4em 1em 0.6em 1em;">Geometry-regularizer experiments on top of the paper configuration. Not the paper configuration.</p>
         <div class="grid">
             <!-- room_normal0p01 — production recipe + static 2DGS normal-consistency loss λ=0.01
@@ -721,6 +721,21 @@
                  3x lower than production (0.145 vs 0.418) at equal quality (31.59 dB / LPIPS 0.1892 vs
                  31.56 / 0.1891, 62.7k surfels, 3210 HW FPS). λ≥0.05 collapses the scene (16–20 dB),
                  and neither GT- nor SV-gradient gating rescues it. -->
+            <!-- bicycle_normal0p01 — production recipe + static 2DGS normal-consistency loss λ=0.01
+                 (RD_SV_bicycle_ln0p01 → shelf bake max_res 64 → 3k texture finetune = RD_SV_bicycle_ln0p01_aftp;
+                 atlas repacked to 8192 wide for NAT2). Outdoor robustness check of the room result, 2026-09-09:
+                 24.51 dB / 0.7204 / LPIPS 0.2356 @ 1373 SW / 2851 HW FPS, 161.7k surfels — vs production
+                 shelf finetune 24.44 / 0.7137 / 0.2383 @ 1460 SW / 2814 HW, 160.8k. Compare against the
+                 Bicycle card in the paper section (extent-3 + RD bake, 63 MB) for the unregularized model. -->
+            <a class="demo" data-folder="regs" data-scene="bicycle_normal0p01" data-hd-mb="88" data-true-mb="88" data-bc7-single="bicycle_normal0p01.bitymi"
+               data-astc-hd="bicycle_normal0p01_astc.bitymi" data-astc-lite="bicycle_normal0p01_astc.bitymi" data-astc-classic="bicycle_normal0p01_astc.bitymi" data-astc-mb="556"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/regs/bicycle_normal0p01.bitymi">
+                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle · normal consistency 0.01" loading="lazy">
+                <div class="text">
+                    <div class="title">Bicycle · normal consistency λ=0.01</div>
+                    <div class="meta"><span class="size">88 MB</span> · Mip-NeRF 360 · production recipe + static 2DGS normal loss 0.01 · 24.51 dB / LPIPS 0.236 · shelf bake, finetuned · typeD BC7-codebook atlas + BPLY</div>
+                </div>
+            </a>
             <a class="demo" data-folder="regs" data-scene="room_normal0p01" data-hd-mb="33" data-true-mb="33" data-bc7-single="room_normal0p01.bitymi"
                data-astc-hd="room_normal0p01_astc.bitymi" data-astc-lite="room_normal0p01_astc.bitymi" data-astc-classic="room_normal0p01_astc.bitymi" data-astc-mb="198"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/regs/room_normal0p01.bitymi">
