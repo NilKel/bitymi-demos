@@ -1035,7 +1035,7 @@
         </details>
 
         <details class="folder" open>
-        <summary><span class="chev">▸</span><span class="fname">personal</span><span class="fcount">4 scenes</span></summary>
+        <summary><span class="chev">▸</span><span class="fname">personal</span><span class="fcount">5 scenes</span></summary>
         <div class="grid">
             <a class="demo" data-invariant="true"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/jhabbu.bitymi">
@@ -1060,6 +1060,25 @@
                 <div class="text">
                     <div class="title">Felix</div>
                     <div class="meta"><span class="size">63 MB</span> · 122k Gauss · 25.94 dB · 353 FPS baked (5090)</div>
+                </div>
+            </a>
+            <!-- Felix_re — the Felix capture retrained with static normal-consistency
+                 regularization (--lambda_normal 0.01) on top of the original recipe
+                 (beta_scaled, hybrid_levels=2, ppisp, --lowpass, 35k), then the e3rd atlas
+                 pipeline: extent-3 bake -> finetune -> RD probe -> per-surfel resolution
+                 allocation -> extent-3+RD bake -> finetune (aftp_e3rd_ln0p01). 117k Gauss,
+                 typeD BC7-codebook atlas 4096x20928 (25.5 MB bundle; ASTC 96 MB, no codebook).
+                 Held-out (41 views): finetuned 27.40 dB / 0.920 SSIM / 0.187 LPIPS;
+                 neural teacher 25.95 dB. CUDA CONIC baked 845 FPS (5090, same session). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/felix_re.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/felix_re_astc.bitymi"
+               data-bc7-mb="26" data-astc-mb="96"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/felix_re.bitymi">
+                <img class="thumb" src="static/thumbs/felix_re.jpg" alt="Felix_re · normal-consistency reg + e3rd atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Felix_re</div>
+                    <div class="meta"><span class="size">26 MB</span> · 117k Gauss · 27.40 dB · normal reg 0.01 + e3rd atlas · 845 FPS CUDA-baked (5090)</div>
                 </div>
             </a>
             <a class="demo" data-invariant="true"
