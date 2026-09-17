@@ -22,7 +22,7 @@
       #bench-panel details { margin: 4px 0; }
       #bench-panel label { white-space: nowrap; }
     </style>
-    <script type="module" crossorigin src="./assets/bench-5af90fa8.js"></script>
+    <script type="module" crossorigin src="./assets/bench-11458104.js"></script>
     <link rel="stylesheet" href="./assets/bench-d92546d3.css">
   </head>
   <body>
@@ -48,6 +48,11 @@
           <label>cooldown <input id="cooldown" type="number" value="30" min="0"> s</label>
           <label>rounds <input id="rounds" type="number" value="2" min="1"></label>
           <label><input id="frozen" type="checkbox" checked> Mobile-GS frozen-MLP ablation</label>
+        </div>
+        <div class="row">
+          <label><input id="byid" type="checkbox"> BITYMI fetch-by-id</label>
+          <label><input id="legacy" type="checkbox"> BITYMI legacy renderer</label>
+          <label><input id="diag" type="checkbox"> BITYMI diagnostics (atlas off, octagon bound)</label>
         </div>
         <div class="muted">Offscreen at the eval resolution and training FOV, cycling the 24 test views. Rounds alternate order (A→D, D→A) so heat build-up does not favour one method. Keep the phone plugged in, screen on, other apps closed.</div>
       </details>
