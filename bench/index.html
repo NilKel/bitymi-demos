@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <title>Splat Mobile Bench</title>
+    <style>
+      #bench-panel { position: fixed; top: 8px; left: 8px; z-index: 10; max-width: min(560px, calc(100vw - 32px));
+        max-height: calc(100vh - 32px); overflow: auto; background: rgba(12, 14, 20, 0.88); color: #e8e8e8;
+        font: 13px/1.4 ui-sans-serif, system-ui, sans-serif; padding: 10px 12px; border-radius: 8px; }
+      #bench-panel h1 { font-size: 15px; margin: 0 0 6px; }
+      #bench-panel .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0; }
+      #bench-panel button, #bench-panel select, #bench-panel input { font: inherit; background: #242834; color: #eee;
+        border: 1px solid #444a58; border-radius: 5px; padding: 4px 8px; }
+      #bench-panel input[type=number] { width: 4.5em; }
+      #benchall { background: #2d5bd7 !important; border-color: #2d5bd7 !important; font-weight: 600; }
+      #bench-panel .muted { color: #9aa0ab; font-size: 12px; }
+      #bench-panel table { border-collapse: collapse; margin-top: 6px; font-variant-numeric: tabular-nums; }
+      #bench-panel td, #bench-panel th { padding: 2px 6px; border-bottom: 1px solid #333; text-align: right; }
+      #bench-panel td:first-child, #bench-panel th:first-child { text-align: left; }
+      #bench-panel details { margin: 4px 0; }
+      #bench-panel label { white-space: nowrap; }
+    </style>
+    <script type="module" crossorigin src="./assets/bench-b74ba385.js"></script>
+    <link rel="stylesheet" href="./assets/bench-d92546d3.css">
+  </head>
+  <body>
+    <div id="bench-panel" style="display:none">
+      <h1>Garden · mobile render benchmark</h1>
+      <div class="muted" id="device"></div>
+      <div class="row">
+        <select id="method"></select>
+        <button id="prev">◀</button><span id="view">1/24</span><button id="next">▶</button>
+        <span class="muted" id="live"></span>
+      </div>
+      <div class="muted" id="info"></div>
+      <div class="row"><button id="benchall">📊 Bench all methods</button><span id="status" class="muted">loading…</span></div>
+      <details>
+        <summary>Protocol</summary>
+        <div class="row">
+          <label>warmup <input id="warmup" type="number" value="8" min="0"> s</label>
+          <label>measure <input id="measure" type="number" value="15" min="1"> s</label>
+          <label>min frames <input id="minframes" type="number" value="30" min="1"></label>
+          <label>max <input id="maxs" type="number" value="90" min="5"> s</label>
+        </div>
+        <div class="row">
+          <label>cooldown <input id="cooldown" type="number" value="30" min="0"> s</label>
+          <label>rounds <input id="rounds" type="number" value="2" min="1"></label>
+          <label><input id="frozen" type="checkbox" checked> Mobile-GS frozen-MLP ablation</label>
+        </div>
+        <div class="muted">Offscreen at the eval resolution and training FOV, cycling the 24 test views. Rounds alternate order (A→D, D→A) so heat build-up does not favour one method. Keep the phone plugged in, screen on, other apps closed.</div>
+      </details>
+      <div id="results"></div>
+      <div id="export" style="display:none">
+        <div class="row"><button id="copytable">📋 Copy results table</button><button id="copy">Copy JSON</button><button id="download">Download JSON</button></div>
+        <textarea id="summary" readonly rows="10" style="width:100%;box-sizing:border-box;font:11px/1.35 ui-monospace,monospace;background:#1a1d25;color:#ddd;border:1px solid #444a58;border-radius:5px"></textarea>
+      </div>
+    </div>
+    <canvas id="webgpu-canvas"></canvas>
+    
+  </body>
+</html>
