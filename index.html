@@ -325,126 +325,128 @@
         <!-- E3RD:BEGIN -->
         <h2>🔬 Paper checkpoints <span style="color:#f0b060;font-size:0.75em">· BITYMI · extent-3 + RD atlas, finetuned</span></h2>
         <p style="opacity:0.75; margin:0 0 0.6em 0;">
-            All 13 benchmark scenes in the configuration reported in the paper: baked over the beta kernel's
-            3σ support, texel budget set per surfel by the rate&ndash;distortion probe (~60 % of the atlas kept),
-            texture-finetuned against ground truth, packaged as typeD (BC7-codebook) atlas + BPLY.
+            All 13 benchmark scenes: baked over the beta kernel's 3σ support, texel budget set per surfel by the
+            rate&ndash;distortion probe run on the raw bake (~46 % of the atlas kept, mip-360 mean), then ONE
+            texture finetune against ground truth &mdash; 22 % fewer bytes than the paper's probe-after-finetune
+            pipeline at +0.05 dB / &minus;0.004 LPIPS (mip-360 mean). Packaged as typeD codebook atlas + BPLY;
+            the Android bundle is the same-size typeD-ASTC codebook (no more 300 MB raw-ASTC downloads).
         </p>
         <div class="grid">
-            <a class="demo" data-folder="mip_360" data-scene="garden_e3rd" data-hd-mb="55" data-true-mb="55" data-bc7-single="garden_e3rd.bitymi"
-               data-astc-hd="garden_e3rd_astc.bitymi" data-astc-lite="garden_e3rd_astc.bitymi" data-astc-classic="garden_e3rd_astc.bitymi" data-astc-mb="304"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_e3rd.bitymi">
-                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · BITYMI e3rd" loading="lazy">
+            <a class="demo" data-folder="mip_360" data-scene="garden_e3rdraw" data-hd-mb="50" data-true-mb="50" data-bc7-single="garden_e3rdraw.bitymi"
+               data-astc-hd="garden_e3rdraw_astc.bitymi" data-astc-lite="garden_e3rdraw_astc.bitymi" data-astc-classic="garden_e3rdraw_astc.bitymi" data-astc-mb="50"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · BITYMI e3rd (raw probe)" loading="lazy">
                 <div class="text">
                     <div class="title">Garden</div>
-                    <div class="meta"><span class="size">55 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                    <div class="meta"><span class="size">50 MB</span> · Mip-NeRF 360 · typeD codebook atlas (BC7 / ASTC) + BPLY</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="bicycle_e3rd" data-hd-mb="63" data-true-mb="63" data-bc7-single="bicycle_e3rd.bitymi"
-               data-astc-hd="bicycle_e3rd_astc.bitymi" data-astc-lite="bicycle_e3rd_astc.bitymi" data-astc-classic="bicycle_e3rd_astc.bitymi" data-astc-mb="357"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_e3rd.bitymi">
-                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle · BITYMI e3rd" loading="lazy">
+            <a class="demo" data-folder="mip_360" data-scene="bicycle_e3rdraw" data-hd-mb="50" data-true-mb="50" data-bc7-single="bicycle_e3rdraw.bitymi"
+               data-astc-hd="bicycle_e3rdraw_astc.bitymi" data-astc-lite="bicycle_e3rdraw_astc.bitymi" data-astc-classic="bicycle_e3rdraw_astc.bitymi" data-astc-mb="50"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/bicycle.jpg" alt="Bicycle · BITYMI e3rd (raw probe)" loading="lazy">
                 <div class="text">
                     <div class="title">Bicycle</div>
-                    <div class="meta"><span class="size">63 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                    <div class="meta"><span class="size">50 MB</span> · Mip-NeRF 360 · typeD codebook atlas (BC7 / ASTC) + BPLY</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="flowers_e3rd" data-hd-mb="67" data-true-mb="67" data-bc7-single="flowers_e3rd.bitymi"
-               data-astc-hd="flowers_e3rd_astc.bitymi" data-astc-lite="flowers_e3rd_astc.bitymi" data-astc-classic="flowers_e3rd_astc.bitymi" data-astc-mb="368"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_e3rd.bitymi">
-                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers · BITYMI e3rd" loading="lazy">
+            <a class="demo" data-folder="mip_360" data-scene="flowers_e3rdraw" data-hd-mb="62" data-true-mb="62" data-bc7-single="flowers_e3rdraw.bitymi"
+               data-astc-hd="flowers_e3rdraw_astc.bitymi" data-astc-lite="flowers_e3rdraw_astc.bitymi" data-astc-classic="flowers_e3rdraw_astc.bitymi" data-astc-mb="62"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/flowers_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/flowers.jpg" alt="Flowers · BITYMI e3rd (raw probe)" loading="lazy">
                 <div class="text">
                     <div class="title">Flowers</div>
-                    <div class="meta"><span class="size">67 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                    <div class="meta"><span class="size">62 MB</span> · Mip-NeRF 360 · typeD codebook atlas (BC7 / ASTC) + BPLY</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="stump_e3rd" data-hd-mb="37" data-true-mb="37" data-bc7-single="stump_e3rd.bitymi"
-               data-astc-hd="stump_e3rd_astc.bitymi" data-astc-lite="stump_e3rd_astc.bitymi" data-astc-classic="stump_e3rd_astc.bitymi" data-astc-mb="199"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_e3rd.bitymi">
-                <img class="thumb" src="static/thumbs/stump.jpg" alt="Stump · BITYMI e3rd" loading="lazy">
+            <a class="demo" data-folder="mip_360" data-scene="stump_e3rdraw" data-hd-mb="32" data-true-mb="32" data-bc7-single="stump_e3rdraw.bitymi"
+               data-astc-hd="stump_e3rdraw_astc.bitymi" data-astc-lite="stump_e3rdraw_astc.bitymi" data-astc-classic="stump_e3rdraw_astc.bitymi" data-astc-mb="32"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/stump_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/stump.jpg" alt="Stump · BITYMI e3rd (raw probe)" loading="lazy">
                 <div class="text">
                     <div class="title">Stump</div>
-                    <div class="meta"><span class="size">37 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                    <div class="meta"><span class="size">32 MB</span> · Mip-NeRF 360 · typeD codebook atlas (BC7 / ASTC) + BPLY</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="treehill_e3rd" data-hd-mb="70" data-true-mb="70" data-bc7-single="treehill_e3rd.bitymi"
-               data-astc-hd="treehill_e3rd_astc.bitymi" data-astc-lite="treehill_e3rd_astc.bitymi" data-astc-classic="treehill_e3rd_astc.bitymi" data-astc-mb="403"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_e3rd.bitymi">
-                <img class="thumb" src="static/thumbs/treehill.jpg" alt="Treehill · BITYMI e3rd" loading="lazy">
+            <a class="demo" data-folder="mip_360" data-scene="treehill_e3rdraw" data-hd-mb="58" data-true-mb="58" data-bc7-single="treehill_e3rdraw.bitymi"
+               data-astc-hd="treehill_e3rdraw_astc.bitymi" data-astc-lite="treehill_e3rdraw_astc.bitymi" data-astc-classic="treehill_e3rdraw_astc.bitymi" data-astc-mb="58"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/treehill_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/treehill.jpg" alt="Treehill · BITYMI e3rd (raw probe)" loading="lazy">
                 <div class="text">
                     <div class="title">Treehill</div>
-                    <div class="meta"><span class="size">70 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                    <div class="meta"><span class="size">58 MB</span> · Mip-NeRF 360 · typeD codebook atlas (BC7 / ASTC) + BPLY</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="room_e3rd" data-hd-mb="22" data-true-mb="22" data-bc7-single="room_e3rd.bitymi"
-               data-astc-hd="room_e3rd_astc.bitymi" data-astc-lite="room_e3rd_astc.bitymi" data-astc-classic="room_e3rd_astc.bitymi" data-astc-mb="108"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_e3rd.bitymi">
-                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · BITYMI e3rd" loading="lazy">
+            <a class="demo" data-folder="mip_360" data-scene="room_e3rdraw" data-hd-mb="16" data-true-mb="16" data-bc7-single="room_e3rdraw.bitymi"
+               data-astc-hd="room_e3rdraw_astc.bitymi" data-astc-lite="room_e3rdraw_astc.bitymi" data-astc-classic="room_e3rdraw_astc.bitymi" data-astc-mb="16"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · BITYMI e3rd (raw probe)" loading="lazy">
                 <div class="text">
                     <div class="title">Room</div>
-                    <div class="meta"><span class="size">22 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                    <div class="meta"><span class="size">16 MB</span> · Mip-NeRF 360 · typeD codebook atlas (BC7 / ASTC) + BPLY</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="counter_e3rd" data-hd-mb="21" data-true-mb="21" data-bc7-single="counter_e3rd.bitymi"
-               data-astc-hd="counter_e3rd_astc.bitymi" data-astc-lite="counter_e3rd_astc.bitymi" data-astc-classic="counter_e3rd_astc.bitymi" data-astc-mb="95"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_e3rd.bitymi">
-                <img class="thumb" src="static/thumbs/counter.jpg" alt="Counter · BITYMI e3rd" loading="lazy">
+            <a class="demo" data-folder="mip_360" data-scene="counter_e3rdraw" data-hd-mb="17" data-true-mb="17" data-bc7-single="counter_e3rdraw.bitymi"
+               data-astc-hd="counter_e3rdraw_astc.bitymi" data-astc-lite="counter_e3rdraw_astc.bitymi" data-astc-classic="counter_e3rdraw_astc.bitymi" data-astc-mb="17"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/counter_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/counter.jpg" alt="Counter · BITYMI e3rd (raw probe)" loading="lazy">
                 <div class="text">
                     <div class="title">Counter</div>
-                    <div class="meta"><span class="size">21 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                    <div class="meta"><span class="size">17 MB</span> · Mip-NeRF 360 · typeD codebook atlas (BC7 / ASTC) + BPLY</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="kitchen_e3rd" data-hd-mb="27" data-true-mb="27" data-bc7-single="kitchen_e3rd.bitymi"
-               data-astc-hd="kitchen_e3rd_astc.bitymi" data-astc-lite="kitchen_e3rd_astc.bitymi" data-astc-classic="kitchen_e3rd_astc.bitymi" data-astc-mb="102"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_e3rd.bitymi">
-                <img class="thumb" src="static/thumbs/kitchen.jpg" alt="Kitchen · BITYMI e3rd" loading="lazy">
+            <a class="demo" data-folder="mip_360" data-scene="kitchen_e3rdraw" data-hd-mb="24" data-true-mb="24" data-bc7-single="kitchen_e3rdraw.bitymi"
+               data-astc-hd="kitchen_e3rdraw_astc.bitymi" data-astc-lite="kitchen_e3rdraw_astc.bitymi" data-astc-classic="kitchen_e3rdraw_astc.bitymi" data-astc-mb="24"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/kitchen_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/kitchen.jpg" alt="Kitchen · BITYMI e3rd (raw probe)" loading="lazy">
                 <div class="text">
                     <div class="title">Kitchen</div>
-                    <div class="meta"><span class="size">27 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                    <div class="meta"><span class="size">24 MB</span> · Mip-NeRF 360 · typeD codebook atlas (BC7 / ASTC) + BPLY</div>
                 </div>
             </a>
-            <a class="demo" data-folder="mip_360" data-scene="bonsai_e3rd" data-hd-mb="26" data-true-mb="26" data-bc7-single="bonsai_e3rd.bitymi"
-               data-astc-hd="bonsai_e3rd_astc.bitymi" data-astc-lite="bonsai_e3rd_astc.bitymi" data-astc-classic="bonsai_e3rd_astc.bitymi" data-astc-mb="117"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_e3rd.bitymi">
-                <img class="thumb" src="static/thumbs/bonsai.jpg" alt="Bonsai · BITYMI e3rd" loading="lazy">
+            <a class="demo" data-folder="mip_360" data-scene="bonsai_e3rdraw" data-hd-mb="21" data-true-mb="21" data-bc7-single="bonsai_e3rdraw.bitymi"
+               data-astc-hd="bonsai_e3rdraw_astc.bitymi" data-astc-lite="bonsai_e3rdraw_astc.bitymi" data-astc-classic="bonsai_e3rdraw_astc.bitymi" data-astc-mb="21"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bonsai_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/bonsai.jpg" alt="Bonsai · BITYMI e3rd (raw probe)" loading="lazy">
                 <div class="text">
                     <div class="title">Bonsai</div>
-                    <div class="meta"><span class="size">26 MB</span> · Mip-NeRF 360 · typeD BC7-codebook atlas + BPLY</div>
+                    <div class="meta"><span class="size">21 MB</span> · Mip-NeRF 360 · typeD codebook atlas (BC7 / ASTC) + BPLY</div>
                 </div>
             </a>
-            <a class="demo" data-folder="tnt" data-scene="train_e3rd" data-hd-mb="31" data-true-mb="31" data-bc7-single="train_e3rd.bitymi"
-               data-astc-hd="train_e3rd_astc.bitymi" data-astc-lite="train_e3rd_astc.bitymi" data-astc-classic="train_e3rd_astc.bitymi" data-astc-mb="161"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/tnt/train_e3rd.bitymi">
-                <img class="thumb" src="static/thumbs/train.jpg" alt="Train · BITYMI e3rd" loading="lazy">
+            <a class="demo" data-folder="tnt" data-scene="train_e3rdraw" data-hd-mb="28" data-true-mb="28" data-bc7-single="train_e3rdraw.bitymi"
+               data-astc-hd="train_e3rdraw_astc.bitymi" data-astc-lite="train_e3rdraw_astc.bitymi" data-astc-classic="train_e3rdraw_astc.bitymi" data-astc-mb="28"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/tnt/train_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/train.jpg" alt="Train · BITYMI e3rd (raw probe)" loading="lazy">
                 <div class="text">
                     <div class="title">Train</div>
-                    <div class="meta"><span class="size">31 MB</span> · Tanks &amp; Temples · typeD BC7-codebook atlas + BPLY</div>
+                    <div class="meta"><span class="size">28 MB</span> · Tanks &amp; Temples · typeD codebook atlas (BC7 / ASTC) + BPLY</div>
                 </div>
             </a>
-            <a class="demo" data-folder="tnt" data-scene="truck_e3rd" data-hd-mb="31" data-true-mb="31" data-bc7-single="truck_e3rd.bitymi"
-               data-astc-hd="truck_e3rd_astc.bitymi" data-astc-lite="truck_e3rd_astc.bitymi" data-astc-classic="truck_e3rd_astc.bitymi" data-astc-mb="163"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/tnt/truck_e3rd.bitymi">
-                <img class="thumb" src="static/thumbs/truck.jpg" alt="Truck · BITYMI e3rd" loading="lazy">
+            <a class="demo" data-folder="tnt" data-scene="truck_e3rdraw" data-hd-mb="27" data-true-mb="27" data-bc7-single="truck_e3rdraw.bitymi"
+               data-astc-hd="truck_e3rdraw_astc.bitymi" data-astc-lite="truck_e3rdraw_astc.bitymi" data-astc-classic="truck_e3rdraw_astc.bitymi" data-astc-mb="27"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/tnt/truck_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/truck.jpg" alt="Truck · BITYMI e3rd (raw probe)" loading="lazy">
                 <div class="text">
                     <div class="title">Truck</div>
-                    <div class="meta"><span class="size">31 MB</span> · Tanks &amp; Temples · typeD BC7-codebook atlas + BPLY</div>
+                    <div class="meta"><span class="size">27 MB</span> · Tanks &amp; Temples · typeD codebook atlas (BC7 / ASTC) + BPLY</div>
                 </div>
             </a>
-            <a class="demo" data-folder="db" data-scene="drjohnson_e3rd" data-hd-mb="24" data-true-mb="24" data-bc7-single="drjohnson_e3rd.bitymi"
-               data-astc-hd="drjohnson_e3rd_astc.bitymi" data-astc-lite="drjohnson_e3rd_astc.bitymi" data-astc-classic="drjohnson_e3rd_astc.bitymi" data-astc-mb="126"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/db/drjohnson_e3rd.bitymi">
-                <img class="thumb" src="static/thumbs/drjohnson.jpg" alt="Dr Johnson · BITYMI e3rd" loading="lazy">
+            <a class="demo" data-folder="db" data-scene="drjohnson_e3rdraw" data-hd-mb="20" data-true-mb="20" data-bc7-single="drjohnson_e3rdraw.bitymi"
+               data-astc-hd="drjohnson_e3rdraw_astc.bitymi" data-astc-lite="drjohnson_e3rdraw_astc.bitymi" data-astc-classic="drjohnson_e3rdraw_astc.bitymi" data-astc-mb="20"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/db/drjohnson_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/drjohnson.jpg" alt="Dr Johnson · BITYMI e3rd (raw probe)" loading="lazy">
                 <div class="text">
                     <div class="title">Dr Johnson</div>
-                    <div class="meta"><span class="size">24 MB</span> · Deep Blending · typeD BC7-codebook atlas + BPLY</div>
+                    <div class="meta"><span class="size">20 MB</span> · Deep Blending · typeD codebook atlas (BC7 / ASTC) + BPLY</div>
                 </div>
             </a>
-            <a class="demo" data-folder="db" data-scene="playroom_e3rd" data-hd-mb="23" data-true-mb="23" data-bc7-single="playroom_e3rd.bitymi"
-               data-astc-hd="playroom_e3rd_astc.bitymi" data-astc-lite="playroom_e3rd_astc.bitymi" data-astc-classic="playroom_e3rd_astc.bitymi" data-astc-mb="116"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/db/playroom_e3rd.bitymi">
-                <img class="thumb" src="static/thumbs/playroom.jpg" alt="Playroom · BITYMI e3rd" loading="lazy">
+            <a class="demo" data-folder="db" data-scene="playroom_e3rdraw" data-hd-mb="16" data-true-mb="16" data-bc7-single="playroom_e3rdraw.bitymi"
+               data-astc-hd="playroom_e3rdraw_astc.bitymi" data-astc-lite="playroom_e3rdraw_astc.bitymi" data-astc-classic="playroom_e3rdraw_astc.bitymi" data-astc-mb="16"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/db/playroom_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/playroom.jpg" alt="Playroom · BITYMI e3rd (raw probe)" loading="lazy">
                 <div class="text">
                     <div class="title">Playroom</div>
-                    <div class="meta"><span class="size">23 MB</span> · Deep Blending · typeD BC7-codebook atlas + BPLY</div>
+                    <div class="meta"><span class="size">16 MB</span> · Deep Blending · typeD codebook atlas (BC7 / ASTC) + BPLY</div>
                 </div>
             </a>
         </div>
