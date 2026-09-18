@@ -319,11 +319,13 @@
                     <div class="meta">One button: each method at 1297×840 over the 24 test views, mirrored rounds + cooldown for phone thermals, copy-paste results table, optional BITYMI diagnostics (atlas off / octagon bound / atlas mip chain, +65 MB) · authors' checkpoints (FastGS 86 MB, Speedy-Splat 69 MB, Mobile-GS 44 MB decoded + per-frame MLP) vs BITYMI 50 MB (raw-probe e3rd finetune; typeD BC7 or typeD-ASTC codebook on Android, same size)</div>
                 </div>
             </a>
-            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_e3rdmip.bitymi">
+            <a class="demo" data-folder="mip_360" data-scene="garden_e3rdmip" data-hd-mb="62" data-true-mb="62" data-bc7-single="garden_e3rdmip.bitymi"
+               data-astc-hd="garden_e3rdmip_astc.bitymi" data-astc-lite="garden_e3rdmip_astc.bitymi" data-astc-classic="garden_e3rdmip_astc.bitymi" data-astc-mb="62"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_e3rdmip.bitymi">
                 <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden with an atlas mip chain: switch mip levels live" loading="lazy" style="filter: hue-rotate(25deg);">
                 <div class="text">
                     <div class="title">Garden · atlas mips toggle <span style="color:#f0b060;font-size:0.8em">· experimental</span></div>
-                    <div class="meta"><span class="size">62 MB</span> · raw-probe e3rd + 4 box-filtered atlas mip levels · "Atlas mips" in the pane: off / bias 0 (full) / bias 1 / bias 2 — compare the FPS readout or 📊 Benchmark per setting (bias 0 is ~15 % faster on an Adreno 7xx, costs detail until a mip-aware finetune)</div>
+                    <div class="meta"><span class="size">62 MB</span> · raw-probe e3rd + 4 box-filtered atlas mip levels · follows the BC7 / ASTC switch above · "Atlas mips" in the pane: off / bias 0 (full) / bias 1 / bias 2 — compare the FPS readout or 📊 Benchmark per setting (bias 0 is ~15 % faster on an Adreno 7xx, costs detail until a mip-aware finetune)</div>
                 </div>
             </a>
         </div>
