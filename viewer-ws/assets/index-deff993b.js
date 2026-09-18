@@ -335,7 +335,11 @@ fn preprocess(@builtin(global_invocation_id) gid: vec3<u32>) {
             let c1   = vec2<f32>(kx * sp.tv_x, ky * sp.tv_z);   // d(texel)/d(pix.y): (J⁻¹01, J⁻¹11)
             let tpp  = max(length(c0), length(c1));
             let amax = countTrailingZeros(u32(u0) | u32(v0) | u32(w_span) | u32(h_span));
-            let lmax = f32(min(atlas_params.mip_count - 1u, amax));
+            // ...and never below 4 texels on the short side (a 64x4 tile stops at 16x4, not 64x1):
+            // every level is then a plain halving that exists in the training-side pyramid too
+            // (nest-splatting gaussian_renderer.mip_view_levels, --mip_view_lod finetunes).
+            let side = countTrailingZeros(u32(min(w_span, h_span)));
+            let lmax = f32(min(min(atlas_params.mip_count - 1u, amax), max(side, 2u) - 2u));
             lod = clamp(floor(log2(max(tpp, 1.0)) + 0.5 - atlas_params.lod_bias), 0.0, lmax);
             if lod >= 1.0 {
                 // Level-l texel centres span [u0 + 2^l/2, u0 + w − 2^l/2]: shrink the uv span

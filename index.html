@@ -316,7 +316,7 @@
                 <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden render benchmark: BITYMI, FastGS, Speedy-Splat, Mobile-GS" loading="lazy" style="filter: saturate(0.6) contrast(1.1);">
                 <div class="text">
                     <div class="title">Garden · bench all methods on this device</div>
-                    <div class="meta">One button: each method at 1297×840 over the 24 test views, mirrored rounds + cooldown for phone thermals, copy-paste results table, optional BITYMI diagnostics (atlas off / octagon bound / atlas mip chain, +65 MB) · authors' checkpoints (FastGS 86 MB, Speedy-Splat 69 MB, Mobile-GS 44 MB decoded + per-frame MLP) vs BITYMI 50 MB (raw-probe e3rd finetune; typeD BC7 or typeD-ASTC codebook on Android, same size)</div>
+                    <div class="meta">One button: each method at 1297×840 over the 24 test views, mirrored rounds + cooldown for phone thermals, copy-paste results table, optional BITYMI diagnostics (atlas off / octagon bound / atlas mip chain, +65 MB / mip-aware finetune at bias 0, +65 MB; <code>?only=bitymi_mipft0,fastgs,speedy</code> for a short run) · authors' checkpoints (FastGS 86 MB, Speedy-Splat 69 MB, Mobile-GS 44 MB decoded + per-frame MLP) vs BITYMI 50 MB (raw-probe e3rd finetune; typeD BC7 or typeD-ASTC codebook on Android, same size)</div>
                 </div>
             </a>
             <a class="demo" data-folder="mip_360" data-scene="garden_e3rdmip" data-hd-mb="62" data-true-mb="62" data-bc7-single="garden_e3rdmip.bitymi"
@@ -326,6 +326,15 @@
                 <div class="text">
                     <div class="title">Garden · atlas mips toggle <span style="color:#f0b060;font-size:0.8em">· experimental</span></div>
                     <div class="meta"><span class="size">62 MB</span> · raw-probe e3rd + 4 box-filtered atlas mip levels · follows the BC7 / ASTC switch above · "Atlas mips" in the pane: off / bias 0 (full) / bias 1 / bias 2 — compare the FPS readout or 📊 Benchmark per setting (bias 0 is ~15 % faster on an Adreno 7xx, costs detail until a mip-aware finetune)</div>
+                </div>
+            </a>
+            <a class="demo" data-folder="mip_360" data-scene="garden_e3rdmipft" data-hd-mb="62" data-true-mb="62" data-bc7-single="garden_e3rdmipft.bitymi"
+               data-astc-hd="garden_e3rdmipft_astc.bitymi" data-astc-lite="garden_e3rdmipft_astc.bitymi" data-astc-classic="garden_e3rdmipft_astc.bitymi" data-astc-mb="62" data-extra="&amp;mipbias=0"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_e3rdmipft.bitymi&amp;mipbias=0">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden with an atlas finetuned through the bias-0 mip rule" loading="lazy" style="filter: hue-rotate(60deg);">
+                <div class="text">
+                    <div class="title">Garden · mip-aware finetune, bias 0 <span style="color:#f0b060;font-size:0.8em">· experimental</span></div>
+                    <div class="meta"><span class="size">62 MB</span> · same bake, atlas finetuned 3k iters THROUGH the viewer's bias-0 per-surfel mip rule · opens with "Atlas mips" = bias 0 · follows the BC7 / ASTC switch above · browser vs GT (24 views): 24.99 dB / 0.696 / LPIPS 0.235 vs 25.05 / 0.681 / 0.261 for the plain mip chain at bias 0 and 25.23 / 0.720 / 0.207 without mips</div>
                 </div>
             </a>
         </div>
@@ -1200,7 +1209,7 @@
                     // funnels through this one concat, so prefixing here covers
                     // all quality/atlas/color combos.
                     const folder = card.dataset.folder ? card.dataset.folder + '/' : '';
-                    card.href = cfg.viewer + '/index.html?bundle=' + HF_BASE + folder + filename + cfg.extra;
+                    card.href = cfg.viewer + '/index.html?bundle=' + HF_BASE + folder + filename + cfg.extra + (card.dataset.extra || '');
 
                     const sizeEl = card.querySelector('.size');
                     if (sizeEl) {
