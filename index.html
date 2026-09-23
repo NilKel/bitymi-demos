@@ -1151,11 +1151,16 @@
             const colorButtons   = document.querySelectorAll('.quality-bar button[data-color]');
             const cards = document.querySelectorAll('a.demo[data-scene]');
 
+            // All three modes serve the SAME Halloumi-WS build; only the bundle suffix
+            // differs. They used to point at a second copy of that build in viewer-ws/,
+            // which had to be kept byte-identical to viewer/ by hand (and silently drifted
+            // when only one was redeployed). One build now, in viewer/; viewer-ws/index.html
+            // is a query-preserving redirect so links copied from the old address bar live on.
             const SUFFIX = {
-                'lite-ws':    { viewer: 'viewer-ws', suffix: '_lite',    extra: '' },
-                'hd-ws':      { viewer: 'viewer-ws', suffix: '',         extra: '' },
+                'lite-ws':    { viewer: 'viewer', suffix: '_lite',    extra: '' },
+                'hd-ws':      { viewer: 'viewer', suffix: '',         extra: '' },
                 // Classic = the pre-mixed_3d 2DGS bake (one tier, HD-equivalent).
-                'classic-ws': { viewer: 'viewer-ws', suffix: '_classic', extra: '' },
+                'classic-ws': { viewer: 'viewer', suffix: '_classic', extra: '' },
             };
             const VALID_Q = new Set(Object.keys(SUFFIX));
             const VALID_A = new Set(['bc7', 'astc']);
