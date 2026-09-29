@@ -1114,6 +1114,34 @@
                     <div class="meta"><span class="size">26 MB</span> · 117k Gauss · 27.40 dB · normal reg 0.01 + e3rd atlas · 845 FPS CUDA-baked (5090)</div>
                 </div>
             </a>
+            <!-- Neel @ Opéra v2 — same single-photo pipeline with the foreground awning removed:
+                 depth-based mask (top 35 %, 1.8-2.0 m, outside the subject matte) -> FLUX.1 Fill
+                 on BOTH the photo and the clean plate (seed 0 each) -> SHARP on both -> merged
+                 35-view grid -> 3D_SH_res (--edgs, mono disparity reg 0.01, 20k) -> 6.4k Gauss ->
+                 raw-probe e3rd (max_res 256). typeD BC7 / ASTC codebook, 3.9 MB each. vs the
+                 SHARP-rendered held-out views: baked 47.21 dB / 0.992 / 0.026 LPIPS @ 4129 FPS
+                 (5090 CUDA). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_v2_e3rd.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_v2_e3rd_astc.bitymi"
+               data-bc7-mb="4" data-astc-mb="4"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_v2_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/neel_opera_v2.jpg" alt="Neel at the Opéra, awning removed · single photo, SHARP + FLUX, e3rd atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Neel @ Opéra v2 (one photo, no awning)</div>
+                    <div class="meta"><span class="size">4 MB</span> · 6.4k Gauss · SHARP + FLUX plate, awning inpainted · e3rd atlas · 47.2 dB vs SHARP views · 4129 FPS baked (5090)</div>
+                </div>
+            </a>
+            <!-- v2 in the restricted "window" portal (training views / free, framed / full,
+                 WebGPU with WebGL2 fallback). -->
+            <a class="demo" data-invariant="true"
+               href="portal/?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_v2_e3rd.bitymi&amp;astc=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_v2_e3rd_astc.bitymi&amp;poster=neel_opera_v2_poster.jpg">
+                <img class="thumb" src="static/thumbs/neel_opera_v2.jpg" alt="Neel at the Opéra v2 · restricted window portal" loading="lazy">
+                <div class="text">
+                    <div class="title">Neel @ Opéra v2 — window</div>
+                    <div class="meta"><span class="size">4 MB</span> · no awning · restricted to the training views · framed like the photo · WebGPU / WebGL2</div>
+                </div>
+            </a>
             <!-- Neel @ Opéra — ONE film photo (no capture). Pipeline: BiRefNet matte ->
                  FLUX.1 Fill [dev] clean plate behind the subject -> SHARP (apple/ml-sharp)
                  on photo + plate, merged (subject from the photo, background from the plate,
