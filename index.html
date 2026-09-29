@@ -1114,6 +1114,41 @@
                     <div class="meta"><span class="size">26 MB</span> · 117k Gauss · 27.40 dB · normal reg 0.01 + e3rd atlas · 845 FPS CUDA-baked (5090)</div>
                 </div>
             </a>
+            <!-- Neel @ Opéra — ONE film photo (no capture). Pipeline: BiRefNet matte ->
+                 FLUX.1 Fill [dev] clean plate behind the subject -> SHARP (apple/ml-sharp)
+                 on photo + plate, merged (subject from the photo, background from the plate,
+                 scale-aligned) -> 35 synthetic views on a +-9 cm grid -> 3D_SH_res trained
+                 from a sparse depth-gradient surfel init (--edgs, 18.6k surfels), mono
+                 disparity reg 0.01, 20k iters -> 6.4k Gauss. Bake max_res 256, typeD
+                 BC7-codebook (atlas-PSNR 39.6 dB). PSNR is vs the SHARP-rendered held-out
+                 views (not real photos): neural 45.49 dB, baked 43.82 dB / 0.984 / 0.066
+                 LPIPS @ 3843 FPS (5090 CUDA). Orbit only a little: views beyond ~10 deg are
+                 extrapolation. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_astc.bitymi"
+               data-bc7-mb="11" data-astc-mb="77"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera.bitymi">
+                <img class="thumb" src="static/thumbs/neel_opera.jpg" alt="Neel at the Opéra · single photo, SHARP + FLUX plate (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Neel @ Opéra (one photo)</div>
+                    <div class="meta"><span class="size">11 MB</span> · 6.4k Gauss · SHARP + FLUX plate · depth reg · 43.8 dB vs SHARP views · 3843 FPS baked (5090)</div>
+                </div>
+            </a>
+            <!-- Same as above without the mono-disparity regularizer: 6.0k Gauss, neural
+                 45.60 dB, baked (max_res 256, typeD atlas-PSNR 39.3 dB) 44.04 dB / 0.985 /
+                 0.062 LPIPS @ 3739 FPS vs the SHARP-rendered held-out views. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_nodepth.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_nodepth_astc.bitymi"
+               data-bc7-mb="10" data-astc-mb="67"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_nodepth.bitymi">
+                <img class="thumb" src="static/thumbs/neel_opera_nodepth.jpg" alt="Neel at the Opéra, no depth reg · single photo, SHARP + FLUX plate (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Neel @ Opéra (one photo, no depth reg)</div>
+                    <div class="meta"><span class="size">10 MB</span> · 6.0k Gauss · SHARP + FLUX plate · 44.0 dB vs SHARP views · 3739 FPS baked (5090)</div>
+                </div>
+            </a>
             <a class="demo" data-invariant="true"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/Max.bitymi">
                 <img class="thumb" src="static/thumbs/Max.jpg" alt="Max handheld video (mixed_3d, RVQ+BPLY) preview" loading="lazy">
