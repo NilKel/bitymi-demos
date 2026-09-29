@@ -1119,34 +1119,46 @@
                  on photo + plate, merged (subject from the photo, background from the plate,
                  scale-aligned) -> 35 synthetic views on a +-9 cm grid -> 3D_SH_res trained
                  from a sparse depth-gradient surfel init (--edgs, 18.6k surfels), mono
-                 disparity reg 0.01, 20k iters -> 6.4k Gauss. Bake max_res 256, typeD
-                 BC7-codebook (atlas-PSNR 39.6 dB). PSNR is vs the SHARP-rendered held-out
-                 views (not real photos): neural 45.49 dB, baked 43.82 dB / 0.984 / 0.066
-                 LPIPS @ 3843 FPS (5090 CUDA). Orbit only a little: views beyond ~10 deg are
-                 extrapolation. -->
+                 disparity reg 0.01, 20k iters -> 6.4k Gauss -> raw-probe e3rd (extent-3 fp16
+                 bake at max_res 256, RD probe, 29.5% of texels kept, extent-3 BC7 re-bake,
+                 3k atlas finetune). typeD BC7 / ASTC codebook bundles, 4.6 MB each. PSNR is vs
+                 the SHARP-rendered held-out views (not real photos): baked 47.49 dB / 0.993 /
+                 0.022 LPIPS @ 3768 FPS (5090 CUDA). Card opens the full viewer; the "window"
+                 link opens the restricted portal (portal/, Halloumi-WS portal.html). -->
             <a class="demo" data-invariant="true"
-               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera.bitymi"
-               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_astc.bitymi"
-               data-bc7-mb="11" data-astc-mb="77"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera.bitymi">
-                <img class="thumb" src="static/thumbs/neel_opera.jpg" alt="Neel at the Opéra · single photo, SHARP + FLUX plate (BC7/ASTC)" loading="lazy">
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_e3rd.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_e3rd_astc.bitymi"
+               data-bc7-mb="5" data-astc-mb="5"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/neel_opera.jpg" alt="Neel at the Opéra · single photo, SHARP + FLUX plate, e3rd atlas (BC7/ASTC)" loading="lazy">
                 <div class="text">
                     <div class="title">Neel @ Opéra (one photo)</div>
-                    <div class="meta"><span class="size">11 MB</span> · 6.4k Gauss · SHARP + FLUX plate · depth reg · 43.8 dB vs SHARP views · 3843 FPS baked (5090)</div>
+                    <div class="meta"><span class="size">5 MB</span> · 6.4k Gauss · SHARP + FLUX plate · depth reg · e3rd atlas · 47.5 dB vs SHARP views · 3768 FPS baked (5090)</div>
                 </div>
             </a>
-            <!-- Same as above without the mono-disparity regularizer: 6.0k Gauss, neural
-                 45.60 dB, baked (max_res 256, typeD atlas-PSNR 39.3 dB) 44.04 dB / 0.985 /
-                 0.062 LPIPS @ 3739 FPS vs the SHARP-rendered held-out views. -->
+            <!-- Same scene in the restricted "window" portal: camera limited to the training
+                 views (button toggles free movement), framed at the photo's exact aspect/FOV
+                 (button toggles full-bleed). Hover / drag / device tilt. -->
             <a class="demo" data-invariant="true"
-               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_nodepth.bitymi"
-               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_nodepth_astc.bitymi"
-               data-bc7-mb="10" data-astc-mb="67"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_nodepth.bitymi">
-                <img class="thumb" src="static/thumbs/neel_opera_nodepth.jpg" alt="Neel at the Opéra, no depth reg · single photo, SHARP + FLUX plate (BC7/ASTC)" loading="lazy">
+               href="portal/?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_e3rd.bitymi&amp;astc=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_e3rd_astc.bitymi&amp;poster=neel_opera_poster.jpg">
+                <img class="thumb" src="static/thumbs/neel_opera.jpg" alt="Neel at the Opéra · restricted window portal" loading="lazy">
+                <div class="text">
+                    <div class="title">Neel @ Opéra — window</div>
+                    <div class="meta"><span class="size">5 MB</span> · restricted to the training views · framed like the photo · hover / drag / tilt</div>
+                </div>
+            </a>
+            <!-- Same as above without the mono-disparity regularizer: 6.0k Gauss, raw-probe
+                 e3rd (30.5% of texels kept), baked 46.85 dB / 0.992 / 0.024 LPIPS @ 4090 FPS vs
+                 the SHARP-rendered held-out views. 4.2 MB bundles. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_nodepth_e3rd.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_nodepth_e3rd_astc.bitymi"
+               data-bc7-mb="4" data-astc-mb="4"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/personal/neel_opera_nodepth_e3rd.bitymi">
+                <img class="thumb" src="static/thumbs/neel_opera_nodepth.jpg" alt="Neel at the Opéra, no depth reg · single photo, e3rd atlas (BC7/ASTC)" loading="lazy">
                 <div class="text">
                     <div class="title">Neel @ Opéra (one photo, no depth reg)</div>
-                    <div class="meta"><span class="size">10 MB</span> · 6.0k Gauss · SHARP + FLUX plate · 44.0 dB vs SHARP views · 3739 FPS baked (5090)</div>
+                    <div class="meta"><span class="size">4 MB</span> · 6.0k Gauss · SHARP + FLUX plate · e3rd atlas · 46.9 dB vs SHARP views · 4090 FPS baked (5090)</div>
                 </div>
             </a>
             <a class="demo" data-invariant="true"
