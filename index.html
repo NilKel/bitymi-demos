@@ -309,6 +309,19 @@
             </a>
         </div>
 
+        <!-- FETCHBENCH:BEGIN — throwaway test build of the viewer with 1..4 atlas fetches per fragment -->
+        <h2>🧪 Fetch-count test <span style="color:#f0b060;font-size:0.75em">· 1 to 4 atlas fetches per fragment</span></h2>
+        <div class="grid">
+            <a class="demo" data-invariant="true" href="fetchbench/">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Fetch-count test: 1 to 4 atlas fetches per fragment" loading="lazy" style="filter: saturate(0.6) contrast(1.1);">
+                <div class="text">
+                    <div class="title">Room / Bicycle · how slow are 2, 3, 4 texture fetches?</div>
+                    <div class="meta">Test viewer build: a <b>Fetches: N</b> button cycles 1–4 per-fragment atlas fetches live (extra fetches blend 12% noise in on purpose), <b>Sweep 1-4</b> runs the offscreen no-vsync benchmark for every count in two interleaved rounds and prints a copyable table · Room 16 MB, Bicycle 50 MB · BC7 or ASTC link picked for this device · <code>&amp;fetches=N</code> to start at a count</div>
+                </div>
+            </a>
+        </div>
+        <!-- FETCHBENCH:END -->
+
         <!-- BENCH:BEGIN — cross-method render benchmark (Halloumi-WS bench page, assets under HF bench/garden/) -->
         <h2>📊 Device benchmark <span style="color:#f0b060;font-size:0.75em">· BITYMI vs FastGS vs Speedy-Splat vs Mobile-GS</span></h2>
         <div class="grid">

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<title>BITYMI fetch-count test</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; background: #111; color: #ddd; margin: 0; padding: 20px; max-width: 760px; }
+  h1 { font-size: 1.3em; color: #f0b060; }
+  a.go { display: block; margin: 10px 0; padding: 14px 16px; border: 1px solid #444; border-radius: 8px; color: #eee; text-decoration: none; background: #1c1c1c; }
+  a.go.rec { border-color: #f0b060; }
+  a.go small { display: block; color: #999; }
+  code { color: #f0b060; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<h1>Fetch-count test: 1 to 4 atlas fetches per fragment</h1>
+<p>Test build of the WebGPU viewer. Each extra fetch samples the same atlas at another per-surfel
+location and blends 12% of it in, so the picture turns noisy on purpose: that is how you can see the
+fetches are live. The quality is meaningless; only the timing matters.</p>
+<ol>
+  <li>Open the link for your device and wait for the scene.</li>
+  <li><b>Fetches: N</b> (bottom left) cycles 1, 2, 3, 4 live.</li>
+  <li><b>Sweep 1-4</b> runs the offscreen, no-vsync benchmark for every count, twice and interleaved
+      (about a minute on a phone), then shows a table you can long-press to copy. A gap between the two
+      rounds of the same count means thermal throttling.</li>
+</ol>
+<div id="links"></div>
+<p><small>Source change against the viewer: <a href="fetchbench.patch" style="color:#9cf">fetchbench.patch</a>.
+Start at a given count with <code>&amp;fetches=3</code>.</small></p>
+<script>
+  const HF = 'https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/';
+  const android = /Android/i.test(navigator.userAgent);
+  const scenes = [
+    ['Room', 'mip_360/room_e3rdraw', '16 MB, 63k surfels, 1557x1038 benchmark'],
+    ['Bicycle', 'mip_360/bicycle_e3rdraw', '50 MB, 161k surfels, 1237x822 benchmark, heavier overdraw'],
+  ];
+  const fmts = [['BC7 (desktop, iPhone, iPad)', '', !android], ['ASTC (Android)', '_astc', android]];
+  const el = document.getElementById('links');
+  for (const want of [true, false]) for (const [name, path, note] of scenes) for (const [fname, suf, rec] of fmts) {
+    if (rec !== want) continue;
+    const a = document.createElement('a');
+    a.className = 'go' + (rec ? ' rec' : '');
+    a.href = 'viewer.html?bundle=' + HF + path + suf + '.bitymi';
+    a.innerHTML = `${name} · ${fname}${rec ? ' · this device' : ''}<small>${note}</small>`;
+    el.append(a);
+  }
+</script>
+</body>
+</html>

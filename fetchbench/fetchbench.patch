@@ -1,0 +1,136 @@
+diff -ru src/render-settings.ts /tmp/claude-1000/-home-nilkel-Projects-nest-splatting/04c298ca-3830-46c9-9988-83c73823192c/scratchpad/hws-fetchbench/src/render-settings.ts
+--- src/render-settings.ts	2026-09-23 15:33:20.175206353 +0200
++++ /tmp/claude-1000/-home-nilkel-Projects-nest-splatting/04c298ca-3830-46c9-9988-83c73823192c/scratchpad/hws-fetchbench/src/render-settings.ts	2026-10-01 21:49:43.997415955 +0200
+@@ -142,6 +142,15 @@
+ }
+ 
+ // Stubs kept for legacy splat-app.ts callers. We don't use SH degree under SV.
++/** FETCHBENCH: number of EXTRA per-fragment atlas fetches (0..3), packed into
++ *  accel_flags bits 16..17 (read by render_2dgs.wgsl; ignored by cull/preprocess). */
++export function setExtraFetches(n: number, device?: GPUDevice, buffer?: GPUBuffer, commit: boolean = true) {
++  const f = RenderSettingsViews.accel_flags[0] & ~(3 << 16);
++  RenderSettingsViews.accel_flags[0] = (f | ((Math.max(0, Math.min(3, n | 0)) & 3) << 16)) >>> 0;
++  flush(device ?? null, buffer ?? null, commit);
++}
++export function getExtraFetches(): number { return (RenderSettingsViews.accel_flags[0] >>> 16) & 3; }
++
+ export function setMipSplatting(_enabled: boolean, _device?: GPUDevice, _buffer?: GPUBuffer, _commit: boolean = true) {}
+ export function setKernelSize(_v: number, _device?: GPUDevice, _buffer?: GPUBuffer, _commit: boolean = true) {}
+ export function setCurSHDegree(_v: number, _device?: GPUDevice, _buffer?: GPUBuffer, _commit: boolean = true) {}
+diff -ru src/shaders/render_2dgs.wgsl /tmp/claude-1000/-home-nilkel-Projects-nest-splatting/04c298ca-3830-46c9-9988-83c73823192c/scratchpad/hws-fetchbench/src/shaders/render_2dgs.wgsl
+--- src/shaders/render_2dgs.wgsl	2026-09-23 15:33:20.175206353 +0200
++++ /tmp/claude-1000/-home-nilkel-Projects-nest-splatting/04c298ca-3830-46c9-9988-83c73823192c/scratchpad/hws-fetchbench/src/shaders/render_2dgs.wgsl	2026-10-01 21:49:43.997415955 +0200
+@@ -580,6 +580,25 @@
+         let lod_eff = select(0.0, in.lod, tex_params.mip_mode != 0u);
+         let rgba = textureSampleLevel(atlas, atlas_samp, uv, layer, lod_eff);
+         color = color + rgba.rgb * tex_params.atlas_scale + vec3<f32>(tex_params.atlas_offset);
++        // ---- FETCHBENCH (2026-10-01): 0..3 EXTRA atlas fetches per fragment -------------
++        // accel_flags bits 16..17 carry the extra count. Each extra fetch samples the same
++        // atlas (same sampler, layer and LOD) through a different per-surfel placement:
++        // the tile centre is re-hashed to another atlas location and the fragment's offset
++        // inside the tile is rotated by a multiple of 90 degrees. This is the cost model of
++        // a decomposed texture (unique low band + shared detail bands fetched through
++        // per-surfel probes); a real build would pass each placement as a flat varying.
++        // The result is blended in at a visible 12% so it is obvious the fetches are live.
++        let fb_extra = (render_settings.accel_flags >> 16u) & 3u;
++        let fb_d = uv - in.uv_base;
++        for (var fb_k = 0u; fb_k < fb_extra; fb_k = fb_k + 1u) {
++            let fk = f32(fb_k + 1u);
++            let fb_base = fract(in.uv_base * (3.17 + 2.31 * fk) + vec2<f32>(0.37, 0.61) * fk);
++            var fb_dk = vec2<f32>(-fb_d.y, fb_d.x);
++            if fb_k == 1u { fb_dk = -fb_d; }
++            if fb_k == 2u { fb_dk = vec2<f32>(fb_d.y, -fb_d.x); }
++            let fb_rgba = textureSampleLevel(atlas, atlas_samp, fb_base + fb_dk, layer, lod_eff);
++            color = color + (fb_rgba.rgb * tex_params.atlas_scale + vec3<f32>(tex_params.atlas_offset)) * 0.12;
++        }
+     }
+     color = max(vec3<f32>(0.0), color + vec3<f32>(tex_params.res_bias));
+ 
+diff -ru src/splat-app.ts /tmp/claude-1000/-home-nilkel-Projects-nest-splatting/04c298ca-3830-46c9-9988-83c73823192c/scratchpad/hws-fetchbench/src/splat-app.ts
+--- src/splat-app.ts	2026-09-29 16:44:22.886213863 +0200
++++ /tmp/claude-1000/-home-nilkel-Projects-nest-splatting/04c298ca-3830-46c9-9988-83c73823192c/scratchpad/hws-fetchbench/src/splat-app.ts	2026-10-01 21:49:44.004415935 +0200
+@@ -9,7 +9,7 @@
+ import { Pane } from 'tweakpane';
+ import { GaussianRenderer } from './gaussian-renderer';
+ import { Camera, load_camera_presets } from './camera';
+-import { setGaussianScaling, setShBias, setAccelFlags, setCanvasSize } from './render-settings.ts';
++import { setGaussianScaling, setShBias, setAccelFlags, setCanvasSize, setExtraFetches, getExtraFetches } from './render-settings.ts';
+ import { CameraControl } from './camera-control';
+ import { fitCircleOrbit, evalOrbit, generateCircleTrajectory, type OrbitParams } from './circle-trajectory';
+ 
+@@ -1454,6 +1454,7 @@
+         }
+         function hideBenchProgress() { benchOverlay.style.display = 'none'; }
+ 
++        let lastBench: { fps: number, ms: number, w: number, h: number } | null = null;
+         async function runBenchmark(numWarmup = 10, numBench = 200) {
+             if (benchRunning) return;
+             if (cameras.length === 0) {
+@@ -1566,6 +1567,7 @@
+                 const totalMs = await runChunked(numBench, 'Benchmarking');
+                 const meanMs = totalMs / numBench;
+                 const fps = 1000 / meanMs;
++                lastBench = { fps, ms: meanMs, w: benchW, h: benchH };
+                 const N = pc.num_points ?? pc.surfel_data.length / 8;
+                 const fovDeg = (benchFov * 180 / Math.PI).toFixed(1);
+                 const msg =
+@@ -1603,6 +1605,59 @@
+ 
+         pane.addButton({ title: '📊 Benchmark' }).on('click', () => runBenchmark());
+ 
++        // ---- FETCHBENCH: 1..4 atlas fetches per fragment ---------------------------------
++        // "Fetches: N" cycles the per-fragment fetch count live (the image changes: each
++        // extra fetch blends 12% of another atlas location in). "Sweep 1-4" runs the
++        // offscreen no-vsync benchmark for every count, twice and interleaved, so thermal
++        // drift on a phone shows up as a difference between the two rounds.
++        const fbCss = 'position:fixed;left:8px;z-index:1001;height:34px;padding:0 12px;' +
++            'border-radius:6px;border:1px solid #f0b060;background:#1c1c1cdd;color:#f0b060;' +
++            'font:600 13px/1 system-ui,sans-serif;cursor:pointer;backdrop-filter:blur(4px);';
++        const fbBtn = document.createElement('button');
++        fbBtn.style.cssText = fbCss + 'bottom:92px;';
++        const fbSync = () => { fbBtn.textContent = `Fetches: ${getExtraFetches() + 1}`; };
++        const fbSet = (n: number) => { setExtraFetches(n - 1, device, renderer.render_settings_buffer); fbSync(); };
++        fbBtn.addEventListener('click', () => { if (!benchRunning) fbSet((getExtraFetches() + 1) % 4 + 1); });
++        const fbSweep = document.createElement('button');
++        fbSweep.style.cssText = fbCss + 'bottom:50px;';
++        fbSweep.textContent = 'Sweep 1-4';
++        const fbOut = document.createElement('pre');
++        fbOut.style.cssText = 'position:fixed;left:8px;right:8px;top:48px;z-index:1002;margin:0;padding:12px;' +
++            'border-radius:8px;background:#000000e6;color:#fff;font:12px/1.5 monospace;white-space:pre-wrap;' +
++            'display:none;user-select:text;-webkit-user-select:text;';
++        fbOut.addEventListener('click', () => { fbOut.style.display = 'none'; });
++        fbSweep.addEventListener('click', async () => {
++            if (benchRunning) return;
++            const before = getExtraFetches() + 1;
++            const rounds: number[][] = [[], []];
++            let dims = '';
++            for (let r = 0; r < 2; r++) {
++                for (let n = 1; n <= 4; n++) {
++                    fbSet(n);
++                    lastBench = null;
++                    await runBenchmark(10, 200);
++                    const lb = lastBench as { fps: number, ms: number, w: number, h: number } | null;
++                    rounds[r].push(lb ? lb.ms : NaN);
++                    if (lb) dims = `${lb.w}x${lb.h}`;
++                }
++            }
++            fbSet(before);
++            const mean = [0, 1, 2, 3].map(i => (rounds[0][i] + rounds[1][i]) / 2);
++            const line = (i: number) =>
++                `${i + 1} fetch${i ? 'es' : '  '}  ${mean[i].toFixed(2)} ms  ${(1000 / mean[i]).toFixed(1).padStart(7)} FPS  ` +
++                `${i ? ((mean[i] / mean[0] - 1) * 100 >= 0 ? '+' : '') + ((mean[i] / mean[0] - 1) * 100).toFixed(1) + '%' : 'base'}` +
++                `   (rounds ${rounds[0][i].toFixed(2)} / ${rounds[1][i].toFixed(2)} ms)`;
++            const txt = `FETCHBENCH  ${dims}  offscreen, no vsync, 200 frames x 2 rounds\n` +
++                [0, 1, 2, 3].map(line).join('\n') + `\n${navigator.userAgent}\n(tap to close)`;
++            fbOut.textContent = txt; fbOut.style.display = 'block';
++            console.log('[fetchbench]\n' + txt);
++        });
++        const fbInit = Math.max(1, Math.min(4, parseInt(new URLSearchParams(window.location.search).get('fetches') ?? '1', 10) || 1));
++        if (atlas) {
++            document.body.appendChild(fbBtn); document.body.appendChild(fbSweep); document.body.appendChild(fbOut);
++            fbSet(fbInit);
++        }
++
+         // ---- Keyboard: WASD (+Q/E down/up, Z/X roll) fly navigation, T = texture toggle ----
+         // Z/X are the desktop equivalent of the 2-finger twist: X rolls in the
+         // same sense as twisting two fingers clockwise. Rate is per-second and
