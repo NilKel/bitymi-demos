@@ -930,7 +930,7 @@
         E3RD:HIDDEN-END -->
         <!-- E3RD:END -->
         <details class="folder" open>
-        <summary><span class="chev">▸</span><span class="fname">medical</span><span class="fcount">11 scenes</span></summary>
+        <summary><span class="chev">▸</span><span class="fname">medical</span><span class="fcount">12 scenes</span></summary>
 
         <h2>Cinematic Anatomy (micro-CT)</h2>
         <div class="grid">
@@ -1034,6 +1034,24 @@
                 <div class="text">
                     <div class="title">Prostate (HiP-CT)</div>
                     <div class="meta"><span class="size">24 MB</span> · cinematic-anatomy · 38k Gauss · 31.69 dB · 3927 FPS (5090)</div>
+                </div>
+            </a>
+            <!-- Prostate CT (HIM-25-005, 102 um ds12 volume) — 3D_SH_res SV, iter 35k at -r 2
+                 (1024x1024), FastGS densify kept on to 35k. 200-view Cinematic sphere capture
+                 with real RGBA alpha. Raw-probe e3rd: extent-3 bake -> RD probe on the raw bake
+                 (47.5% of texels kept, 16,671 surfels untextured) -> ONE 3k atlas-only finetune.
+                 31.92 dB / 0.9406 / 0.0542 @ 2136 FPS (5090, CUDA) on 25 views held out of the
+                 finetune (the teacher trained on all 200, so not a clean test split).
+                 typeD codebook atlas, BC7 and ASTC twins, both 54 MB, + BPLY. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/ct_ds12_view1_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/ct_ds12_view1_e3rdraw_astc.bitymi"
+               data-bc7-mb="54" data-astc-mb="54"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/ct_ds12_view1_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/prostate_ct_ds12.jpg" alt="Prostate CT (HIM-25-005) · 3D_SH_res SV, e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate CT (HIM-25-005)</div>
+                    <div class="meta"><span class="size">54 MB</span> · cinematic-anatomy · 102 µm CT · 150k Gauss · e3rd finetuned · 31.92 dB · 2136 FPS (5090)</div>
                 </div>
             </a>
             <!-- Split-slider: two synced viewer iframes side-by-side with a
