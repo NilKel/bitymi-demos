@@ -930,7 +930,7 @@
         E3RD:HIDDEN-END -->
         <!-- E3RD:END -->
         <details class="folder" open>
-        <summary><span class="chev">▸</span><span class="fname">medical</span><span class="fcount">12 scenes</span></summary>
+        <summary><span class="chev">▸</span><span class="fname">medical</span><span class="fcount">13 scenes</span></summary>
 
         <h2>Cinematic Anatomy (micro-CT)</h2>
         <div class="grid">
@@ -1037,11 +1037,12 @@
                 </div>
             </a>
             <!-- Prostate CT (HIM-25-005, 102 um ds12 volume) — 3D_SH_res SV, iter 35k at -r 2
-                 (1024x1024), FastGS densify kept on to 35k. 200-view Cinematic sphere capture
-                 with real RGBA alpha. Raw-probe e3rd: extent-3 bake -> RD probe on the raw bake
-                 (47.5% of texels kept, 16,671 surfels untextured) -> ONE 3k atlas-only finetune.
-                 31.92 dB / 0.9406 / 0.0542 @ 2136 FPS (5090, CUDA) on 25 views held out of the
-                 finetune (the teacher trained on all 200, so not a clean test split).
+                 (1024x1024), FastGS densify kept on to 35k, blur_thresh 3000. 200-view Cinematic
+                 sphere capture with real RGBA alpha; ALL 200 views are training views (no test split).
+                 Raw-probe e3rd: extent-3 bake -> RD probe on the raw bake (47.5% of texels kept,
+                 16,671 surfels untextured) -> ONE 3k atlas-only finetune on all 200 views.
+                 37.00 dB / 0.9845 / 0.0223 on 25 of the TRAINING views (fit, not generalisation).
+                 2136 FPS (5090, CUDA) measured on an idle GPU with the same geometry + atlas layout.
                  typeD codebook atlas, BC7 and ASTC twins, both 54 MB, + BPLY. -->
             <a class="demo" data-invariant="true"
                data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/ct_ds12_view1_e3rdraw.bitymi"
@@ -1051,7 +1052,25 @@
                 <img class="thumb" src="static/thumbs/prostate_ct_ds12.jpg" alt="Prostate CT (HIM-25-005) · 3D_SH_res SV, e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
                 <div class="text">
                     <div class="title">Prostate CT (HIM-25-005)</div>
-                    <div class="meta"><span class="size">54 MB</span> · cinematic-anatomy · 102 µm CT · 150k Gauss · e3rd finetuned · 31.92 dB · 2136 FPS (5090)</div>
+                    <div class="meta"><span class="size">54 MB</span> · cinematic-anatomy · 102 µm CT · 150k Gauss · e3rd finetuned · 37.00 dB on training views · 2136 FPS (5090)</div>
+                </div>
+            </a>
+            <!-- Same capture, denser teacher: blur_thresh 6000 + --aniso_reg 0.01 --aniso_max 4
+                 (AniBS6k_SV_h2_beta_dens35k_r2, 298,725 surfels, 281,111 after bake pruning).
+                 Raw-probe e3rd: 39.2% of texels kept, 50,005 surfels untextured, ONE 3k atlas-only
+                 finetune on all 200 views. 39.27 dB / 0.9910 / 0.0141 on 25 of the TRAINING views.
+                 1621 FPS (5090, CUDA) is the pre-finetune e3rd bake on an idle GPU (same geometry +
+                 atlas layout); the post-finetune bench ran beside another training job.
+                 typeD codebook atlas, BC7 and ASTC twins, both 88 MB, + BPLY. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/ct_ds12_view1_anibs6k_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/ct_ds12_view1_anibs6k_e3rdraw_astc.bitymi"
+               data-bc7-mb="88" data-astc-mb="88"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/ct_ds12_view1_anibs6k_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/prostate_ct_ds12.jpg" alt="Prostate CT (HIM-25-005) dense · anisotropy-regularised teacher, e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate CT (HIM-25-005) · dense <span style="color:#a0f0a0;font-size:0.75em">· aniso reg</span></div>
+                    <div class="meta"><span class="size">88 MB</span> · cinematic-anatomy · 102 µm CT · 281k Gauss · anisotropy-regularised teacher · e3rd finetuned · 39.27 dB on training views · 1621 FPS (5090)</div>
                 </div>
             </a>
             <!-- Split-slider: two synced viewer iframes side-by-side with a
