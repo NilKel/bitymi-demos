@@ -228,7 +228,7 @@
     <main>
         <h1>BITYMI demos</h1>
         <p>WebGPU 2D-surfel splatting with texture atlases baked from a neural representation. All scenes use <code>--feature SV</code> (K=7 Spherical-Voronoi sites/surfel) and a typeD (BC7-codebook) residual atlas.
-           Browsers and phones without WebGPU get the same scenes through a <b>WebGL2 fallback</b> (transform-feedback preprocess, same image); the viewer pane has a "Switch to WebGL2 / WebGPU" button that remembers your choice, and <code>?renderer=webgl</code> / <code>?renderer=webgpu</code> on any viewer link forces one.</p>
+           Browsers and phones without WebGPU get the same scenes through a <b>WebGL2 fallback</b> (transform-feedback preprocess, same image); the viewer pane has a "Switch to WebGL2 / WebGPU" button that remembers your choice, and <code>?renderer=webgl</code> / <code>?renderer=webgpu</code> on any viewer link forces one. The WebGPU pane also has an <b>MSAA 4×</b> toggle (<code>?msaa=1</code>): a multisampled colour target that only changes quad / hard-disc edges — the fragment still runs once per pixel.</p>
 
         <div class="quality-bar" role="group" aria-label="Atlas compression format">
             <span class="label">Atlas</span>
