@@ -940,7 +940,7 @@
         E3RD:HIDDEN-END -->
         <!-- E3RD:END -->
         <details class="folder" open>
-        <summary><span class="chev">▸</span><span class="fname">medical</span><span class="fcount">16 scenes</span></summary>
+        <summary><span class="chev">▸</span><span class="fname">medical</span><span class="fcount">17 scenes</span></summary>
 
         <h2>Cinematic Anatomy (micro-CT)</h2>
         <div class="grid">
@@ -1098,6 +1098,26 @@
                 <div class="text">
                     <div class="title">Prostate CT (HIM-25-005) · dense <span style="color:#a0f0a0;font-size:0.75em">· aniso + normal reg</span></div>
                     <div class="meta"><span class="size">102 MB</span> · cinematic-anatomy · 102 µm CT · 305k Gauss · anisotropy + normal-consistency (λ 0.05) teacher · e3rd finetuned · 39.57 dB on training views · 1516 FPS (5090)</div>
+                </div>
+            </a>
+            <!-- Same HIM-25-005 specimen, second Cinematic capture: a wedge cut away to show the
+                 interior with segmentation colours (220 views, 2560x1369 RGBA, trained at -r 2). The
+                 capture came WITHOUT cameras: COLMAP on its own, then aligned into the ct_ds12_view1
+                 frame geometrically (data/himalaya/ct_3dgs1/align_info.json, good to ~1-2 px).
+                 Teacher clip_AniBS6k_SV_h2_beta_dens35k_r2_ln05_001w25 (blur 6000, aniso 0.01,
+                 lambda_normal 0.05, --w_lambda 0.001) -> raw-probe e3rd: 39.4% of texels kept, ONE 3k
+                 atlas-only finetune on all 220 views. 296,465 surfels after bake pruning.
+                 33.89 / 0.9764 / 0.0316 on 28 TRAINING views, 1210 FPS (5090, CUDA, idle GPU).
+                 typeD codebook atlas, BC7 and ASTC twins, both 94 MB, + BPLY. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/ct_3dgs1_clip_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/ct_3dgs1_clip_e3rdraw_astc.bitymi"
+               data-bc7-mb="94" data-astc-mb="94"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/ct_3dgs1_clip_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/prostate_ct_clip.jpg" alt="Prostate CT clipped (HIM-25-005) · wedge cut with segmented interior, e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate CT (HIM-25-005) · clipped <span style="color:#a0f0a0;font-size:0.75em">· segmented interior</span></div>
+                    <div class="meta"><span class="size">94 MB</span> · cinematic-anatomy · wedge cut showing segmentation · 296k Gauss · e3rd finetuned · 33.89 dB on training views · 1210 FPS (5090)</div>
                 </div>
             </a>
             <!-- MedRelight relit organ: 36 renders on a 60 deg spiral (1024x1024), alpha matted from the
