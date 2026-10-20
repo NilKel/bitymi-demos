@@ -626,6 +626,20 @@
                 </div>
             </a>
 
+            <!-- garden_sB8kqat — ONE 8192x8192 BC7 probe image (proberes, fixed probes): RD sizes at the 8k budget
+                 + appearance (t-SNE) placement (stage B), 5k-iteration texel finetune with a straight-through BC7 round trip
+                 every 100 iterations (--probe_bc7_qat_every 100), geometry + SV frozen. No mips (FPS A/B vs garden_e3rdraw).
+                 Exact BC7 test eval 27.12 / 0.8447 / 0.1212 vs e3rd raw shelf 27.06 / 0.8405 / 0.1247.
+                 NAT2 atlas_format=9, 148,803 probes stride 6. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/garden_sB8kqat.bitymi&amp;mip=0">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · one 8k BC7 probe image, BC7-aware finetune" loading="lazy" style="filter: hue-rotate(90deg) saturate(1.2);">
+                <div class="text">
+                    <div class="title">🎯 Garden · one 8k probe image <span style="color:#7fd1b9;font-size:0.75em">· BC7-aware finetune</span></div>
+                    <div class="meta"><span class="size">83 MB</span> · 8192² BC7 image + 148,803 affine probes · PSNR 27.12 · LPIPS 0.1212 · no mips (<code>?mip=0</code>) for an FPS A/B with the e3rd card</div>
+                </div>
+            </a>
+
             <!-- kitchen_octc — proberes with the CONTRACTED-metric probe sizing +
                  a mip chain. Two changes vs kitchen_p32_oct:
                  (1) probe footprints are sized by mip-360 CONTRACTED-space surfel
