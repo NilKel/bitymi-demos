@@ -382,6 +382,18 @@
                     <div class="meta"><span class="size">50 MB</span> + 50 MB ASTC twin · Mip-NeRF 360 · typeD codebook atlas · <b>verify:</b> loads both BC7 and ASTC atlases, "Atlas source" toggle in the pane (temporary)</div>
                 </div>
             </a>
+            <!-- nyc_e3rdraw — Zip-NeRF nyc house (990 photos, undistorted, images_2), ONE hash field, no submodels: COLMAP recentred on
+                 the camera centroid, UNCONTRACTED grid (range +-7, 4 hash levels x 4D, 2^22), normal consistency 0.01, house
+                 densification gates (227k surfels). Raw-probe e3rd shelf + 3k texel finetune: 27.07 / 0.8411 / 0.2775 (training
+                 eval) vs 3DGS 26.41 / 0.829 / 0.343 and Zip-NeRF 28.42 / 0.850 / 0.281 (SMERF tables). typeD BC7 codebook, 49 MB. -->
+            <a class="demo" data-invariant="true"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/zipnerf/nyc_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/nyc.jpg" alt="NYC house · BITYMI e3rd (raw probe)" loading="lazy">
+                <div class="text">
+                    <div class="title">NYC house <span style="color:#7fd1b9;font-size:0.75em">· Zip-NeRF dataset</span></div>
+                    <div class="meta"><span class="size">49 MB</span> · whole multi-room house from one hash field, no submodels · 227k surfels · PSNR 27.07 · LPIPS 0.2775 · typeD codebook atlas</div>
+                </div>
+            </a>
             <a class="demo" data-folder="mip_360" data-scene="bicycle_e3rdraw" data-hd-mb="50" data-true-mb="50" data-bc7-single="bicycle_e3rdraw.bitymi"
                data-astc-hd="bicycle_e3rdraw_astc.bitymi" data-astc-lite="bicycle_e3rdraw_astc.bitymi" data-astc-classic="bicycle_e3rdraw_astc.bitymi" data-astc-mb="50"
                href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/bicycle_e3rdraw.bitymi">
