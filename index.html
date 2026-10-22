@@ -966,7 +966,7 @@
         E3RD:HIDDEN-END -->
         <!-- E3RD:END -->
         <details class="folder" open>
-        <summary><span class="chev">▸</span><span class="fname">medical</span><span class="fcount">17 scenes</span></summary>
+        <summary><span class="chev">▸</span><span class="fname">medical</span><span class="fcount">18 scenes</span></summary>
 
         <h2>Cinematic Anatomy (micro-CT)</h2>
         <div class="grid">
@@ -1146,22 +1146,40 @@
                     <div class="meta"><span class="size">94 MB</span> · cinematic-anatomy · wedge cut showing segmentation · 296k Gauss · e3rd finetuned · 33.89 dB on training views · 1210 FPS (5090)</div>
                 </div>
             </a>
-            <!-- MedRelight relit organ: 36 renders on a 60 deg spiral (1024x1024), alpha matted from the
-                 cream backdrop, visual-hull init (COLMAP finds almost no matches on this data), scene
-                 normalized to half-extent 1.4. BITYMI 3D_SH_res teacher (35k, -r 1, aniso 0.01 + lambda_normal
-                 0.05, FastGS densify to 35k) -> raw-probe e3rd, ONE 3k atlas-only finetune on all 36 views.
-                 Quality is on 5 TRAINING views (no held-out split). typeD codebook atlas, BC7 + ASTC twins, + BPLY.
-                 Brain: 136,930 surfels, probe kept 42.1% of texels; teacher ~36.0 dB -> 42.64 / 0.9986 / 0.0015,
-                 2460 FPS (5090, CUDA). -->
+            <!-- MedRelight brain v2 (2026-10-22): 36 relit renders on a 60 deg spiral, alpha matted, visual-hull
+                 init; trained on 31 views, 5 held out (every 8th) for evaluation. BITYMI 3D_SH_res teacher
+                 BSfg25k_eval (beta_scaled, --w_lambda 0.005 --w_lambda_gamma 25000 --w_lambda_fg = falloff reg
+                 balanced on FOREGROUND pixels only, aniso 0.01, lambda_normal 0.05, FastGS densify to 35k);
+                 the unregularized twin tied it (27.70 vs 27.73 dB). Raw-probe e3rd (71% of texels kept),
+                 ONE 3k atlas-only finetune on the 31 train views. 112,495 surfels.
+                 HELD-OUT (5 views, scripts/score_renders.py, same code as the cinematic-gaussians card):
+                 27.74 dB / 0.9139 / LPIPS 0.0590; 2119 FPS Vulkan HW raster (vk_raster), 1758 FPS CUDA, 5090.
+                 Replaces the v1 card (trained on all 36 views, quoted training-view PSNR).
+                 typeD codebook atlas, BC7 + ASTC twins, 54 MB, + BPLY. -->
             <a class="demo" data-invariant="true"
-               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/medrelight/medrelight_brain_e3rdraw.bitymi"
-               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/medrelight/medrelight_brain_e3rdraw_astc.bitymi"
-               data-bc7-mb="45" data-astc-mb="45"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/medrelight/medrelight_brain_e3rdraw.bitymi">
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/medrelight/medrelight_brain_v2_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/medrelight/medrelight_brain_v2_e3rdraw_astc.bitymi"
+               data-bc7-mb="54" data-astc-mb="54"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/medrelight/medrelight_brain_v2_e3rdraw.bitymi">
                 <img class="thumb" src="static/thumbs/medrelight_brain.jpg" alt="Brain (MedRelight) · BITYMI e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
                 <div class="text">
-                    <div class="title">Brain (MedRelight)</div>
-                    <div class="meta"><span class="size">45 MB</span> · relit organ render · 137k Gauss · e3rd finetuned · 42.64 dB on training views · 2460 FPS (5090)</div>
+                    <div class="title">Brain (MedRelight) · BITYMI</div>
+                    <div class="meta"><span class="size">54 MB</span> · 112k surfels · e3rd finetuned · held-out 27.74 dB / 0.914 / LPIPS 0.059 · 2119 FPS Vulkan (5090) · compare: cinematic-gaussians card</div>
+                </div>
+            </a>
+            <!-- cinematic-gaussians (Niedermayr, Neuhauser, Petkov, Engel, Westermann 2024; ../cinematic-gaussians):
+                 Mip-Splatting 3DGS + c3dgs sensitivity-aware VQ compression, README recipe (30k it,
+                 --densify_grad_threshold 0.00005, random init, RGBA/alpha-supervised), SAME 31/5 split and
+                 premultiplied RGBA targets. Compressed npz = 265,843 Gaussians, 4.4 MB.
+                 HELD-OUT (same scoring code): 27.16 dB / 0.9042 / LPIPS 0.0585; their WebGPU renderer
+                 web-splat (Vulkan, 5090, same 5 views at 1024x1024) 1909 FPS, frames validated at 27.08 dB.
+                 Viewer = their web-splat built from ../web-splat (wasm-bindgen 0.2.113), hosted at web-splat/. -->
+            <a class="demo" data-invariant="true"
+               href="web-splat/index.html?file=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/medrelight/cinematic_brain_c3dgs.npz&amp;scene=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/medrelight/cinematic_brain_cameras.json">
+                <img class="thumb" src="static/thumbs/cinematic_brain.jpg" alt="Brain (MedRelight) · cinematic-gaussians baseline in its own web-splat viewer" loading="lazy">
+                <div class="text">
+                    <div class="title">Brain (MedRelight) · cinematic-gaussians <span style="color:#f0b060;font-size:0.75em">· baseline</span></div>
+                    <div class="meta"><span class="size">4.4 MB</span> · 266k Gaussians · Mip-Splatting + c3dgs compression (Niedermayr et al. 2024) · held-out 27.16 dB / 0.904 / LPIPS 0.059 · 1909 FPS web-splat (5090) · their WebGPU viewer</div>
                 </div>
             </a>
             <!-- MedRelight relit organ: 36 renders on a 60 deg spiral (1024x1024), alpha matted from the
