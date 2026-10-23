@@ -310,6 +310,26 @@
             </a>
         </div>
 
+        <!-- BSPPOP:BEGIN — popping test: per-surfel BSP painter order vs the stock depth sort (Halloumi-WS build in viewer-bsp/) -->
+        <h2>🧪 Popping test <span style="color:#f0b060;font-size:0.75em">· BSP painter order vs depth sort</span></h2>
+        <div class="grid">
+            <a class="demo" data-invariant="true" href="viewer-bsp/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_bsp_nc10.bitymi&amp;bsp=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_bsp_nc10.bsp">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room, non-crossing cores, BSP order test" loading="lazy" style="filter: saturate(0.6) contrast(1.1);">
+                <div class="text">
+                    <div class="title">Room · non-crossing cores (λ 1.0) · BSP order</div>
+                    <div class="meta">Surfel cores regularised not to cross (3 % of surfels still do, vs 37 %), drawn in BSP painter order recomputed on the CPU each time the camera moves · flip <b>BSP order (vs depth sort)</b> in the Surfel math panel to compare on the same view · whole surfels, no splitting · 31.61 dB / 0.1917 LPIPS · 17 MB + 2 MB tree · <a href="viewer-bsp/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_bsp_nc10_astc.bitymi&amp;bsp=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_bsp_nc10.bsp">Android (ASTC)</a> · <code>&amp;bsp_order=0</code> starts on depth sort</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer-bsp/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_bsp_geomctl.bitymi&amp;bsp=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_bsp_geomctl.bsp">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room, unregularised control, BSP order test" loading="lazy" style="filter: saturate(0.6) contrast(1.1);">
+                <div class="text">
+                    <div class="title">Room · control (no core regulariser) · BSP order</div>
+                    <div class="meta">Same finetune without the regulariser (37 % of surfels have a crossing core), same BSP-order toggle · 31.75 dB / 0.1894 LPIPS · 17 MB + 2 MB tree · <a href="viewer-bsp/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_bsp_geomctl_astc.bitymi&amp;bsp=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/mip_360/room_bsp_geomctl.bsp">Android (ASTC)</a></div>
+                </div>
+            </a>
+        </div>
+        <!-- BSPPOP:END -->
+
         <!-- FETCHBENCH:BEGIN — throwaway test build of the viewer with 1..4 atlas fetches per fragment -->
         <h2>🧪 Fetch-count test <span style="color:#f0b060;font-size:0.75em">· 1 to 4 atlas fetches per fragment</span></h2>
         <div class="grid">
