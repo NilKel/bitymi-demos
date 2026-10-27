@@ -1029,6 +1029,20 @@
 
         <h2>Cinematic Anatomy (micro-CT)</h2>
         <div class="grid">
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_bfc_bench.bitymi&amp;bfc=1&amp;bfc_cos=0.2">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Backface-culled brain, native resolution" loading="lazy">
+                <div class="text">
+                    <div class="title">Brain BFC · native <span style="color:#f0b060;font-size:0.8em">· upscaling A/B</span></div>
+                    <div class="meta"><span class="size">194 MB</span> · July backface-cull model (217 k surfels, the bake used in the 4K upscaling benchmark; opens with <code>bfc=1&amp;bfc_cos=0.2</code>, no proxy-mesh cull in this viewer, which only skips surfels already hidden) · renders at full canvas resolution · compare with the upscaled card next to it</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_bfc_bench.bitymi&amp;bfc=1&amp;bfc_cos=0.2&amp;up=bc5&amp;rs=0.5&amp;slope_bc5=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_bfc_slope_bc5_ft2.nat2&amp;slope_bc5_4x=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_bfc_slope_bc5_ft4.nat2&amp;slope_p=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_bfc_slope_p_ft2.nat2&amp;slope_p_4x=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_bfc_slope_p_ft4.nat2">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Backface-culled brain, rendered at half resolution and upscaled with texture slopes" loading="lazy" style="filter: hue-rotate(-40deg) saturate(1.2);">
+                <div class="text">
+                    <div class="title">Brain BFC · upscaled 2× <span style="color:#f0b060;font-size:0.8em">· texture slopes, desktop</span></div>
+                    <div class="meta"><span class="size">194 MB + 814 MB per slope file</span> · same bundle, opens rendering at <b>1/2 resolution</b>, upscaled with Hermite + the finetuned <b>BC5</b> texture slopes · pane "Upscale": off / bilinear / bicubic / hermite / texture-aware (green, no extra data) / texture BC5 / texture P, "Upscale factor" 2× / 4× (4× loads the 4×-finetuned file) · slope files download on first use ("Slope data" row; Hermite until then) · slopes finetuned against the training-resolution (2048²) images, not 4K; 4K-finetuned files to follow · 4K benchmark at 4×: Hermite LPIPS 0.253, texture slopes 0.230–0.233, native 0.204 · BC5 / P need BC texture support (desktop, Mac; Android falls back to Hermite)</div>
+                </div>
+            </a>
             <a class="demo" data-folder="himalaya_brain" data-scene="brain_clip47um" data-hd-mb="98"
                data-true-mb="94"
                data-astc-hd="brain_clip47um_astc.bitymi"
