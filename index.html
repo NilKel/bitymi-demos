@@ -1304,6 +1304,52 @@
                     <div class="meta"><span class="size">91 MB</span> · cinematic-anatomy · 102 µm CT · wedge cut + segmentation colours · 344k Gauss · anisotropy + normal-consistency (λ 0.05) teacher · e3rd finetuned · 31.77 dB on training views · 1257 FPS (5090)</div>
                 </div>
             </a>
+            <!-- HIM-25-005 (2026-10-28): CT ds3 4k + MRI pre-aligned / warped-to-CT, same recipe
+                 (AniBS6k_SV_h2_beta_dens35k_ln05_mdepth1: aniso reg + blur split + normal + mono depth),
+                 raw-probe e3rd finetuned on ALL views (no held-out split) -> numbers are on training views. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_e3rdraw_astc.bitymi"
+               data-bc7-mb="98" data-astc-mb="98"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/him25005_ct_ds3_4k.jpg" alt="Prostate CT (HIM-25-005), ds3 4k volume · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate CT (HIM-25-005) · ds3 4k</div>
+                    <div class="meta"><span class="size">98 MB</span> · cinematic-anatomy · ds3 CT at 4k · 615k surfels · aniso + blur-split + normal + mono-depth teacher · e3rd finetuned · 32.51 dB / LPIPS 0.048 on training views · 705 FPS (5090)</div>
+                </div>
+            </a>
+            <!-- MRI split slider: reuses heart-slider/ (generic left/right/labels/title params,
+                 camera relay between the two viewer iframes). Both MRI captures share the CT rig. -->
+            <a class="demo" data-invariant="true"
+               href="heart-slider/index.html?left=https%3A%2F%2Fhuggingface.co%2Fdatasets%2FNilkel%2Fbitymi-demos%2Fresolve%2Fmain%2Fhimalaya_prostate%2Fhim25005_mri_prealigned_e3rdraw.bitymi&amp;right=https%3A%2F%2Fhuggingface.co%2Fdatasets%2FNilkel%2Fbitymi-demos%2Fresolve%2Fmain%2Fhimalaya_prostate%2Fhim25005_mri_warped_e3rdraw.bitymi&amp;left_label=MRI%20%C2%B7%20pre-aligned&amp;right_label=MRI%20%C2%B7%20warped%20to%20CT&amp;title=HIM-25-005%20MRI%3A%20pre-aligned%20vs%20warped">
+                <img class="thumb" src="static/thumbs/him25005_mri_warped.jpg" alt="HIM-25-005 MRI pre-aligned vs warped to CT · camera-synced split slider" loading="lazy">
+                <div class="text">
+                    <div class="title">🔀 Prostate MRI (HIM-25-005) · pre-aligned ↔ warped · split-slider</div>
+                    <div class="meta">drag the divider to compare the MRI before and after warping onto the CT · orbit either side and the other follows · pre-aligned 77 MB / 40.72 dB · warped 64 MB / 39.03 dB (training views)</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_prealigned_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_prealigned_e3rdraw_astc.bitymi"
+               data-bc7-mb="73" data-astc-mb="73"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_prealigned_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/him25005_mri_prealigned.jpg" alt="Prostate MRI (HIM-25-005), pre-aligned · e3rd finetuned typeD atlas" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate MRI (HIM-25-005) · pre-aligned</div>
+                    <div class="meta"><span class="size">73 MB</span> · 343k surfels · e3rd finetuned · 40.72 dB / LPIPS 0.010 on training views · 1527 FPS (5090)</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_warped_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_warped_e3rdraw_astc.bitymi"
+               data-bc7-mb="61" data-astc-mb="61"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_warped_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/him25005_mri_warped.jpg" alt="Prostate MRI (HIM-25-005), warped to CT · e3rd finetuned typeD atlas" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate MRI (HIM-25-005) · warped to CT</div>
+                    <div class="meta"><span class="size">61 MB</span> · 289k surfels · e3rd finetuned · 39.03 dB / LPIPS 0.013 on training views · 1666 FPS (5090)</div>
+                </div>
+            </a>
             <!-- Split-slider: two synced viewer iframes side-by-side with a
                  draggable divider. Uses the halloumi_sync_pose / _camera_state
                  postMessage bridge added to the viewer 2026-07-28. Both heart
