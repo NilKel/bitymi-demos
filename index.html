@@ -1387,6 +1387,63 @@
                     <div class="meta"><span class="size">61 MB</span> · 289k surfels · e3rd finetuned · 39.03 dB / LPIPS 0.013 on training views · 1666 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Prostate CT (HIM-25-005) · ds3 4k · BFC: 25.6 µm HiP-CT, 100 views at 4096² (trained at -r 2). Teacher AniBS6k_SV_h2_beta_dens35k_ln05_mdepth1_bfc5k02: BITYMI 3D_SH_res recipe of the ct_ds12 _ln05 run +
+                 depth prior from the renderer's exact depth maps (--mono_depth_reg 1.0) + backface culling as in the
+                 deployed brain BFC run (--backface_cull_after 5000 --backface_cull_cos 0.2, random back-plate mesh,
+                 random background); trained on Sherlock (A100), 704,249 surfels, 26.02 dB teacher.
+                 Raw-probe e3rd: 22.9% of texels kept, 367,005 surfels untextured, ONE 3k atlas-only finetune on all
+                 100 views -> 30.30 dB / 0.9504 / 0.0654 on 25 of the TRAINING views,
+                 686 FPS (5090, CUDA). typeD codebook atlas, BC7 96 MB / ASTC 96 MB. Opens with
+                 bfc=1&bfc_cos=0.2 (the centroid-oriented cull the BFC-trained models need). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_bfc_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_bfc_e3rdraw_astc.bitymi"
+               data-bc7-mb="96" data-astc-mb="96"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_bfc_e3rdraw.bitymi&amp;bfc=1&amp;bfc_cos=0.2">
+                <img class="thumb" src="static/thumbs/him25005_ct_ds3_4k_bfc.jpg" alt="Prostate CT (HIM-25-005) · ds3 4k · BFC · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate CT (HIM-25-005) · ds3 4k · BFC <span style="color:#a0f0a0;font-size:0.75em">· backface cull + depth prior</span></div>
+                    <div class="meta"><span class="size">96 MB</span> · 25.6 µm HiP-CT, 100 views at 4096² (trained at -r 2) · 635k Gauss · BITYMI + backface culling (cos 0.2) + depth-prior teacher · e3rd finetuned · 30.30 dB / LPIPS 0.065 on training views · 686 FPS (5090) · opens with <code>bfc=1</code></div>
+                </div>
+            </a>
+            <!-- Prostate MRI 7T E7 (HIM-25-005) · warped to CT · BFC: 7T T2 E7 (0.4 mm slices), ANTs SyN-registered to the HiP-CT, 100 views at 1000². Teacher AniBS6k_SV_h2_beta_dens35k_ln05_mdepth1_bfc5k02: BITYMI 3D_SH_res recipe of the ct_ds12 _ln05 run +
+                 depth prior from the renderer's exact depth maps (--mono_depth_reg 1.0) + backface culling as in the
+                 deployed brain BFC run (--backface_cull_after 5000 --backface_cull_cos 0.2, random back-plate mesh,
+                 random background); trained on Sherlock (A100), 417,827 surfels, 31.13 dB teacher.
+                 Raw-probe e3rd: 18.5% of texels kept, 220,731 surfels untextured, ONE 3k atlas-only finetune on all
+                 100 views -> 34.09 dB / 0.9839 / 0.0218 on 25 of the TRAINING views,
+                 1344 FPS (5090, CUDA). typeD codebook atlas, BC7 57 MB / ASTC 57 MB. Opens with
+                 bfc=1&bfc_cos=0.2 (the centroid-oriented cull the BFC-trained models need). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_e7_warped_bfc_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_e7_warped_bfc_e3rdraw_astc.bitymi"
+               data-bc7-mb="57" data-astc-mb="57"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_e7_warped_bfc_e3rdraw.bitymi&amp;bfc=1&amp;bfc_cos=0.2">
+                <img class="thumb" src="static/thumbs/him25005_mri_e7_warped_bfc.jpg" alt="Prostate MRI 7T E7 (HIM-25-005) · warped to CT · BFC · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate MRI 7T E7 (HIM-25-005) · warped to CT · BFC <span style="color:#a0f0a0;font-size:0.75em">· backface cull + depth prior</span></div>
+                    <div class="meta"><span class="size">57 MB</span> · 7T T2 E7 (0.4 mm slices), ANTs SyN-registered to the HiP-CT, 100 views at 1000² · 391k Gauss · BITYMI + backface culling (cos 0.2) + depth-prior teacher · e3rd finetuned · 34.09 dB / LPIPS 0.022 on training views · 1344 FPS (5090) · opens with <code>bfc=1</code></div>
+                </div>
+            </a>
+            <!-- Prostate MRI 7T E7 (HIM-25-005) · pre-aligned · BFC: 7T T2 E7 (0.4 mm slices), affine pre-alignment only, 100 views at 1000². Teacher AniBS6k_SV_h2_beta_dens35k_ln05_mdepth1_bfc5k02: BITYMI 3D_SH_res recipe of the ct_ds12 _ln05 run +
+                 depth prior from the renderer's exact depth maps (--mono_depth_reg 1.0) + backface culling as in the
+                 deployed brain BFC run (--backface_cull_after 5000 --backface_cull_cos 0.2, random back-plate mesh,
+                 random background); trained on Sherlock (A100), 414,906 surfels, 30.53 dB teacher.
+                 Raw-probe e3rd: 19.3% of texels kept, 214,022 surfels untextured, ONE 3k atlas-only finetune on all
+                 100 views -> 34.05 dB / 0.9838 / 0.0214 on 25 of the TRAINING views,
+                 1375 FPS (5090, CUDA). typeD codebook atlas, BC7 57 MB / ASTC 57 MB. Opens with
+                 bfc=1&bfc_cos=0.2 (the centroid-oriented cull the BFC-trained models need). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_e7_prealigned_bfc_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_e7_prealigned_bfc_e3rdraw_astc.bitymi"
+               data-bc7-mb="57" data-astc-mb="57"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_e7_prealigned_bfc_e3rdraw.bitymi&amp;bfc=1&amp;bfc_cos=0.2">
+                <img class="thumb" src="static/thumbs/him25005_mri_e7_prealigned_bfc.jpg" alt="Prostate MRI 7T E7 (HIM-25-005) · pre-aligned · BFC · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate MRI 7T E7 (HIM-25-005) · pre-aligned · BFC <span style="color:#a0f0a0;font-size:0.75em">· backface cull + depth prior</span></div>
+                    <div class="meta"><span class="size">57 MB</span> · 7T T2 E7 (0.4 mm slices), affine pre-alignment only, 100 views at 1000² · 388k Gauss · BITYMI + backface culling (cos 0.2) + depth-prior teacher · e3rd finetuned · 34.05 dB / LPIPS 0.021 on training views · 1375 FPS (5090) · opens with <code>bfc=1</code></div>
+                </div>
+            </a>
             <!-- Split-slider: two synced viewer iframes side-by-side with a
                  draggable divider. Uses the halloumi_sync_pose / _camera_state
                  postMessage bridge added to the viewer 2026-07-28. Both heart
