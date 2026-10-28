@@ -1159,6 +1159,13 @@
                     <div class="meta"><span class="size">24 MB</span> · cinematic-anatomy · 38k Gauss · 31.69 dB · 3927 FPS (5090)</div>
                 </div>
             </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_prealigned_e3rdraw_up_x2.bitymi&amp;up=bc5&amp;rs=0.5&amp;slope_bc5=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_mri_prealigned_e3rdraw_up_x2_slope_bc5_typed.nat2">
+                <img class="thumb" src="static/thumbs/prostate.jpg" alt="Prostate MRI · prealigned (HIM-25-005), rendered at 1/2 resolution and upscaled with texture slopes" loading="lazy" style="filter: hue-rotate(-40deg) saturate(1.2);">
+                <div class="text">
+                    <div class="title">Prostate MRI · prealigned (HIM-25-005) · upscaled 2× <span style="color:#f0b060;font-size:0.8em">· texture slopes, desktop</span></div>
+                    <div class="meta"><span class="size">73 MB + 37 MB slope file</span> · e3rd raw bake of the AniBS6k SV model, then the best upscale finetune: everything unfrozen (atlas, colour, geometry) plus a jointly trained BC5 texture-slope field, 3k iterations against the 1000² MRI renders seen through the 2× upscaler · opens rendering at <b>1/2 resolution</b>, upscaled with Hermite + the finetuned slopes · bundle and slope file both typeD (codebook) · pane "Upscale" switches to off / bilinear / bicubic / hermite / texture-aware for comparison · "Atlas filter" adds anisotropic filtering · slope file downloads on first use (Hermite until then) · BC5 slopes need BC texture support (desktop, Mac)</div>
+                </div>
+            </a>
             <!-- Prostate CT (HIM-25-005, 102 um ds12 volume) — 3D_SH_res SV, iter 35k at -r 2
                  (1024x1024), FastGS densify kept on to 35k, blur_thresh 3000. 200-view Cinematic
                  sphere capture with real RGBA alpha; ALL 200 views are training views (no test split).
