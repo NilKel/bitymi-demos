@@ -1325,6 +1325,15 @@
                     <div class="meta"><span class="size">98 MB</span> · cinematic-anatomy · ds3 CT at 4k · 615k surfels · aniso + blur-split + normal + mono-depth teacher · e3rd finetuned · 32.51 dB / LPIPS 0.048 on training views · 705 FPS (5090)</div>
                 </div>
             </a>
+            <!-- CT vs warped-MRI split slider: same heart-slider/ page; both share the CT world frame + orbit rig. -->
+            <a class="demo" data-invariant="true"
+               href="heart-slider/index.html?left=https%3A%2F%2Fhuggingface.co%2Fdatasets%2FNilkel%2Fbitymi-demos%2Fresolve%2Fmain%2Fhimalaya_prostate%2Fhim25005_ct_ds3_4k_e3rdraw.bitymi&amp;right=https%3A%2F%2Fhuggingface.co%2Fdatasets%2FNilkel%2Fbitymi-demos%2Fresolve%2Fmain%2Fhimalaya_prostate%2Fhim25005_mri_warped_e3rdraw.bitymi&amp;left_label=CT%20%C2%B7%20ds3%204k&amp;right_label=MRI%20%C2%B7%20warped%20to%20CT&amp;title=HIM-25-005%3A%20CT%20vs%20warped%20MRI">
+                <img class="thumb" src="static/thumbs/him25005_ct_vs_mri_warped.jpg" alt="HIM-25-005 CT vs MRI warped to CT · camera-synced split slider" loading="lazy">
+                <div class="text">
+                    <div class="title">🔀 Prostate CT ↔ warped MRI (HIM-25-005) · split-slider</div>
+                    <div class="meta">drag the divider to compare the CT with the MRI warped onto it · orbit either side and the other follows · CT 98 MB / 32.51 dB · warped MRI 61 MB / 39.03 dB (training views)</div>
+                </div>
+            </a>
             <!-- MRI split slider: reuses heart-slider/ (generic left/right/labels/title params,
                  camera relay between the two viewer iframes). Both MRI captures share the CT rig. -->
             <a class="demo" data-invariant="true"
