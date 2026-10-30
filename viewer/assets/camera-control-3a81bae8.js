@@ -1,4 +1,4 @@
-var U=Object.defineProperty;var q=(f,t,e)=>t in f?U(f,t,{enumerable:!0,configurable:!0,writable:!0,value:e}):f[t]=e;var a=(f,t,e)=>(q(f,typeof t!="symbol"?t+"":t,e),e);import{v as i,q as m,m as w,a as D}from"./camera-24ebc32d.js";const M={bilinear:0,bicubic:1,hermite:2,texture:3,bc5:4,p:4,spline:5},G={texture:0,p:1,bc5:2,spline:2},E=.7,I=`
+var U=Object.defineProperty;var q=(f,t,e)=>t in f?U(f,t,{enumerable:!0,configurable:!0,writable:!0,value:e}):f[t]=e;var a=(f,t,e)=>(q(f,typeof t!="symbol"?t+"":t,e),e);import{v as i,q as m,m as w,a as D}from"./camera-2fb96db3.js";const M={bilinear:0,bicubic:1,hermite:2,texture:3,bc5:4,p:4,spline:5},G={texture:0,p:1,bc5:2,spline:2},E=.7,I=`
 struct P { wl: u32, hl: u32, w: u32, h: u32, mode: u32, lam: f32, T: f32, pad2: u32, K: vec4<f32> };
 @group(0) @binding(0) var src: texture_2d<f32>;
 @group(0) @binding(1) var<uniform> p: P;
