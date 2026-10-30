@@ -1079,6 +1079,13 @@
                     <div class="meta"><span class="size">66 MB</span> · July backface-cull model (217 k surfels; raw-probe e3rd atlas: rate-distortion tile sizes (40 % of the shelf bake's texels, 5952×54400) finetuned 3k it against the photos with the cull on, typeD codebook; 28.73 dB / 0.898 / 0.110 LPIPS on the 13 test views with the cull (66 MB, was a 194 MB unfinetuned shelf bake); opens with <code>bfc=1&amp;bfc_cos=0.2</code>, no proxy-mesh cull in this viewer, which only skips surfels already hidden; pane "Backface cull (cos 0.2)" turns the cull off to show the unsupervised back shell) · renders at full canvas resolution · pane "Atlas filter" switches to anisotropic 16× texture filtering (see the anisotropic card) · the upscaled cards still use the earlier unfinetuned shelf bake (their slope files are laid out for its tiles)</div>
                 </div>
             </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_bfc_probe8k.bitymi&amp;bfc=1&amp;bfc_cos=0.2">
+                <img class="thumb" src="static/thumbs/brain.jpg" alt="Backface-culled brain textured from one shared 8192x8192 probe image" loading="lazy" style="filter: hue-rotate(160deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">Brain BFC · shared probes 8k <span style="color:#f0b060;font-size:0.8em">· one 8192² texture</span></div>
+                    <div class="meta"><span class="size">97 MB</span> · same backface-cull brain, but instead of a per-surfel atlas every surfel reads ONE shared 8192² BC7 image through its own 2×3 affine probe (proberes): t-SNE placement of the teacher's tiles at rate-distortion sizes, 5k texel finetune with BC7-aware training, geometry frozen · 13 test views with the cull: <b>28.08 dB / 0.882 / 0.129 LPIPS</b> (64 MiB BC7) vs the e3rd atlas card 28.71 / 0.898 / 0.111 (309 MiB BC7) and the old unfinetuned shelf 28.23 / 0.890 / 0.127 (777 MiB) · plain BC7, not the typeD codebook: typeD on this image costs 0.9 dB / +0.025 LPIPS (27.17 / 0.853 / 0.154), so it ships uncompressed · cull on (<code>bfc=1&amp;bfc_cos=0.2</code>)</div>
+                </div>
+            </a>
             <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_brain/brain_bfc_e3rdraw.bitymi&amp;bfc=1&amp;bfc_cos=0.2&amp;mipbias=aniso">
                 <img class="thumb" src="static/thumbs/brain.jpg" alt="Backface-culled brain with anisotropic texture filtering" loading="lazy" style="filter: hue-rotate(40deg) saturate(1.1);">
                 <div class="text">
