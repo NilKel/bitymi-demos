@@ -1491,6 +1491,25 @@
                     <div class="meta"><span class="size">61 MB</span> · 289k surfels · e3rd finetuned · 39.03 dB / LPIPS 0.013 on training views · 1666 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Prostate CT (HIM-25-005) · XClipGS-style z clipping: ds4 (34 µm) HiP-CT, 600 views at 1600² in the XClipGS
+                 protocol (201 intact fit / 99 intact close-up / 201 clipped near-fit / 99 clipped close-up; one z half-space
+                 plane per clipped view, tau in 30..70 % of the extent, lower side kept, camera 25..70° off the normal), 74
+                 held out (tau-interleaved). Teacher AniBS6k_SV_h2_beta_dens35k_ln05_mdepth1_xclip: previous CT recipe +
+                 depth prior + --xclip (EXACT per-fragment half-space clip at the ray-surfel hit, fwd+bwd, no learned clip
+                 parameters; textures untouched). 2.68 M surfels, test 24.05 dB (teacher). Raw-probe e3rd with the
+                 tau-fair `max` alpha*T importance (303 MB raw BC7, 2.40 M surfels), 3k atlas finetune (24.23 dB test).
+                 The viewer applies the same exact clip per fragment (render_2dgs.wgsl) — drag the Clip (z) slider. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_clipz_xclip_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_clipz_xclip_e3rdraw_astc.bitymi"
+               data-bc7-mb="329" data-astc-mb="329"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_clipz_xclip_e3rdraw.bitymi&amp;clip=z&amp;clip_min=-0.5529&amp;clip_max=0.5601&amp;clip_keep=lower&amp;clip_t=0.5">
+                <img class="thumb" src="static/thumbs/him25005_ct_clipz_xclip.jpg" alt="Prostate CT (HIM-25-005) · XClipGS-style z clipping · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate CT (HIM-25-005) · clip plane (z) <span style="color:#a0f0a0;font-size:0.75em">· exact half-space clipping, interactive slider</span></div>
+                    <div class="meta"><span class="size">329 MB</span> · 34 µm HiP-CT, 600 views at 1600² (XClipGS protocol, z axis) · 2.4 M Gauss · BITYMI + exact per-fragment clip + depth-prior teacher · e3rd finetuned · 24.2 dB on held-out views (half of them at unseen cut offsets) · opens with <code>clip=z</code> — move the <b>Clip (z)</b> slider</div>
+                </div>
+            </a>
             <!-- Prostate CT (HIM-25-005) · ds3 4k · BFC: 25.6 µm HiP-CT, 100 views at 4096² (trained at -r 2). Teacher AniBS6k_SV_h2_beta_dens35k_ln05_mdepth1_bfc5k02: BITYMI 3D_SH_res recipe of the ct_ds12 _ln05 run +
                  depth prior from the renderer's exact depth maps (--mono_depth_reg 1.0) + backface culling as in the
                  deployed brain BFC run (--backface_cull_after 5000 --backface_cull_cos 0.2, random back-plate mesh,
