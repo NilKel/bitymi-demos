@@ -1503,11 +1503,11 @@
                data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_clipz_xclip_e3rdraw.bitymi"
                data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_clipz_xclip_e3rdraw_astc.bitymi"
                data-bc7-mb="329" data-astc-mb="329"
-               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_clipz_xclip_e3rdraw.bitymi&amp;clip=z&amp;clip_min=-0.5529&amp;clip_max=0.5601&amp;clip_keep=lower&amp;clip_t=0.5">
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_clipz_xclip_e3rdraw.bitymi&amp;clip=z&amp;clip_min=-0.5529&amp;clip_max=0.5601&amp;clip_keep=lower&amp;clip_t=0.5&amp;cap=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_capz_1024.capstack">
                 <img class="thumb" src="static/thumbs/him25005_ct_clipz_xclip.jpg" alt="Prostate CT (HIM-25-005) · XClipGS-style z clipping · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
                 <div class="text">
                     <div class="title">Prostate CT (HIM-25-005) · clip plane (z) <span style="color:#a0f0a0;font-size:0.75em">· exact half-space clipping, interactive slider</span></div>
-                    <div class="meta"><span class="size">329 MB</span> · 34 µm HiP-CT, 600 views at 1600² (XClipGS protocol, z axis) · 2.4 M Gauss · BITYMI + exact per-fragment clip + depth-prior teacher · e3rd finetuned · 24.2 dB on held-out views (half of them at unseen cut offsets) · opens with <code>clip=z</code> — move the <b>Clip (z)</b> slider</div>
+                    <div class="meta"><span class="size">329 MB</span> · 34 µm HiP-CT, 600 views at 1600² (XClipGS protocol, z axis) · 2.4 M Gauss · BITYMI + exact per-fragment clip + depth-prior teacher · e3rd finetuned · 24.2 dB on held-out views (half of them at unseen cut offsets) · + 128 MB cap stack (128 orthographic cross-sections at 1024², lerped in τ) drawn as a textured plane under which the surfels are clipped · opens with <code>clip=z&amp;cap=</code> — move the <b>Clip (z)</b> slider</div>
                 </div>
             </a>
             <!-- Prostate CT (HIM-25-005) · ds3 4k · BFC: 25.6 µm HiP-CT, 100 views at 4096² (trained at -r 2). Teacher AniBS6k_SV_h2_beta_dens35k_ln05_mdepth1_bfc5k02: BITYMI 3D_SH_res recipe of the ct_ds12 _ln05 run +
