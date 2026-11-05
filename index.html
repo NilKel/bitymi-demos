@@ -1491,6 +1491,36 @@
                     <div class="meta"><span class="size">61 MB</span> · 289k surfels · e3rd finetuned · 39.03 dB / LPIPS 0.013 on training views · 1666 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Blueten apartment · video walkthrough: handheld phone video (1080p30, 4.5 min, night, whole apartment) -> 814 sharpest-of-window frames ->
+                 COLMAP (single OPENCV camera, sequential + vocab-tree loop closure; 547 registered, 0.61 px) -> images_2.
+                 Teacher RD_SV_30thr_005w25gLP_N2f_frz5k10_base (standard BITYMI recipe (no geometry regulariser)), 35k it, held-out every 8th view.
+                 Raw-probe e3rd + 3k atlas finetune -> 27.98 dB / 0.904 / 0.208 on the test views. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_base_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_base_e3rdraw_astc.bitymi"
+               data-bc7-mb="9" data-astc-mb="9"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_base_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_base.jpg" alt="Blueten apartment · video walkthrough · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · video walkthrough</div>
+                    <div class="meta"><span class="size">9 MB</span> · phone video walkthrough, 547 COLMAP frames at 960×540 · 30k Gauss · BITYMI standard BITYMI recipe (no geometry regulariser) · e3rd finetuned · 27.98 dB / LPIPS 0.208 on held-out views · 2840 FPS (5090)</div>
+                </div>
+            </a>
+            <!-- Blueten apartment · normal consistency: handheld phone video (1080p30, 4.5 min, night, whole apartment) -> 814 sharpest-of-window frames ->
+                 COLMAP (single OPENCV camera, sequential + vocab-tree loop closure; 547 registered, 0.61 px) -> images_2.
+                 Teacher RD_SV_30thr_005w25gLP_N2f_frz5k10_nrm05 (standard recipe + 2DGS depth-normal consistency (--lambda_normal 0.05 from 7k)), 35k it, held-out every 8th view.
+                 Raw-probe e3rd + 3k atlas finetune -> 26.69 dB / 0.892 / 0.220 on the test views. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_nrm05_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_nrm05_e3rdraw_astc.bitymi"
+               data-bc7-mb="9" data-astc-mb="9"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_nrm05_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_nrm05.jpg" alt="Blueten apartment · normal consistency · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · normal consistency</div>
+                    <div class="meta"><span class="size">9 MB</span> · phone video walkthrough, 547 COLMAP frames at 960×540 · 30k Gauss · BITYMI standard recipe + 2DGS depth-normal consistency (--lambda_normal 0.05 from 7k) · e3rd finetuned · 26.69 dB / LPIPS 0.220 on held-out views · 2835 FPS (5090)</div>
+                </div>
+            </a>
             <!-- Prostate CT (HIM-25-005) · XClipGS-style z clipping: ds4 (34 µm) HiP-CT, 600 views at 1600² in the XClipGS
                  protocol (201 intact fit / 99 intact close-up / 201 clipped near-fit / 99 clipped close-up; one z half-space
                  plane per clipped view, tau in 30..70 % of the extent, lower side kept, camera 25..70° off the normal), 74
