@@ -1521,6 +1521,24 @@
                     <div class="meta"><span class="size">9 MB</span> · phone video walkthrough, 547 COLMAP frames at 960×540 · 30k Gauss · BITYMI standard recipe + 2DGS depth-normal consistency (--lambda_normal 0.05 from 7k) · e3rd finetuned · 26.69 dB / LPIPS 0.220 on held-out views · 2835 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Blueten apartment · v5 stitched: the v4 MASt3R-SLAM skeleton has a ~2x scale drift over the walk (camera
+                 height above floor 2.0 -> 4.1 units; local scale vs COLMAP 1.25 -> 0.61), which the fixed-skeleton registration
+                 baked in (-4 dB vs pure COLMAP, unfixable by per-view pose refinement). v5 keeps the locally correct COLMAP
+                 fragments (v3b core 68-238 s as reference, its two mis-attached tails, the 195-209 s piece, the entrance/kitchen
+                 fragment) and places them with LOCAL Sim3 chains through the SLAM/v4 poses (scripts/stitch_fragments.py), then
+                 global BA, registers the remaining frames, drops 3 outliers -> 1527 images, whole video, no jumps (gate max step
+                 7.5x median). Teacher 35k: 30.03 dB test. Raw-probe e3rd + 3k atlas finetune -> 32.36 dB / 0.941 / 0.157. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v5_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v5_e3rdraw_astc.bitymi"
+               data-bc7-mb="15" data-astc-mb="15"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v5_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v5.jpg" alt="Blueten apartment · stitched COLMAP fragments (v5) · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · stitched poses (v5, whole video)</div>
+                    <div class="meta"><span class="size">15 MB</span> · locally-correct COLMAP fragments stitched via local SLAM Sim3 chains, 1527 frames at 960×540, no folds, no scale drift · 51k Gauss · standard BITYMI recipe · e3rd finetuned · 32.36 dB / LPIPS 0.157 on held-out views · 3210 FPS (5090)</div>
+                </div>
+            </a>
             <!-- Blueten apartment · v4 SLAM-skeleton fusion: v2 COLMAP folded the bedroom onto the living room (9-unit jump,
                  lax mapper + false vocab-tree loops). v4: 1628 sharpest-of-5 frames; MASt3R-SLAM (calibrated, 15 fps, sub-map
                  re-init after reloc failure; 255 keyframes) gives the global skeleton; COLMAP registers the dense frames against
