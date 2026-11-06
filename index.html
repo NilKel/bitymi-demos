@@ -1521,6 +1521,38 @@
                     <div class="meta"><span class="size">9 MB</span> · phone video walkthrough, 547 COLMAP frames at 960×540 · 30k Gauss · BITYMI standard recipe + 2DGS depth-normal consistency (--lambda_normal 0.05 from 7k) · e3rd finetuned · 26.69 dB / LPIPS 0.220 on held-out views · 2835 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Blueten apartment · v4 SLAM-skeleton fusion: v2 COLMAP folded the bedroom onto the living room (9-unit jump,
+                 lax mapper + false vocab-tree loops). v4: 1628 sharpest-of-5 frames; MASt3R-SLAM (calibrated, 15 fps, sub-map
+                 re-init after reloc failure; 255 keyframes) gives the global skeleton; COLMAP registers the dense frames against
+                 the fixed skeleton (sequential matching only, fixed intrinsics), global BA, 18 outlier frames dropped -> 1587 images,
+                 whole video incl. entrance/kitchen. The 1 s of blank wall at 66 s (kitchen->living room) is dead-reckoned.
+                 Teacher 35k: 28.03 dB test. Raw-probe e3rd + 3k atlas finetune -> 29.80 dB / 0.919 / 0.198 on the test views. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v4_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v4_e3rdraw_astc.bitymi"
+               data-bc7-mb="15" data-astc-mb="15"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v4_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v4.jpg" alt="Blueten apartment · SLAM-skeleton poses (v4) · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · SLAM-skeleton poses (v4, whole video)</div>
+                    <div class="meta"><span class="size">15 MB</span> · MASt3R-SLAM keyframe skeleton + COLMAP dense registration, 1587 frames at 960×540, no folded rooms · 51k Gauss · standard BITYMI recipe · e3rd finetuned · 29.80 dB / LPIPS 0.198 on held-out views · 3019 FPS (5090)</div>
+                </div>
+            </a>
+            <!-- Blueten apartment · v3b pure COLMAP: same 1628 sharp frames, sequential + vocab-tree retrieval with strict
+                 min_num_matches 50; largest model 1101 images (68-272 s, no entrance/kitchen) with two persistent seams at
+                 238 s and 262 s (bedroom->living-room return) that PSNR does not see. Locally sharper than v4 (incremental BA).
+                 Teacher 35k: 31.74 dB test. e3rd + 3k finetune -> 33.81 dB / 0.953 / 0.144 on the test views. For comparison. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v3b_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v3b_e3rdraw_astc.bitymi"
+               data-bc7-mb="12" data-astc-mb="12"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v3b_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v3b.jpg" alt="Blueten apartment · pure COLMAP (v3b, seams) · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · pure COLMAP (v3b, has seams)</div>
+                    <div class="meta"><span class="size">12 MB</span> · COLMAP sequential+vocab-tree, 1101 frames (68–272 s only) at 960×540, two mis-registered seams · 44k Gauss · standard BITYMI recipe · e3rd finetuned · 33.81 dB / LPIPS 0.144 on held-out views · 3254 FPS (5090)</div>
+                </div>
+            </a>
             <!-- Prostate CT (HIM-25-005) · XClipGS-style z clipping: ds4 (34 µm) HiP-CT, 600 views at 1600² in the XClipGS
                  protocol (201 intact fit / 99 intact close-up / 201 clipped near-fit / 99 clipped close-up; one z half-space
                  plane per clipped view, tau in 30..70 % of the extent, lower side kept, camera 25..70° off the normal), 74
