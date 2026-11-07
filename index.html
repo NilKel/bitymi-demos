@@ -1539,6 +1539,30 @@
                     <div class="meta"><span class="size">15 MB</span> · locally-correct COLMAP fragments stitched via local SLAM Sim3 chains, 1527 frames at 960×540, no folds, no scale drift · 51k Gauss · standard BITYMI recipe · e3rd finetuned · 32.36 dB / LPIPS 0.157 on held-out views · 3210 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Blueten v5 · --contraction false --lambda_normal 0.05 (all earlier blueten runs used the 360_indoor contract:True warp). Teacher 35k: 29.58 dB test. e3rd + 3k finetune -> 31.36 / 0.934 / 0.169. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v5_nocontract_nrm05_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v5_nocontract_nrm05_e3rdraw_astc.bitymi"
+               data-bc7-mb="16" data-astc-mb="16"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v5_nocontract_nrm05_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v5_nocontract_nrm05.jpg" alt="Blueten apartment · v5 · no contraction + normal consistency · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v5 · no contraction + normal consistency</div>
+                    <div class="meta"><span class="size">16 MB</span> · same stitched v5 poses (1527 frames at 960×540) · --contraction false (unbounded hashgrid, no mip-360 warp) + 2DGS depth-normal consistency (--lambda_normal 0.05) · 54k Gauss · e3rd finetuned · 31.36 dB / LPIPS 0.169 on held-out views · 3444 FPS (5090)</div>
+                </div>
+            </a>
+            <!-- Blueten v5 · contraction on (360_indoor default) + --lambda_normal 0.05. Teacher 35k: 29.39 dB test. e3rd + 3k finetune -> 31.62 / 0.936 / 0.167. Normal consistency costs ~0.7 dB vs the v5 base (32.36) on this scene; contraction on/off is a wash (+0.26 baked, -0.19 teacher). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v5_nrm05_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v5_nrm05_e3rdraw_astc.bitymi"
+               data-bc7-mb="15" data-astc-mb="15"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v5_nrm05_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v5_nrm05.jpg" alt="Blueten apartment · v5 · contraction + normal consistency · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v5 · contraction + normal consistency</div>
+                    <div class="meta"><span class="size">15 MB</span> · same stitched v5 poses (1527 frames at 960×540) · 360_indoor contraction (as v5 base) + 2DGS depth-normal consistency (--lambda_normal 0.05) · 52k Gauss · e3rd finetuned · 31.62 dB / LPIPS 0.167 on held-out views · 3357 FPS (5090)</div>
+                </div>
+            </a>
             <!-- Blueten apartment · v4 SLAM-skeleton fusion: v2 COLMAP folded the bedroom onto the living room (9-unit jump,
                  lax mapper + false vocab-tree loops). v4: 1628 sharpest-of-5 frames; MASt3R-SLAM (calibrated, 15 fps, sub-map
                  re-init after reloc failure; 255 keyframes) gives the global skeleton; COLMAP registers the dense frames against
