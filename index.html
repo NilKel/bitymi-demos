@@ -1521,6 +1521,21 @@
                     <div class="meta"><span class="size">9 MB</span> · phone video walkthrough, 547 COLMAP frames at 960×540 · 30k Gauss · BITYMI standard recipe + 2DGS depth-normal consistency (--lambda_normal 0.05 from 7k) · e3rd finetuned · 26.69 dB / LPIPS 0.220 on held-out views · 2835 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Blueten apartment · v6 = v5 stitched poses + the entryway (62.5-68 s, 21 frames transplanted from the v4
+                 SLAM-registered model via a local Sim3, scripts/fill_gap_from_model.py), retriangulated + second global BA +
+                 outlier filter -> 1548 images, whole apartment incl. the shoe-rack entryway. Teacher 35k: 31.71 dB test
+                 (v5: 30.03; pure-COLMAP v3b with folds: 31.74). Raw-probe e3rd + 3k atlas finetune -> 32.42 / 0.940 / 0.159. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v6_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v6_e3rdraw_astc.bitymi"
+               data-bc7-mb="15" data-astc-mb="15"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v6_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v6.jpg" alt="Blueten apartment · v6 stitched + entryway · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v6 (stitched poses + entryway, whole video)</div>
+                    <div class="meta"><span class="size">15 MB</span> · v5 stitched COLMAP fragments + SLAM-bridged entryway frames, second global BA, 1548 frames at 960×540, no folds, no scale drift · 53k Gauss · standard BITYMI recipe · e3rd finetuned · 32.42 dB / LPIPS 0.159 on held-out views · 3230 FPS (5090)</div>
+                </div>
+            </a>
             <!-- Blueten apartment · v5 stitched: the v4 MASt3R-SLAM skeleton has a ~2x scale drift over the walk (camera
                  height above floor 2.0 -> 4.1 units; local scale vs COLMAP 1.25 -> 0.61), which the fixed-skeleton registration
                  baked in (-4 dB vs pure COLMAP, unfixable by per-view pose refinement). v5 keeps the locally correct COLMAP
