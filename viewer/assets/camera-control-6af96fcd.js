@@ -1,4 +1,4 @@
-var U=Object.defineProperty;var E=(p,t,e)=>t in p?U(p,t,{enumerable:!0,configurable:!0,writable:!0,value:e}):p[t]=e;var a=(p,t,e)=>(E(p,typeof t!="symbol"?t+"":t,e),e);import{v as i,q as m,m as w,a as D}from"./camera-fdaf2e89.js";const M={bilinear:0,bicubic:1,hermite:2,texture:3,bc5:4,p:4,spline:5,refetch:2},G={texture:0,p:1,bc5:2,spline:2},q=.7,I=`
+var U=Object.defineProperty;var E=(p,t,e)=>t in p?U(p,t,{enumerable:!0,configurable:!0,writable:!0,value:e}):p[t]=e;var a=(p,t,e)=>(E(p,typeof t!="symbol"?t+"":t,e),e);import{v as i,q as m,m as w,a as D}from"./camera-dcb40004.js";const M={bilinear:0,bicubic:1,hermite:2,texture:3,bc5:4,p:4,spline:5,refetch:2},G={texture:0,p:1,bc5:2,spline:2},q=.7,I=`
 struct P { wl: u32, hl: u32, w: u32, h: u32, mode: u32, lam: f32, T: f32, pad2: u32, K: vec4<f32> };
 @group(0) @binding(0) var src: texture_2d<f32>;
 @group(0) @binding(1) var<uniform> p: P;
