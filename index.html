@@ -483,6 +483,129 @@
         <!-- BENCH:END -->
 
         <!-- E3RD:BEGIN -->
+        <h2>🧪 Rebuttal <span style="color:#f0b060;font-size:0.75em">· matched memory vs FastGS · fewer primitives · mipmapping</span></h2>
+        <p style="opacity:0.75; margin:0 0 0.6em 0;">
+            One scene per dataset plus garden, exact paper recipe. <b>Matched memory</b>: same surfels and training, the atlas re-allocated
+            (RD probe bisected to a texel budget) so BC7 atlas + fp32 PLY equals FastGS’s released file size on that scene
+            &mdash; LPIPS and SSIM lead kept on all three, PSNR within ±0.1 dB. <b>Fewer primitives</b>: teacher retrained with
+            harder FastGS pruning (−27 to −33 % surfels) for −0.1 to −0.3 dB. <b>Mipmapping</b>: the paper bundles with a
+            6-level atlas chain (down to one texel per tile), textbook per-pixel trilinear and the anisotropic sampler. Desktop (BC7) only. Full tables: nest-splatting <code>docs/REBUTTAL_2026_11.md</code>.
+        </p>
+        <div class="grid">
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/room_paper.bitymi">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · rebuttal paper" loading="lazy">
+                <div class="text">
+                    <div class="title">Room · paper</div>
+                    <div class="meta"><span class="size">17 MB</span> · Mip-NeRF 360 · paper allocation (raw-probe e3rd, regenerated) · 62,947 surfels, paper Size 89 MB (BC7 atlas + fp32 PLY) · 31.61 dB / 0.9219 / LPIPS 0.1894 · 2937 FPS Vulkan HW (1954 CUDA CONIC) on the 5090 at a locked 2.4 GHz</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/room_matched.bitymi">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · rebuttal matched memory" loading="lazy">
+                <div class="text">
+                    <div class="title">Room · matched memory</div>
+                    <div class="meta"><span class="size">12 MB</span> · Mip-NeRF 360 · atlas cut to FastGS’s 51 MB file size (13 % of full-res texels); FastGS 31.70 / 0.9116 / 0.2405 with 207k prims · 62,947 surfels, paper Size 51 MB (BC7 atlas + fp32 PLY) · 31.58 dB / 0.9207 / LPIPS 0.2011 · 3138 FPS Vulkan HW (1710 CUDA CONIC) on the 5090 at a locked 2.4 GHz</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/room_agg.bitymi">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · rebuttal fewer primitives" loading="lazy">
+                <div class="text">
+                    <div class="title">Room · fewer primitives</div>
+                    <div class="meta"><span class="size">14 MB</span> · Mip-NeRF 360 · −27 % primitives: harder FastGS pruning in the teacher (score 0.75 / min-opacity 0.15 / importance 60) · 46,188 surfels, paper Size 73 MB (BC7 atlas + fp32 PLY) · 31.48 dB / 0.9190 / LPIPS 0.1943 · 3291 FPS Vulkan HW (1802 CUDA CONIC) on the 5090 at a locked 2.4 GHz</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/truck_paper.bitymi">
+                <img class="thumb" src="static/thumbs/truck.jpg" alt="Truck · rebuttal paper" loading="lazy">
+                <div class="text">
+                    <div class="title">Truck · paper</div>
+                    <div class="meta"><span class="size">28 MB</span> · Tanks &amp; Temples · paper allocation (raw-probe e3rd, regenerated) · 85,413 surfels, paper Size 170 MB (BC7 atlas + fp32 PLY) · 25.61 dB / 0.8802 / LPIPS 0.1134 · 3059 FPS Vulkan HW (2051 CUDA CONIC) on the 5090 at a locked 2.4 GHz</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/truck_matched.bitymi">
+                <img class="thumb" src="static/thumbs/truck.jpg" alt="Truck · rebuttal matched memory" loading="lazy">
+                <div class="text">
+                    <div class="title">Truck · matched memory</div>
+                    <div class="meta"><span class="size">15 MB</span> · Tanks &amp; Temples · atlas cut to FastGS’s 63 MB file size (9 % of full-res texels); FastGS 25.70 / 0.8755 / 0.1766 with 253k prims · 85,413 surfels, paper Size 63 MB (BC7 atlas + fp32 PLY) · 25.74 dB / 0.8846 / LPIPS 0.1307 · 2890 FPS Vulkan HW (2135 CUDA CONIC) on the 5090 at a locked 2.4 GHz</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/truck_agg.bitymi">
+                <img class="thumb" src="static/thumbs/truck.jpg" alt="Truck · rebuttal fewer primitives" loading="lazy">
+                <div class="text">
+                    <div class="title">Truck · fewer primitives</div>
+                    <div class="meta"><span class="size">20 MB</span> · Tanks &amp; Temples · −29 % primitives: harder FastGS pruning in the teacher · 60,622 surfels, paper Size 116 MB (BC7 atlas + fp32 PLY) · 25.49 dB / 0.8787 / LPIPS 0.1180 · 3236 FPS Vulkan HW (2286 CUDA CONIC) on the 5090 at a locked 2.4 GHz</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/drjohnson_paper.bitymi">
+                <img class="thumb" src="static/thumbs/drjohnson.jpg" alt="Drjohnson · rebuttal paper" loading="lazy">
+                <div class="text">
+                    <div class="title">Drjohnson · paper</div>
+                    <div class="meta"><span class="size">21 MB</span> · Deep Blending · paper allocation (raw-probe e3rd, regenerated) · 66,087 surfels, paper Size 122 MB (BC7 atlas + fp32 PLY) · 29.62 dB / 0.8945 / LPIPS 0.2283 · 3663 FPS Vulkan HW (1826 CUDA CONIC) on the 5090 at a locked 2.4 GHz</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/drjohnson_matched.bitymi">
+                <img class="thumb" src="static/thumbs/drjohnson.jpg" alt="Drjohnson · rebuttal matched memory" loading="lazy">
+                <div class="text">
+                    <div class="title">Drjohnson · matched memory</div>
+                    <div class="meta"><span class="size">14 MB</span> · Deep Blending · atlas cut to FastGS’s 63 MB file size (17 % of full-res texels); FastGS 29.59 / 0.8996 / 0.2697 with 252k prims · 66,087 surfels, paper Size 63 MB (BC7 atlas + fp32 PLY) · 29.68 dB / 0.9012 / LPIPS 0.2391 · 3758 FPS Vulkan HW (1845 CUDA CONIC) on the 5090 at a locked 2.4 GHz</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/drjohnson_agg.bitymi">
+                <img class="thumb" src="static/thumbs/drjohnson.jpg" alt="Drjohnson · rebuttal fewer primitives" loading="lazy">
+                <div class="text">
+                    <div class="title">Drjohnson · fewer primitives</div>
+                    <div class="meta"><span class="size">15 MB</span> · Deep Blending · −33 % primitives: harder FastGS pruning in the teacher · 44,391 surfels, paper Size 82 MB (BC7 atlas + fp32 PLY) · 29.30 dB / 0.8926 / LPIPS 0.2389 · 4259 FPS Vulkan HW (1990 CUDA CONIC) on the 5090 at a locked 2.4 GHz</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/garden_paper.bitymi">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · rebuttal paper" loading="lazy">
+                <div class="text">
+                    <div class="title">Garden · paper</div>
+                    <div class="meta"><span class="size">52 MB</span> · Mip-NeRF 360 · paper allocation (raw-probe e3rd, regenerated) · 148,658 surfels, paper Size 323 MB (BC7 atlas + fp32 PLY) · 27.06 dB / 0.8405 / LPIPS 0.1247 · 2469 FPS Vulkan HW (1932 CUDA CONIC) on the 5090, unlocked clock</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/garden_matched.bitymi">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · rebuttal matched memory" loading="lazy">
+                <div class="text">
+                    <div class="title">Garden · matched memory</div>
+                    <div class="meta"><span class="size">32 MB</span> · Mip-NeRF 360 · atlas cut to FastGS’s 164 MB file size (37 % of full-res texels); FastGS 27.32 / 0.8475 / 0.1574 with 661k prims · 148,658 surfels, paper Size 162 MB (BC7 atlas + fp32 PLY) · 27.28 dB / 0.8503 / LPIPS 0.1191 · 2554 FPS Vulkan HW (1785 CUDA CONIC) on the 5090, unlocked clock</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/garden_agg.bitymi">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · rebuttal fewer primitives" loading="lazy">
+                <div class="text">
+                    <div class="title">Garden · fewer primitives</div>
+                    <div class="meta"><span class="size">32 MB</span> · Mip-NeRF 360 · −39 % primitives: harder FastGS pruning in the teacher (score 0.75 / min-opacity 0.15 / importance 60) · 90,461 surfels, paper Size 197 MB (BC7 atlas + fp32 PLY) · 26.83 dB / 0.8304 / LPIPS 0.1358 · 3153 FPS Vulkan HW (1944 CUDA CONIC) on the 5090, unlocked clock</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/room_paper_mip.bitymi&amp;mipbias=aniso">
+                <img class="thumb" src="static/thumbs/room.jpg" alt="Room · mip chain demo" loading="lazy" style="filter: hue-rotate(40deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">Room · mipmapping <span style="color:#f0b060;font-size:0.8em">· 6-level atlas chain</span></div>
+                    <div class="meta"><span class="size">21 MB</span> · the paper bundle plus 6 box-filtered coarser levels of every surfel tile, down to one texel (+4 MB), opens anisotropic (<code>mipbias=aniso</code>): each fragment hands the sampler its texel footprint (<code>textureSampleGrad</code>), the GPU picks the level per pixel from the footprint’s short axis and takes up to 16 taps along the long one, trilinear across the chain · pane "Atlas mips": <b>off</b> = level 0 bilinear (the paper renderer; shimmers on grazing surfaces when you orbit), <b>trilinear (textbook)</b> = per-pixel fractional level from the texel footprint, blended between adjacent levels (<code>mipbias=tri</code>, one fetch, no pops, no seams), <b>bias 0</b> = one integer level per surfel from texels-per-pixel at its centre (nearest level; seams between neighbours, pops at level changes), <b>bias 1 / 2</b> = one / two levels sharper, <b>anisotropic</b> = textbook plus up to 16 taps along the long axis · judge in motion: orbit slowly over the floor and toggle</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/truck_paper_mip.bitymi&amp;mipbias=aniso">
+                <img class="thumb" src="static/thumbs/truck.jpg" alt="Truck · mip chain demo" loading="lazy" style="filter: hue-rotate(40deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">Truck · mipmapping <span style="color:#f0b060;font-size:0.8em">· 6-level atlas chain</span></div>
+                    <div class="meta"><span class="size">36 MB</span> · the paper bundle plus 6 box-filtered coarser levels of every surfel tile, down to one texel (+8 MB), opens anisotropic (<code>mipbias=aniso</code>): each fragment hands the sampler its texel footprint (<code>textureSampleGrad</code>), the GPU picks the level per pixel from the footprint’s short axis and takes up to 16 taps along the long one, trilinear across the chain · pane "Atlas mips": <b>off</b> = level 0 bilinear (the paper renderer; shimmers on grazing surfaces when you orbit), <b>trilinear (textbook)</b> = per-pixel fractional level from the texel footprint, blended between adjacent levels (<code>mipbias=tri</code>, one fetch, no pops, no seams), <b>bias 0</b> = one integer level per surfel from texels-per-pixel at its centre (nearest level; seams between neighbours, pops at level changes), <b>bias 1 / 2</b> = one / two levels sharper, <b>anisotropic</b> = textbook plus up to 16 taps along the long axis · judge in motion: orbit slowly over the floor and toggle</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/drjohnson_paper_mip.bitymi&amp;mipbias=aniso">
+                <img class="thumb" src="static/thumbs/drjohnson.jpg" alt="Drjohnson · mip chain demo" loading="lazy" style="filter: hue-rotate(40deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">Drjohnson · mipmapping <span style="color:#f0b060;font-size:0.8em">· 6-level atlas chain</span></div>
+                    <div class="meta"><span class="size">27 MB</span> · the paper bundle plus 6 box-filtered coarser levels of every surfel tile, down to one texel (+6 MB), opens anisotropic (<code>mipbias=aniso</code>): each fragment hands the sampler its texel footprint (<code>textureSampleGrad</code>), the GPU picks the level per pixel from the footprint’s short axis and takes up to 16 taps along the long one, trilinear across the chain · pane "Atlas mips": <b>off</b> = level 0 bilinear (the paper renderer; shimmers on grazing surfaces when you orbit), <b>trilinear (textbook)</b> = per-pixel fractional level from the texel footprint, blended between adjacent levels (<code>mipbias=tri</code>, one fetch, no pops, no seams), <b>bias 0</b> = one integer level per surfel from texels-per-pixel at its centre (nearest level; seams between neighbours, pops at level changes), <b>bias 1 / 2</b> = one / two levels sharper, <b>anisotropic</b> = textbook plus up to 16 taps along the long axis · judge in motion: orbit slowly over the floor and toggle</div>
+                </div>
+            </a>
+            <a class="demo" data-invariant="true" href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/rebuttal/garden_paper_mip.bitymi&amp;mipbias=aniso">
+                <img class="thumb" src="static/thumbs/garden.jpg" alt="Garden · mip chain demo" loading="lazy" style="filter: hue-rotate(40deg) saturate(1.1);">
+                <div class="text">
+                    <div class="title">Garden · mipmapping <span style="color:#f0b060;font-size:0.8em">· 6-level atlas chain</span></div>
+                    <div class="meta"><span class="size">66 MB</span> · the paper bundle plus 6 box-filtered coarser levels of every surfel tile, down to one texel (+14 MB), opens anisotropic (<code>mipbias=aniso</code>) · pane "Atlas mips": <b>off</b> = level 0 bilinear (the paper renderer; shimmers on grazing surfaces when you orbit), <b>trilinear (textbook)</b> = per-pixel fractional level from the texel footprint, blended between adjacent levels (<code>mipbias=tri</code>, one fetch, no pops, no seams), <b>bias 0</b> = one integer level per surfel from texels-per-pixel at its centre (nearest level; seams between neighbours, pops at level changes), <b>bias 1 / 2</b> = one / two levels sharper, <b>anisotropic</b> = textbook plus up to 16 taps along the long axis · judge in motion: orbit slowly over the lawn and toggle</div>
+                </div>
+            </a>
+        </div>
+
         <h2>🔬 Paper checkpoints <span style="color:#f0b060;font-size:0.75em">· BITYMI · extent-3 + RD atlas, finetuned</span></h2>
         <p style="opacity:0.75; margin:0 0 0.6em 0;">
             All 13 benchmark scenes: baked over the beta kernel's 3σ support, texel budget set per surfel by the
@@ -1519,6 +1642,22 @@
                 <div class="text">
                     <div class="title">Blueten apartment · normal consistency</div>
                     <div class="meta"><span class="size">9 MB</span> · phone video walkthrough, 547 COLMAP frames at 960×540 · 30k Gauss · BITYMI standard recipe + 2DGS depth-normal consistency (--lambda_normal 0.05 from 7k) · e3rd finetuned · 26.69 dB / LPIPS 0.220 on held-out views · 2835 FPS (5090)</div>
+                </div>
+            </a>
+            <!-- Blueten apartment · v6 · Gaussian kernel: identical to the v6 card but --kernel gaussian instead of the
+                 beta_scaled default; on this scene the plain Gaussian kernel wins (teacher 32.30 vs 31.71 dB test, 94k vs
+                 53k surfels after fastgs). Side results on the same poses: --3rgs pose refinement 31.52 (hurts; learned deltas
+                 median 1.4 mm), DoF-GS thin-lens compensation 32.41 (+0.1, AiF sharper only beyond 2 m), mono-depth prior
+                 neutral. e3rd + 3k atlas finetune -> 32.88 / 0.944 / 0.154. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v6_gauss_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v6_gauss_e3rdraw_astc.bitymi"
+               data-bc7-mb="27" data-astc-mb="27"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v6_gauss_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v6_gauss.jpg" alt="Blueten apartment · v6 · Gaussian kernel · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v6 · Gaussian kernel</div>
+                    <div class="meta"><span class="size">27 MB</span> · v6 stitched poses, 1548 frames at 960×540 · --kernel gaussian (vs beta_scaled) · 94k Gauss · standard BITYMI recipe · e3rd finetuned · 32.88 dB / LPIPS 0.154 on held-out views · 2336 FPS (5090)</div>
                 </div>
             </a>
             <!-- Blueten apartment · v6 = v5 stitched poses + the entryway (62.5-68 s, 21 frames transplanted from the v4
