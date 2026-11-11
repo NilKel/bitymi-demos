@@ -1644,6 +1644,24 @@
                     <div class="meta"><span class="size">9 MB</span> · phone video walkthrough, 547 COLMAP frames at 960×540 · 30k Gauss · BITYMI standard recipe + 2DGS depth-normal consistency (--lambda_normal 0.05 from 7k) · e3rd finetuned · 26.69 dB / LPIPS 0.220 on held-out views · 2835 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Blueten apartment · v7 = ALIKED-n16 + LightGlue poses (hloc, sequential +-30 + NetVLAD top-20 pairs, pycolmap
+                 incremental mapping, fixed intrinsics). One model, 1642 frames (v6: 1548), no SIFT fragments and no SLAM bridge;
+                 a 13-frame block at 121 s registered onto a later pass of the same corridor was dropped. Agrees with v6 within
+                 0.1 units from 80-240 s and fixes the 20-80 s corridor/kitchen wing that v6 placed via the SLAM bridge. First 25 s
+                 of video still a separate fragment (not included). Same long recipe as the v6 70k card (70k iters, FastGS over 100
+                 views/step, Gaussian kernel, Gaussian-kernel finetune). Teacher 33.82 / 0.952 / 0.154 final eval; e3rd + 3k finetune
+                 -> 35.27 / 0.962 / 0.124 (different hold-out set than v6: every 8th of 1642 frames). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7_gauss_k100_70k_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7_gauss_k100_70k_e3rdraw_astc.bitymi"
+               data-bc7-mb="57" data-astc-mb="57"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7_gauss_k100_70k_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v7_gauss_k100_70k.jpg" alt="Blueten apartment · v7 ALIKED poses · Gaussian kernel · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v7 · ALIKED + LightGlue poses</div>
+                    <div class="meta"><span class="size">57 MB</span> · single ALIKED/LightGlue COLMAP model, 1642 frames at 536×957 · --kernel gaussian · 70k iters, FastGS over 100 views/step · 332k Gauss · e3rd finetuned (Gaussian kernel) · 35.27 dB / LPIPS 0.124 on held-out views · 1801 FPS (5090)</div>
+                </div>
+            </a>
             <!-- Blueten apartment · v6 · Gaussian kernel · long schedule: same v6 poses and recipe as the v6 Gaussian card but
                  70k iterations (position-LR decay stretched to 70k; the 35k run was only ~22 epochs on 1548 views and test PSNR
                  was still rising), FastGS densify/prune sampled over 100 views per step instead of 10 (importance threshold 30 -> 3
