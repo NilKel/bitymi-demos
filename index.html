@@ -1644,6 +1644,26 @@
                     <div class="meta"><span class="size">9 MB</span> · phone video walkthrough, 547 COLMAP frames at 960×540 · 30k Gauss · BITYMI standard recipe + 2DGS depth-normal consistency (--lambda_normal 0.05 from 7k) · e3rd finetuned · 26.69 dB / LPIPS 0.220 on held-out views · 2835 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Blueten apartment · v6 · Gaussian kernel · long schedule: same v6 poses and recipe as the v6 Gaussian card but
+                 70k iterations (position-LR decay stretched to 70k; the 35k run was only ~22 epochs on 1548 views and test PSNR
+                 was still rising), FastGS densify/prune sampled over 100 views per step instead of 10 (importance threshold 30 -> 3
+                 so the per-view pixel criterion is unchanged; with 10 random views a 2 % segment of a walkthrough was almost never
+                 sampled and its surfels never qualified), hash freeze from 15k instead of 5k. Densification stopped at 25k because
+                 the yaml densify_until_iter wraps the whole FastGS block (no post-densify prune) -> 324k surfels. Teacher 33.03 dB /
+                 0.943 / LPIPS 0.170 final eval (v6 gauss: 31.67 / 0.930 / 0.193). The atlas finetune now uses the Gaussian kernel
+                 (the earlier v6 cards were finetuned with the chain's beta_scaled default). e3rd + 3k finetune -> 34.25 / 0.952 / 0.138.
+                 Still unsolved: the dresser close-up at 265-271 s (14-18 dB, floaters along the camera path). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v6_gauss_k100_70k_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v6_gauss_k100_70k_e3rdraw_astc.bitymi"
+               data-bc7-mb="61" data-astc-mb="61"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v6_gauss_k100_70k_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v6_gauss_k100_70k.jpg" alt="Blueten apartment · v6 · Gaussian kernel · 70k + 100-view FastGS · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v6 · Gaussian kernel · 70k, 100-view FastGS</div>
+                    <div class="meta"><span class="size">61 MB</span> · v6 stitched poses, 1548 frames at 537×958 · --kernel gaussian · 70k iters, FastGS over 100 views/step · 324k Gauss · e3rd finetuned (Gaussian kernel) · 34.25 dB / LPIPS 0.138 on held-out views · 1575 FPS (5090)</div>
+                </div>
+            </a>
             <!-- Blueten apartment · v6 · Gaussian kernel: identical to the v6 card but --kernel gaussian instead of the
                  beta_scaled default; on this scene the plain Gaussian kernel wins (teacher 32.30 vs 31.71 dB test, 94k vs
                  53k surfels after fastgs). Side results on the same poses: --3rgs pose refinement 31.52 (hurts; learned deltas
