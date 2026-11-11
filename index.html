@@ -1662,6 +1662,22 @@
                     <div class="meta"><span class="size">57 MB</span> · single ALIKED/LightGlue COLMAP model, 1642 frames at 536×957 · --kernel gaussian · 70k iters, FastGS over 100 views/step · 332k Gauss · e3rd finetuned (Gaussian kernel) · 35.27 dB / LPIPS 0.124 on held-out views · 1801 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Blueten apartment · v7 poses + floater regularisers: --lambda_normal 0.05 (2DGS depth-normal consistency) and
+                 --mono_depth_reg 0.2 (Depth-Anything-V2 priors, affine-fitted to the SfM points). Otherwise the v7 card's recipe
+                 (70k iters, FastGS over 100 views/step, Gaussian kernel + Gaussian-kernel finetune). Teacher 33.10 / 0.947 / 0.159
+                 (v7 card 33.82); e3rd + 3k finetune -> 34.53 / 0.958 / 0.132 (v7 card 35.27 / 0.962 / 0.124), same hold-out.
+                 Costs ~0.7 dB, depth maps are much cleaner (fewer near-camera floaters). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7_nrm05_md02_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7_nrm05_md02_e3rdraw_astc.bitymi"
+               data-bc7-mb="60" data-astc-mb="60"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7_nrm05_md02_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v7_nrm05_md02.jpg" alt="Blueten apartment · v7 · normal consistency + mono depth · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v7 · normal consistency + mono depth</div>
+                    <div class="meta"><span class="size">60 MB</span> · v7 ALIKED/LightGlue poses, 1642 frames at 536×957 · --lambda_normal 0.05 + --mono_depth_reg 0.2 (Depth-Anything-V2) against floaters · --kernel gaussian · 70k iters, FastGS over 100 views/step · 359k Gauss · e3rd finetuned (Gaussian kernel) · 34.53 dB / LPIPS 0.132 on held-out views · 1566 FPS (5090)</div>
+                </div>
+            </a>
             <!-- Blueten apartment · v6 · Gaussian kernel · long schedule: same v6 poses and recipe as the v6 Gaussian card but
                  70k iterations (position-LR decay stretched to 70k; the 35k run was only ~22 epochs on 1548 views and test PSNR
                  was still rising), FastGS densify/prune sampled over 100 views per step instead of 10 (importance threshold 30 -> 3
