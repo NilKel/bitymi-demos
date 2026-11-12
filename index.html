@@ -1662,6 +1662,22 @@
                     <div class="meta"><span class="size">57 MB</span> · single ALIKED/LightGlue COLMAP model, 1642 frames at 536×957 · --kernel gaussian · 70k iters, FastGS over 100 views/step · 332k Gauss · e3rd finetuned (Gaussian kernel) · 35.27 dB / LPIPS 0.124 on held-out views · 1801 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Blueten apartment · v7b = v7 poses + the dark entry hallway (video frames 160-720, 148 frames registered with
+                 CLAHE-enhanced ALIKED, anchored to the v7 poses and bundle adjusted) = 1780 frames, and NO hold-out: every frame
+                 trains. Recipe = the v7 normal + mono-depth card (--lambda_normal 0.05, --mono_depth_reg 0.2, 70k iters, FastGS over
+                 100 views/step, Gaussian kernel + Gaussian-kernel finetune). Baked 35.43 / 0.964 / 0.127 measured on TRAINING views,
+                 so not comparable with the held-out numbers on the other cards. First bundle that contains the hallway. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_nrm05_md02_all_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_nrm05_md02_all_e3rdraw_astc.bitymi"
+               data-bc7-mb="60" data-astc-mb="60"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_nrm05_md02_all_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v7b_nrm05_md02_all.jpg" alt="Blueten apartment · v7b · all frames incl. entry hallway · normal consistency + mono depth · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v7b · all frames + entry hallway</div>
+                    <div class="meta"><span class="size">60 MB</span> · v7 poses plus the dark entry hallway, 1780 frames at 536×957, no hold-out (all frames train) · --lambda_normal 0.05 + --mono_depth_reg 0.2 (Depth-Anything-V2) against floaters · --kernel gaussian · 70k iters, FastGS over 100 views/step · 378k Gauss · e3rd finetuned (Gaussian kernel) · 35.43 dB / LPIPS 0.127 on training views (no held-out set) · 1531 FPS (5090)</div>
+                </div>
+            </a>
             <!-- Blueten apartment · v7 poses + floater regularisers: --lambda_normal 0.05 (2DGS depth-normal consistency) and
                  --mono_depth_reg 0.2 (Depth-Anything-V2 priors, affine-fitted to the SfM points). Otherwise the v7 card's recipe
                  (70k iters, FastGS over 100 views/step, Gaussian kernel + Gaussian-kernel finetune). Teacher 33.10 / 0.947 / 0.159
