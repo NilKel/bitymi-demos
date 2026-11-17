@@ -1662,6 +1662,25 @@
                     <div class="meta"><span class="size">57 MB</span> · single ALIKED/LightGlue COLMAP model, 1642 frames at 536×957 · --kernel gaussian · 70k iters, FastGS over 100 views/step · 332k Gauss · e3rd finetuned (Gaussian kernel) · 35.27 dB / LPIPS 0.124 on held-out views · 1801 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Blueten apartment · v7b · sofa repair with generated views (experiment). Start = the v7b all-frames teacher.
+                 The sofa was re-seeded with 78k surfels on a TSDF surface fused from DepthSplat depth; 240 ArtiFixer frames
+                 (14B, our own splat renders as input, no mask) on a +-90 deg orbit around the sofa were added as full-frame
+                 training views next to all real views (replay, so the shared hash grid does not forget the rest of the scene);
+                 only surfels within a ball around the sofa train, 15k iters, depth + per-surfel depth loss, MLP frozen.
+                 Hold-out real views inside the sofa region 35.57 dB (teacher 36.09); rest of the scene unchanged or better.
+                 Baked 36.05 / 0.966 / 0.126 on the bake script's benchmark views, which include training and generated views,
+                 so not a held-out number. Purpose: side views of the sofa at right angles, where the v7b card's surfels float. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_sofa_repair_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_sofa_repair_e3rdraw_astc.bitymi"
+               data-bc7-mb="57" data-astc-mb="57"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_sofa_repair_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v7b_sofa_repair.jpg" alt="Blueten apartment · v7b · sofa repaired with ArtiFixer-generated orbit views · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v7b · sofa repair with generated views</div>
+                    <div class="meta"><span class="size">57 MB</span> · experiment on the v7b all-frames model: sofa re-seeded on a depth-fused surface and retrained with 240 ArtiFixer-generated orbit views (±90° around the sofa) plus all 1780 real frames · only the sofa neighbourhood is optimised · 289k Gauss · e3rd finetuned (Gaussian kernel) · 36.05 dB / LPIPS 0.126 on benchmark views that include training and generated frames (not held-out) · 1526 FPS (5090) · look at the sofa from the sides</div>
+                </div>
+            </a>
             <!-- Blueten apartment · v7b = v7 poses + the dark entry hallway (video frames 160-720, 148 frames registered with
                  CLAHE-enhanced ALIKED, anchored to the v7 poses and bundle adjusted) = 1780 frames, and NO hold-out: every frame
                  trains. Recipe = the v7 normal + mono-depth card (--lambda_normal 0.05, --mono_depth_reg 0.2, 70k iters, FastGS over
