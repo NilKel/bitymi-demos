@@ -1662,6 +1662,45 @@
                     <div class="meta"><span class="size">57 MB</span> · single ALIKED/LightGlue COLMAP model, 1642 frames at 536×957 · --kernel gaussian · 70k iters, FastGS over 100 views/step · 332k Gauss · e3rd finetuned (Gaussian kernel) · 35.27 dB / LPIPS 0.124 on held-out views · 1801 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Blueten apartment · v7b · living-room repair + image-based plane constraint (experiment). Same run as the
+                 living-room repair card below, plus one loss: per training view, plane masks from a semantic segmenter
+                 (SegFormer ADE: wall/floor/ceiling/door/window/painting) split by mono normals (MoGe-2), occluder-cut
+                 patches merged by plane offset; inside each mask a plane is fitted to the rendered depth and the depth is
+                 pulled onto it (weight 0.5, PlanarGS-style, no cross-view matching). 1259 living-room views masked.
+                 Mean |depth - plane| inside the masks 0.029 -> 0.007 scene units over 94 real views. Real-view hold-out
+                 vs the run without planes: sofa 34.30 vs 34.45 dB (LPIPS 0.0329 both), elsewhere 33.21 vs 33.44 dB.
+                 Baked without the quality benchmark (no PSNR/FPS numbers for the bake). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_planes_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_planes_e3rdraw_astc.bitymi"
+               data-bc7-mb="46" data-astc-mb="46"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_planes_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v7b_room_planes.jpg" alt="Blueten apartment · v7b · living room repaired with generated views and an image-based plane constraint on walls, floor and ceiling · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v7b · living-room repair + flat walls and floor</div>
+                    <div class="meta"><span class="size">46 MB</span> · experiment: the living-room repair below with one added constraint · walls, floor and ceiling are found per photo (semantic segmentation split by estimated surface normals) and the rendered depth inside each is pulled onto a fitted plane · those surfaces are about 4× flatter (mean deviation 0.029 → 0.007 scene units) · real-view hold-out within 0.3 dB of the run without planes (sofa 34.30 vs 34.45 dB, same LPIPS) · 275k Gauss · e3rd finetuned (Gaussian kernel) · baked without the quality benchmark, so no bake PSNR or FPS</div>
+                </div>
+            </a>
+            <!-- Blueten apartment · v7b · living-room repair with generated views (experiment). Start = the sofa-repair model.
+                 Coverage of the fused depth surface (seen from >=2 of 5 direction groups within 60 deg of the normal) picked 68
+                 under-covered poses; 27 smooth 121-frame ArtiFixer paths (14B, our renders as input) were generated through them,
+                 and a greedy cover kept 203 of 3240 frames, 179 after dropping frames contradicted by real depth. Trained 15k
+                 iters with all real views replayed, generated views full-frame, depth losses, MLP frozen, only surfels inside the
+                 living-room box. Ceilings / upper walls / floaters are visibly cleaner from low and near-wall viewpoints, but real
+                 views lost fidelity: sofa hold-out 35.57 -> 34.45 dB, rest of the apartment 33.99 -> 33.44 dB, and the sofa
+                 surfels sit less tightly on the fused surface (56 % -> 43 % within 0.02). Baked 35.13 / 0.960 / 0.141 on the bake
+                 script's benchmark views (include training and generated frames, not held-out). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_repair_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_repair_e3rdraw_astc.bitymi"
+               data-bc7-mb="49" data-astc-mb="49"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_repair_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v7b_room_repair.jpg" alt="Blueten apartment · v7b · living room repaired with ArtiFixer-generated views chosen by surface coverage · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v7b · living-room repair with generated views</div>
+                    <div class="meta"><span class="size">49 MB</span> · experiment on top of the sofa-repair model: 179 ArtiFixer-generated frames at viewpoints the walkthrough under-covers (low and near the walls, chosen by surface coverage) plus all real frames · only the living room is optimised · cleaner ceilings and fewer floaters off the walk path, at a cost of about 1 dB on real sofa hold-out views (34.45 vs 35.57 dB) · 275k Gauss · e3rd finetuned (Gaussian kernel) · 35.13 dB / LPIPS 0.141 on benchmark views that include training and generated frames (not held-out) · 1498 FPS (5090)</div>
+                </div>
+            </a>
             <!-- Blueten apartment · v7b · sofa repair with generated views (experiment). Start = the v7b all-frames teacher.
                  The sofa was re-seeded with 78k surfels on a TSDF surface fused from DepthSplat depth; 240 ArtiFixer frames
                  (14B, our own splat renders as input, no mask) on a +-90 deg orbit around the sofa were added as full-frame
