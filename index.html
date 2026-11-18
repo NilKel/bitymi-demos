@@ -1662,6 +1662,71 @@
                     <div class="meta"><span class="size">57 MB</span> · single ALIKED/LightGlue COLMAP model, 1642 frames at 536×957 · --kernel gaussian · 70k iters, FastGS over 100 views/step · 332k Gauss · e3rd finetuned (Gaussian kernel) · 35.27 dB / LPIPS 0.124 on held-out views · 1801 FPS (5090)</div>
                 </div>
             </a>
+            <!-- Blueten apartment · v7b · living-room repair · planes v2 (pictures separate + plane normals) (experiment). run A: image-mask planes with framed pictures fitted as their own planes, plus a term pulling normals inside each plane toward the fitted plane normal (weight 0.1). Same data, start model and schedule
+                 as the living-room repair cards below; fast bake (no benchmark). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_planes2_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_planes2_e3rdraw_astc.bitymi"
+               data-bc7-mb="49" data-astc-mb="49"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_planes2_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v7b_room_planes2.jpg" alt="Blueten apartment · v7b · living-room repair · planes v2 (pictures separate + plane normals) · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v7b · living-room repair · planes v2 (pictures separate + plane normals)</div>
+                    <div class="meta"><span class="size">49 MB</span> · experiment: the flat-walls run below with two changes · framed pictures get their own fitted plane instead of sharing the wall's · normals inside each plane region are pulled toward the plane normal, which targets ripples and ridges along texture edges · mean wall deviation 0.0061 scene units (0.0067 below) · real-view hold-out: sofa 34.47 dB / LPIPS 0.0330, full frame 32.36 dB · 275k Gauss · e3rd finetuned (Gaussian kernel) · baked without the quality benchmark, so no bake PSNR or FPS</div>
+                </div>
+            </a>
+            <!-- Blueten apartment · v7b · living-room repair · planes v2 + masked depth distortion (experiment). run A + depth distortion (weight 100) applied only inside plane masks and solid object regions. Same data, start model and schedule
+                 as the living-room repair cards below; fast bake (no benchmark). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_planes_distmask_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_planes_distmask_e3rdraw_astc.bitymi"
+               data-bc7-mb="45" data-astc-mb="45"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_planes_distmask_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v7b_room_planes_distmask.jpg" alt="Blueten apartment · v7b · living-room repair · planes v2 + masked depth distortion · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v7b · living-room repair · planes v2 + masked depth distortion</div>
+                    <div class="meta"><span class="size">45 MB</span> · experiment: planes v2 plus a depth-distortion term applied only inside the plane masks and solid object regions (not curtains, plants, lamp or glass) · it concentrates the blended fragments along each ray, about 10× lower distortion in the masks · mean wall deviation 0.0057 · real-view hold-out: sofa 34.39 dB / LPIPS 0.0329 (planes v2: 34.47 / 0.0330), rest of the apartment 33.02 vs 33.22 dB · 275k Gauss · e3rd finetuned (Gaussian kernel) · baked without the quality benchmark</div>
+                </div>
+            </a>
+            <!-- Blueten apartment · v7b · living-room repair · planes v2 + global depth distortion (experiment). run A + --lambda_dist 100 on every pixel of every view (active after iteration 3000). Same data, start model and schedule
+                 as the living-room repair cards below; fast bake (no benchmark). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_planes_distglobal_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_planes_distglobal_e3rdraw_astc.bitymi"
+               data-bc7-mb="48" data-astc-mb="48"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_planes_distglobal_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v7b_room_planes_distglobal.jpg" alt="Blueten apartment · v7b · living-room repair · planes v2 + global depth distortion · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v7b · living-room repair · planes v2 + global depth distortion</div>
+                    <div class="meta"><span class="size">48 MB</span> · experiment: planes v2 plus depth distortion on every pixel, for comparison with the masked version · costs more and is no flatter: sofa 34.25 dB / LPIPS 0.0332, rest of the apartment 32.74 dB (masked: 34.39 and 33.02), mean wall deviation 0.0059 · 275k Gauss · e3rd finetuned (Gaussian kernel) · baked without the quality benchmark</div>
+                </div>
+            </a>
+            <!-- Blueten apartment · v7b · living-room repair · planes v2 + object shape + mono normals (experiment). run B: run A + per-region aligned mono-depth shape term on solid object regions (0.2) + mono normal prior on non-planar pixels (0.1). Same data, start model and schedule
+                 as the living-room repair cards below; fast bake (no benchmark). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_objshape_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_objshape_e3rdraw_astc.bitymi"
+               data-bc7-mb="48" data-astc-mb="48"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_objshape_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v7b_room_objshape.jpg" alt="Blueten apartment · v7b · living-room repair · planes v2 + object shape + mono normals · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v7b · living-room repair · planes v2 + object shape + mono normals</div>
+                    <div class="meta"><span class="size">48 MB</span> · experiment: planes v2 plus two priors for non-planar objects · each solid object region is pulled toward the shape of a mono depth estimate (aligned per region and view), and normals outside the planes toward mono normals · on real views this costs half a dB on the sofa (33.91 vs 34.47 dB, LPIPS 0.0332) and moves it off the stereo-fused surface (39 % vs 45 % of surfel weight within 0.02) · 274k Gauss · e3rd finetuned (Gaussian kernel) · baked without the quality benchmark</div>
+                </div>
+            </a>
+            <!-- Blueten apartment · v7b · living-room repair · planes v2 + object priors + masked distortion (experiment). run C: run B + masked depth distortion (weight 100). Same data, start model and schedule
+                 as the living-room repair cards below; fast bake (no benchmark). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_objdist_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_objdist_e3rdraw_astc.bitymi"
+               data-bc7-mb="48" data-astc-mb="48"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/blueten/blueten_v7b_room_objdist_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/blueten_v7b_room_objdist.jpg" alt="Blueten apartment · v7b · living-room repair · planes v2 + object priors + masked distortion · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Blueten apartment · v7b · living-room repair · planes v2 + object priors + masked distortion</div>
+                    <div class="meta"><span class="size">48 MB</span> · experiment: all terms together: planes v2, object shape, mono normals and masked depth distortion · real-view hold-out: sofa 33.96 dB / LPIPS 0.0329, rest of the apartment 33.00 dB · mean wall deviation 0.0061 · 275k Gauss · e3rd finetuned (Gaussian kernel) · baked without the quality benchmark</div>
+                </div>
+            </a>
             <!-- Blueten apartment · v7b · living-room repair + image-based plane constraint (experiment). Same run as the
                  living-room repair card below, plus one loss: per training view, plane masks from a semantic segmenter
                  (SegFormer ADE: wall/floor/ceiling/door/window/painting) split by mono normals (MoGe-2), occluder-cut
