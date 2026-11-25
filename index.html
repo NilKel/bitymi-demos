@@ -1588,6 +1588,21 @@
                     <div class="meta"><span class="size">98 MB</span> · cinematic-anatomy · ds3 CT at 4k · histology-style false-colour LUT · 648k surfels · aniso + blur-split + normal + mono-depth teacher · e3rd finetuned · 34.34 dB / LPIPS 0.037 on training views · 268 FPS (A100, CUDA)</div>
                 </div>
             </a>
+            <!-- HIM-25-005 ds3 4k, histology-style colour map + backface culling (2026-11-25): same data as the previous
+                 H&E card; teacher with the deployed BFC recipe (--backface_cull_after 5000 --backface_cull_cos 0.2, random
+                 back-plate mesh, random background). Trained/baked on Sherlock (A100): 653k surfels, 27.94 dB teacher
+                 (train views), raw-probe e3rd finetune. Opens with bfc=1&bfc_cos=0.2. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_bfc_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_bfc_e3rdraw_astc.bitymi"
+               data-bc7-mb="91" data-astc-mb="91"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_bfc_e3rdraw.bitymi&amp;bfc=1&amp;bfc_cos=0.2">
+                <img class="thumb" src="static/thumbs/him25005_ct_ds3_4k_he_bfc.jpg" alt="Prostate CT (HIM-25-005), ds3 4k volume, histology-style (H&amp;E) colour map, backface culling · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate CT (HIM-25-005) · ds3 4k · H&amp;E colour map · BFC</div>
+                    <div class="meta"><span class="size">91 MB</span> · cinematic-anatomy · ds3 CT at 4k · histology-style false-colour LUT · backface-culling teacher · 653k surfels · e3rd finetuned · 32.21 dB / LPIPS 0.050 on training views · 292 FPS (A100, CUDA)</div>
+                </div>
+            </a>
             <!-- CT vs warped-MRI split slider: same heart-slider/ page; both share the CT world frame + orbit rig. -->
             <a class="demo" data-invariant="true"
                href="heart-slider/index.html?left=https%3A%2F%2Fhuggingface.co%2Fdatasets%2FNilkel%2Fbitymi-demos%2Fresolve%2Fmain%2Fhimalaya_prostate%2Fhim25005_ct_ds3_4k_e3rdraw.bitymi&amp;right=https%3A%2F%2Fhuggingface.co%2Fdatasets%2FNilkel%2Fbitymi-demos%2Fresolve%2Fmain%2Fhimalaya_prostate%2Fhim25005_mri_warped_e3rdraw.bitymi&amp;left_label=CT%20%C2%B7%20ds3%204k&amp;right_label=MRI%20%C2%B7%20warped%20to%20CT&amp;title=HIM-25-005%3A%20CT%20vs%20warped%20MRI">
