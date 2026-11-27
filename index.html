@@ -1655,6 +1655,22 @@
                     <div class="meta"><span class="size">90 MB</span> · cinematic-anatomy · stained, free-standing annotations + backface culling · 707k surfels · e3rd finetuned · 29.31 dB / LPIPS 0.075 on training views · 268 FPS (A100, CUDA)</div>
                 </div>
             </a>
+            <!-- HIM-25-005 ds3 4k (2026-11-27): learned per-surfel visibility cones (nest-splatting --learn_cull, lambda 0.03, Adam eps 1e-15)
+                 on the camera-linked-light + normal-prior model: a 3k-iteration atlas finetune of the no-cull bake in which every surfel learns a
+                 cos threshold per side of its disc; the cones ship in the bundle as a kind-6 chunk and the viewer's cull pass applies them
+                 per view (panel toggle "Learned cones", ?cones=0 starts with them off). Baked bench on 25 training views, A100: 33.62 dB / LPIPS 0.042
+                 with 32 % of the 666k surfels alive per view, 438 FPS vs 236 FPS without. -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_lk_cones_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_lk_cones_e3rdraw_astc.bitymi"
+               data-bc7-mb="107" data-astc-mb="107"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_lk_cones_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/him25005_ct_ds3_4k_he_lk_cones.jpg" alt="Prostate CT (HIM-25-005), ds3 4k, H&amp;E colour map, learned visibility cones · e3rd finetuned typeD atlas (BC7/ASTC)" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate CT (HIM-25-005) · ds3 4k · H&amp;E · learned visibility cones</div>
+                    <div class="meta"><span class="size">107 MB</span> · cinematic-anatomy · per-surfel learned cull cones in the bundle (toggle "Learned cones") · 32 % of 666k surfels alive per view · 33.62 dB / LPIPS 0.042 on training views · 438 FPS vs 236 without (A100, CUDA)</div>
+                </div>
+            </a>
             <!-- CT vs warped-MRI split slider: same heart-slider/ page; both share the CT world frame + orbit rig. -->
             <a class="demo" data-invariant="true"
                href="heart-slider/index.html?left=https%3A%2F%2Fhuggingface.co%2Fdatasets%2FNilkel%2Fbitymi-demos%2Fresolve%2Fmain%2Fhimalaya_prostate%2Fhim25005_ct_ds3_4k_e3rdraw.bitymi&amp;right=https%3A%2F%2Fhuggingface.co%2Fdatasets%2FNilkel%2Fbitymi-demos%2Fresolve%2Fmain%2Fhimalaya_prostate%2Fhim25005_mri_warped_e3rdraw.bitymi&amp;left_label=CT%20%C2%B7%20ds3%204k&amp;right_label=MRI%20%C2%B7%20warped%20to%20CT&amp;title=HIM-25-005%3A%20CT%20vs%20warped%20MRI">
