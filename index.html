@@ -1603,6 +1603,58 @@
                     <div class="meta"><span class="size">91 MB</span> · cinematic-anatomy · ds3 CT at 4k · histology-style false-colour LUT · backface-culling teacher · 653k surfels · e3rd finetuned · 32.21 dB / LPIPS 0.050 on training views · 292 FPS (A100, CUDA)</div>
                 </div>
             </a>
+            <!-- HIM-25-005 ds3 4k (2026-11-27): camera-linked light probe + renderer normal-map prior. Rendered, trained (35k its, -r 2, mono-depth + mono-normal prior w 0.1)
+                 and baked (raw-probe e3rd) on Sherlock (A100): 721k surfels, 29.56 dB teacher (train views). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_lk_nrm_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_lk_nrm_e3rdraw_astc.bitymi"
+               data-bc7-mb="106" data-astc-mb="106"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_lk_nrm_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/him25005_ct_ds3_4k_he_lk_nrm.jpg" alt="Prostate CT (HIM-25-005) · ds3 4k · H&amp;E · camera-linked light" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate CT (HIM-25-005) · ds3 4k · H&amp;E · camera-linked light</div>
+                    <div class="meta"><span class="size">106 MB</span> · cinematic-anatomy · camera-linked light probe + renderer normal-map prior · 721k surfels · e3rd finetuned · 33.58 dB / LPIPS 0.042 on training views · 236 FPS (A100, CUDA)</div>
+                </div>
+            </a>
+            <!-- HIM-25-005 ds3 4k (2026-11-27): camera-linked light probe + renderer normal-map prior + backface culling. Rendered, trained (35k its, -r 2, mono-depth + mono-normal prior w 0.1)
+                 and baked (raw-probe e3rd) on Sherlock (A100): 727k surfels, 26.94 dB teacher (train views). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_lk_bfc_nrm_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_lk_bfc_nrm_e3rdraw_astc.bitymi"
+               data-bc7-mb="98" data-astc-mb="98"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_lk_bfc_nrm_e3rdraw.bitymi&amp;bfc=1&amp;bfc_cos=0.2">
+                <img class="thumb" src="static/thumbs/him25005_ct_ds3_4k_he_lk_bfc_nrm.jpg" alt="Prostate CT (HIM-25-005) · ds3 4k · H&amp;E · camera-linked light · BFC" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate CT (HIM-25-005) · ds3 4k · H&amp;E · camera-linked light · BFC</div>
+                    <div class="meta"><span class="size">98 MB</span> · cinematic-anatomy · camera-linked light probe + renderer normal-map prior + backface culling · 727k surfels · e3rd finetuned · 31.27 dB / LPIPS 0.058 on training views · 290 FPS (A100, CUDA)</div>
+                </div>
+            </a>
+            <!-- HIM-25-005 ds3 4k (2026-11-27): HiP-CT annotations stained in colour (urethra red, others green / blue / yellow) and kept whole while the tissue is clipped. Rendered, trained (35k its, -r 2, mono-depth + mono-normal prior w 0.1)
+                 and baked (raw-probe e3rd) on Sherlock (A100): 622k surfels, 30.32 dB teacher (train views). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_st_nrm_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_st_nrm_e3rdraw_astc.bitymi"
+               data-bc7-mb="95" data-astc-mb="95"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_st_nrm_e3rdraw.bitymi">
+                <img class="thumb" src="static/thumbs/him25005_ct_ds3_4k_he_st_nrm.jpg" alt="Prostate CT (HIM-25-005) · ds3 4k · stained annotations (free-standing)" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate CT (HIM-25-005) · ds3 4k · stained annotations (free-standing)</div>
+                    <div class="meta"><span class="size">95 MB</span> · cinematic-anatomy · HiP-CT annotations stained in colour (urethra red, others green / blue / yellow) and kept whole while the tissue is clipped · 622k surfels · e3rd finetuned · 34.17 dB / LPIPS 0.037 on training views · 272 FPS (A100, CUDA)</div>
+                </div>
+            </a>
+            <!-- HIM-25-005 ds3 4k (2026-11-27): stained, free-standing annotations + backface culling. Rendered, trained (35k its, -r 2, mono-depth + mono-normal prior w 0.1)
+                 and baked (raw-probe e3rd) on Sherlock (A100): 707k surfels, 25.53 dB teacher (train views). -->
+            <a class="demo" data-invariant="true"
+               data-bc7-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_st_bfc_nrm_e3rdraw.bitymi"
+               data-astc-hf="https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_st_bfc_nrm_e3rdraw_astc.bitymi"
+               data-bc7-mb="90" data-astc-mb="90"
+               href="viewer/index.html?bundle=https://huggingface.co/datasets/Nilkel/bitymi-demos/resolve/main/himalaya_prostate/him25005_ct_ds3_4k_he_st_bfc_nrm_e3rdraw.bitymi&amp;bfc=1&amp;bfc_cos=0.2">
+                <img class="thumb" src="static/thumbs/him25005_ct_ds3_4k_he_st_bfc_nrm.jpg" alt="Prostate CT (HIM-25-005) · ds3 4k · stained annotations (free-standing) · BFC" loading="lazy">
+                <div class="text">
+                    <div class="title">Prostate CT (HIM-25-005) · ds3 4k · stained annotations (free-standing) · BFC</div>
+                    <div class="meta"><span class="size">90 MB</span> · cinematic-anatomy · stained, free-standing annotations + backface culling · 707k surfels · e3rd finetuned · 29.31 dB / LPIPS 0.075 on training views · 268 FPS (A100, CUDA)</div>
+                </div>
+            </a>
             <!-- CT vs warped-MRI split slider: same heart-slider/ page; both share the CT world frame + orbit rig. -->
             <a class="demo" data-invariant="true"
                href="heart-slider/index.html?left=https%3A%2F%2Fhuggingface.co%2Fdatasets%2FNilkel%2Fbitymi-demos%2Fresolve%2Fmain%2Fhimalaya_prostate%2Fhim25005_ct_ds3_4k_e3rdraw.bitymi&amp;right=https%3A%2F%2Fhuggingface.co%2Fdatasets%2FNilkel%2Fbitymi-demos%2Fresolve%2Fmain%2Fhimalaya_prostate%2Fhim25005_mri_warped_e3rdraw.bitymi&amp;left_label=CT%20%C2%B7%20ds3%204k&amp;right_label=MRI%20%C2%B7%20warped%20to%20CT&amp;title=HIM-25-005%3A%20CT%20vs%20warped%20MRI">
